@@ -4,7 +4,8 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo"
-	"github.com/uphy/watch-web/check"
+	"github.com/labstack/echo/middleware"
+	"github.com/uphy/watch-web/server/check"
 )
 
 func main() {
@@ -25,10 +26,13 @@ func run() error {
 	exe.Start()
 
 	e := echo.New()
+	e.Pre(middleware.RemoveTrailingSlash())
 	e.GET("/api/jobs", func(ctx echo.Context) error {
-		jobs := []string{}
+		jobs := []check.Job{}
 		for _, j := range exe.Jobs {
-			jobs = append(jobs, j.Name)
+			job := *j
+			job.Previous = nil
+			jobs = append(jobs, job)
 		}
 		return ctx.JSON(200, jobs)
 	})
@@ -60,5 +64,6 @@ func run() error {
 		}
 		return ctx.NoContent(200)
 	})
+	e.Static("/", "./static")
 	return e.Start(":8080")
 }
