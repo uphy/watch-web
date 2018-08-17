@@ -14,7 +14,7 @@ type (
 		Text string `json:"text"`
 	}
 	SlackAction struct {
-		url string
+		URL string `json:"url"`
 	}
 )
 
@@ -37,7 +37,7 @@ func (s *SlackAction) Run(res *Result) error {
 	if err != nil {
 		return err
 	}
-	resp, err := http.Post(s.url, "application/json", bytes.NewReader(body))
+	resp, err := http.Post(s.URL, "application/json", bytes.NewReader(body))
 	if err != nil {
 		return err
 	}

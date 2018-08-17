@@ -14,7 +14,6 @@ import (
 type (
 	Config struct {
 		Jobs       map[string]JobConfig `json:"jobs"`
-		Interval   *string              `json:"interval,omitempty"`
 		InitialRun *bool                `json:"initial_run,omitempty"`
 	}
 	JobConfig struct {
@@ -26,7 +25,7 @@ type (
 		DOM *DOMSource `json:"dom,omitempty"`
 	}
 	ActionConfig struct {
-		Slack *SlackActionConfig `json:"slack,omitempty"`
+		Slack *SlackAction `json:"slack,omitempty"`
 	}
 	DOMConfig struct {
 		URL      string  `json:"url"`
@@ -119,7 +118,7 @@ func (s *SourceConfig) Source() (Source, error) {
 
 func (a *ActionConfig) Action() (Action, error) {
 	if a.Slack != nil {
-		return a.Slack.Action()
+		return a.Slack, nil
 	}
 	return nil, errors.New("no action defined")
 }
