@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/uphy/watch-web/server/check"
@@ -51,7 +49,7 @@ func run() error {
 			return echo.NewHTTPError(404, "specified job is not exist")
 		}
 		job.Check()
-		return ctx.Redirect(301, fmt.Sprintf("/api/jobs/%s", name))
+		return ctx.NoContent(200)
 	})
 	e.POST("/api/jobs/:name/test-actions", func(ctx echo.Context) error {
 		name := ctx.Param("name")
