@@ -1,0 +1,21 @@
+initial_run: true
+jobs:
+  taylorevents:
+    schedule: "@every 10m"
+    source:
+      dom:
+        url: https://www.taylorguitars.jp/events/
+        selector: .next_event
+    actions:
+      - slack:
+          url: '{{ env "SLACK_WEBHOOK" }}'
+  uranai:
+    schedule: "@every 10m"
+    source:
+      dom:
+        url: http://www.rdcross.com/php/user/whatsnew.php
+        selector: table
+        encoding: Shift_JIS
+    actions:
+      - slack:
+          url: '{{ env "SLACK_WEBHOOK" }}'
