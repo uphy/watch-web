@@ -45,6 +45,7 @@
               </v-card>
             </v-expansion-panel-content>
           </v-expansion-panel>
+          <a @click="testJobActions(job.name)">Test alert</a>
         </v-card-text>
 
         <v-card-actions>
@@ -106,6 +107,9 @@ export default class App extends Vue {
     await client.checkJob(name);
     this.job = await client.getJob(name);
     this.updateList();
+  }
+  async testJobActions(name:string){
+    await client.testJobActions(name);
   }
 }
 </script>

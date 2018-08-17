@@ -25,6 +25,7 @@ func run() error {
 
 	e := echo.New()
 	e.Pre(middleware.RemoveTrailingSlash())
+	e.Use(middleware.Logger())
 	e.GET("/api/jobs", func(ctx echo.Context) error {
 		jobs := []check.Job{}
 		for _, j := range exe.Jobs {
