@@ -25,15 +25,8 @@ type (
 		DOM *DOMSource `json:"dom,omitempty"`
 	}
 	ActionConfig struct {
-		Slack *SlackAction `json:"slack,omitempty"`
-	}
-	DOMConfig struct {
-		URL      string  `json:"url"`
-		Selector string  `json:"selector"`
-		Encoding *string `json:"encoding"`
-	}
-	SlackActionConfig struct {
-		URL string `json:"url"`
+		Slack      *SlackAction      `json:"slack,omitempty"`
+		LINENotify *LINENotifyAction `json:"line_notify,omitempty"`
 	}
 )
 
@@ -120,12 +113,8 @@ func (a *ActionConfig) Action() (Action, error) {
 	if a.Slack != nil {
 		return a.Slack, nil
 	}
-	return nil, errors.New("no action defined")
-}
-
-func (s *SlackActionConfig) Action() (Action, error) {
-	if s.URL == "" {
-		return nil, errors.New("empty url")
+	if a.LINENotify != nil {
+		return a.LINENotify, nil
 	}
-	return NewSlackAction(s.URL), nil
+	return nil, errors.New("no action defined")
 }

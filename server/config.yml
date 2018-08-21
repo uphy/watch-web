@@ -1,4 +1,4 @@
-initial_run: true
+#initial_run: true
 jobs:
   taylorevents:
     schedule: "@every 10m"
@@ -7,8 +7,8 @@ jobs:
         url: https://www.taylorguitars.jp/events/
         selector: .next_event
     actions:
-      - slack:
-          url: '{{ env "SLACK_WEBHOOK" }}'
+      - line_notify:
+          access_token: '{{ env "LINE_ACCESSTOKEN" }}'
   uranai:
     schedule: "@every 10m"
     source:
@@ -17,5 +17,5 @@ jobs:
         selector: table
         encoding: Shift_JIS
     actions:
-      - slack:
-          url: '{{ env "SLACK_WEBHOOK" }}'
+      - line_notify:
+          access_token: '{{ env "LINE_ACCESSTOKEN" }}'

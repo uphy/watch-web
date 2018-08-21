@@ -127,11 +127,11 @@ func (j *Job) TestActions() error {
 }
 
 func (j *Job) doActions(result *Result) error {
-	var err error
+	var errs error
 	for _, action := range j.actions {
 		if err := action.Run(result); err != nil {
-			err = multierror.Append(err, err)
+			errs = multierror.Append(errs, err)
 		}
 	}
-	return err
+	return errs
 }

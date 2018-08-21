@@ -13,6 +13,7 @@
         "cloud": "v1"
     },
     "env": {
-        "SLACK_WEBHOOK": "@slack-webhook"
+        "SLACK_WEBHOOK": "@slack-webhook",
+        "LINE_ACCESSTOKEN": "@line-accesstoken"
     }
 }
