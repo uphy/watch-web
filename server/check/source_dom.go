@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -32,6 +33,10 @@ func NewDOMSource(url, selector string) *DOMSource {
 		URL:      url,
 		Selector: selector,
 	}
+}
+
+func (d *DOMSource) Label() string {
+	return fmt.Sprintf("URL: %s", d.URL)
 }
 
 func (d *DOMSource) Fetch() (string, error) {

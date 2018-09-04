@@ -25,7 +25,8 @@ func (a *LINENotifyAction) Run(res *Result) error {
 	message := fmt.Sprintf(`%s に更新があったよ！
 
 %s
-`, res.Name, changes.String())
+%s
+`, res.Name, changes.String(), res.Label)
 	form := url.Values{}
 	form.Add("message", message)
 	req, err := http.NewRequest("POST", "https://notify-api.line.me/api/notify", strings.NewReader(form.Encode()))

@@ -31,7 +31,8 @@ func (s *SlackAction) Run(res *Result) error {
 		Text: fmt.Sprintf(`Updated %s
 
 %s
-`, res.Name, changes.String()),
+%s
+`, res.Name, changes.String(), res.Label),
 	}
 	body, err := json.Marshal(payload)
 	if err != nil {

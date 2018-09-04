@@ -11,6 +11,7 @@ import (
 type (
 	Result struct {
 		Name     string
+		Label    string
 		Previous string
 		Current  string
 	}

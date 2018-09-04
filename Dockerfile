@@ -17,6 +17,5 @@ WORKDIR /app
 COPY --from=server-builder /server .
 COPY server/config.yml .
 COPY --from=client-builder /app/dist ./static
-RUN ls -al
 EXPOSE 8080
 ENTRYPOINT ["./server"]

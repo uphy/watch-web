@@ -26,6 +26,7 @@ type (
 	}
 	Source interface {
 		Fetch() (string, error)
+		Label() string
 	}
 	Action interface {
 		Run(result *Result) error
@@ -106,7 +107,7 @@ func (j *Job) Check() {
 	}
 
 	if j.Previous != nil {
-		result := &Result{j.Name, *j.Previous, current}
+		result := &Result{j.Name, j.source.Label(), *j.Previous, current}
 		if err := j.doActions(result); err != nil {
 			j.Status = StatusError
 			j.Error = err
