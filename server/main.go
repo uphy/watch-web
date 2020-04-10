@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/uphy/watch-web/server/check"
@@ -64,5 +67,9 @@ func run() error {
 		return ctx.NoContent(200)
 	})
 	e.Static("/", "./static")
-	return e.Start(":8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	return e.Start(fmt.Sprintf(":%s", port))
 }

@@ -1,21 +1,12 @@
-#initial_run: true
+initial_run: true
 jobs:
-  taylorevents:
+  ur:
     schedule: "@every 10m"
     source:
-      dom:
-        url: https://www.taylorguitars.jp/events/
-        selector: .next_event
-    actions:
-      - line_notify:
-          access_token: '{{ env "LINE_ACCESSTOKEN" }}'
-  uranai:
-    schedule: "@every 10m"
-    source:
-      dom:
-        url: http://www.rdcross.com/php/user/whatsnew.php
-        selector: table
-        encoding: Shift_JIS
+      command:
+        command: |
+          curl -sS https://chintai.sumai.ur-net.go.jp/chintai/api/bukken/detail/detail_bukken_room/ -d 'shisya=20&danchi=688&shikibetu=0&orderByField=0&orderBySort=0&pageIndex=0&pageIndex=0&sp=' | gojq '.[] | "\(.id) \(.name)"'
+        label: UR
     actions:
       - line_notify:
           access_token: '{{ env "LINE_ACCESSTOKEN" }}'

@@ -1,8 +1,7 @@
-FROM golang:1.10 as server-builder
+FROM golang:1.13 as server-builder
 WORKDIR /go/src/github.com/uphy/watch-web/server
 COPY server .
-RUN go get -u github.com/golang/dep/cmd/dep
-RUN dep ensure
+RUN CGO_ENABLED=0 GOOS=linux go install github.com/itchyny/gojq/cmd/gojq
 RUN CGO_ENABLED=0 GOOS=linux go build -o /server
 
 FROM node:8.11 as client-builder

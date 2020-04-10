@@ -22,7 +22,8 @@ type (
 		Actions  []ActionConfig `json:"actions,omitempty"`
 	}
 	SourceConfig struct {
-		DOM *DOMSource `json:"dom,omitempty"`
+		DOM     *DOMSource     `json:"dom,omitempty"`
+		Command *CommandSource `json:"command,omitempty"`
 	}
 	ActionConfig struct {
 		Slack      *SlackAction      `json:"slack,omitempty"`
@@ -105,6 +106,9 @@ func (c *Config) NewExecutor() (*Executor, error) {
 func (s *SourceConfig) Source() (Source, error) {
 	if s.DOM != nil {
 		return s.DOM, nil
+	}
+	if s.Command != nil {
+		return s.Command, nil
 	}
 	return nil, errors.New("no source defined")
 }
