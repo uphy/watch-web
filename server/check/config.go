@@ -15,6 +15,7 @@ type (
 	Config struct {
 		Jobs       map[string]JobConfig `json:"jobs"`
 		InitialRun *bool                `json:"initial_run,omitempty"`
+		Store      *StoreConfig         `json:"store,omitempty"`
 	}
 	JobConfig struct {
 		Source   *SourceConfig  `json:"source,omitempty"`
@@ -28,6 +29,14 @@ type (
 	ActionConfig struct {
 		Slack      *SlackAction      `json:"slack,omitempty"`
 		LINENotify *LINENotifyAction `json:"line_notify,omitempty"`
+	}
+
+	StoreConfig struct {
+		Redis *RedisConfig `json:"redis,omitempty"`
+	}
+	RedisConfig struct {
+		Address  string  `json:"address"`
+		Password *string `json:"password"`
 	}
 )
 
@@ -81,7 +90,8 @@ func (c *Config) Save(w io.Writer) error {
 }
 
 func (c *Config) NewExecutor() (*Executor, error) {
-	e := NewExecutor()
+	store := newStore(c.Store)
+	e := NewExecutor(store)
 	if c.InitialRun != nil {
 		e.initialRun = *c.InitialRun
 	}

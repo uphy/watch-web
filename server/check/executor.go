@@ -13,6 +13,7 @@ type (
 		c          *cron.Cron
 		Jobs       []*Job
 		initialRun bool
+		store      Store
 	}
 	Job struct {
 		Name     string `json:"name"`
@@ -23,6 +24,7 @@ type (
 		Error    error      `json:"error,omitempty"`
 		Last     *time.Time `json:"last,omitempty"`
 		Count    int        `json:"count"`
+		store    Store
 	}
 	Source interface {
 		Fetch() (string, error)
@@ -44,9 +46,10 @@ func init() {
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 }
 
-func NewExecutor() *Executor {
+func NewExecutor(store Store) *Executor {
 	return &Executor{
-		c: cron.New(),
+		c:     cron.New(),
+		store: store,
 	}
 }
 
@@ -70,6 +73,7 @@ func (e *Executor) AddJob(name string, schedule string, source Source, action ..
 		Previous: nil,
 		Status:   StatusOK,
 		Error:    nil,
+		store:    e.store,
 	}
 	e.Jobs = append(e.Jobs, job)
 	return e.c.AddFunc(schedule, func() {
@@ -105,14 +109,23 @@ func (j *Job) Check() {
 		log.Printf("Failed to fetch %s: %v", j.Name, err)
 		return
 	}
+	prev, err := j.store.Get(j.Name)
+	if err != nil {
+		log.Println("failed to get previous value: ", err)
+		return
+	}
 
-	if j.Previous != nil {
-		result := &Result{j.Name, j.source.Label(), *j.Previous, current}
+	if prev != nil {
+		result := &Result{j.Name, j.source.Label(), *prev, current}
 		if err := j.doActions(result); err != nil {
 			j.Status = StatusError
 			j.Error = err
 			log.Printf("Failed to perform action %s: %v", j.Name, err)
 		}
+	}
+	if err := j.store.Set(j.Name, current); err != nil {
+		log.Println("failed to set current value: ", err)
+		return
 	}
 	j.Previous = &current
 	j.Status = StatusOK

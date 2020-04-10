@@ -10,3 +10,7 @@ jobs:
     actions:
       - line_notify:
           access_token: '{{ env "LINE_ACCESSTOKEN" }}'
+store:
+  redis:
+    address: '{{ env "REDIS_ADDRESS" }}'
+    password: '{{ env "REDIS_PASSWORD" }}'

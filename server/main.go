@@ -38,6 +38,12 @@ func run() error {
 		}
 		return ctx.JSON(200, jobs)
 	})
+	e.POST("/api/jobs/check-all", func(ctx echo.Context) error {
+		for _, j := range exe.Jobs {
+			j.Check()
+		}
+		return ctx.JSON(200, exe.Jobs)
+	})
 	e.GET("/api/jobs/:name", func(ctx echo.Context) error {
 		name := ctx.Param("name")
 		job := exe.Job(name)
