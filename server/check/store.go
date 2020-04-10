@@ -1,6 +1,11 @@
 package check
 
-import "github.com/go-redis/redis/v7"
+import (
+	"log"
+	"net/url"
+
+	"github.com/go-redis/redis/v7"
+)
 
 const redisPrefix = "v:"
 
@@ -18,19 +23,44 @@ type (
 )
 
 func newStore(config *StoreConfig) Store {
-	if config.Redis != nil {
+	if config != nil && config.Redis != nil {
 		password := ""
-		if config.Redis.Password != nil {
-			password = *config.Redis.Password
+		addr := ""
+		if config.Redis.Address != nil {
+			if config.Redis.Password != nil {
+				password = *config.Redis.Password
+			}
+			addr = *config.Redis.Address
+		} else if config.Redis.RedisToGo != nil {
+			var err error
+			addr, password, err = parseRedisToGoURL(*config.Redis.RedisToGo)
+			if err != nil {
+				log.Println(err)
+				return nil
+			}
 		}
 		return &RedisStore{
 			redis.NewClient(&redis.Options{
-				Addr:     config.Redis.Address,
+				Addr:     addr,
 				Password: password,
 			}),
 		}
 	}
 	return &MemoryStore{make(map[string]string)}
+}
+
+func parseRedisToGoURL(redisToGo string) (addr string, password string, err error) {
+	var redisInfo *url.URL
+	redisInfo, err = url.Parse(redisToGo)
+	if err != nil {
+		return
+	}
+
+	addr = redisInfo.Host
+	if redisInfo.User != nil {
+		password, _ = redisInfo.User.Password()
+	}
+	return
 }
 
 func (s *MemoryStore) Get(name string) (*string, error) {

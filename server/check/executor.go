@@ -109,6 +109,7 @@ func (j *Job) Check() {
 		log.Printf("Failed to fetch %s: %v", j.Name, err)
 		return
 	}
+	log.Println("current: ", current)
 	prev, err := j.store.Get(j.Name)
 	if err != nil {
 		log.Println("failed to get previous value: ", err)

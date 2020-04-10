@@ -15,7 +15,7 @@ type (
 	Config struct {
 		Jobs       map[string]JobConfig `json:"jobs"`
 		InitialRun *bool                `json:"initial_run,omitempty"`
-		Store      *StoreConfig         `json:"store,omitempty"`
+		Store      *StoreConfig         `json:"store"`
 	}
 	JobConfig struct {
 		Source   *SourceConfig  `json:"source,omitempty"`
@@ -35,8 +35,9 @@ type (
 		Redis *RedisConfig `json:"redis,omitempty"`
 	}
 	RedisConfig struct {
-		Address  string  `json:"address"`
-		Password *string `json:"password"`
+		Address   *string `json:"address"`
+		Password  *string `json:"password"`
+		RedisToGo *string `json:"redistogo"`
 	}
 )
 

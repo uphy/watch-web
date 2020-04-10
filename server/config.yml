@@ -1,16 +1,23 @@
 initial_run: true
 jobs:
-  ur:
+  ur-greenhills:
     schedule: "@every 10m"
     source:
       command:
-        command: |
-          curl -sS https://chintai.sumai.ur-net.go.jp/chintai/api/bukken/detail/detail_bukken_room/ -d 'shisya=20&danchi=688&shikibetu=0&orderByField=0&orderBySort=0&pageIndex=0&pageIndex=0&sp=' | gojq '.[] | "\(.id) \(.name)"'
+        command: ur 688
         label: UR
     actions:
-      - line_notify:
-          access_token: '{{ env "LINE_ACCESSTOKEN" }}'
+      - slack:
+          url: '{{ env "SLACK_WEBHOOK_URL" }}'
+  ur-kiyose:
+    schedule: "@every 10m"
+    source:
+      command:
+        command: ur 399
+        label: UR
+    actions:
+      - slack:
+          url: '{{ env "SLACK_WEBHOOK_URL" }}'
 store:
-  redis:
-    address: '{{ env "REDIS_ADDRESS" }}'
-    password: '{{ env "REDIS_PASSWORD" }}'
+#  redis:
+#    redistogo: '{{ env "REDISTOGO_URL" }}'
