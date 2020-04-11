@@ -2,6 +2,7 @@ package check
 
 import (
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -19,6 +20,8 @@ type (
 		Name     string `json:"name"`
 		source   Source
 		actions  []Action
+		Link     string     `json:"link,omitempty"`
+		Label    string     `json:"label,omitempty"`
 		Previous *string    `json:"previous,omitempty"`
 		Status   Status     `json:"status"`
 		Error    error      `json:"error,omitempty"`
@@ -62,7 +65,7 @@ func (e *Executor) Job(name string) *Job {
 	return nil
 }
 
-func (e *Executor) AddJob(name string, schedule string, source Source, action ...Action) error {
+func (e *Executor) AddJob(name, schedule, label, link string, source Source, action ...Action) error {
 	if schedule == "" {
 		schedule = "@every 1h"
 	}
@@ -70,6 +73,8 @@ func (e *Executor) AddJob(name string, schedule string, source Source, action ..
 		Name:     name,
 		source:   source,
 		actions:  action,
+		Label:    label,
+		Link:     link,
 		Previous: nil,
 		Status:   StatusOK,
 		Error:    nil,
@@ -109,7 +114,7 @@ func (j *Job) Check() {
 		log.Printf("Failed to fetch %s: %v", j.Name, err)
 		return
 	}
-	log.Println("current: ", current)
+	current = strings.Trim(current, " \t\n")
 	prev, err := j.store.Get(j.Name)
 	if err != nil {
 		log.Println("failed to get previous value: ", err)
@@ -117,7 +122,7 @@ func (j *Job) Check() {
 	}
 
 	if prev != nil {
-		result := &Result{j.Name, j.source.Label(), *prev, current}
+		result := &Result{j.Name, j.Label, j.Link, *prev, current}
 		if err := j.doActions(result); err != nil {
 			j.Status = StatusError
 			j.Error = err
@@ -136,6 +141,8 @@ func (j *Job) Check() {
 func (j *Job) TestActions() error {
 	return j.doActions(&Result{
 		Name:     j.Name,
+		Label:    "test action",
+		Link:     "https://google.com",
 		Previous: "This is test action.",
 		Current:  "This is test action.\naaaa",
 	})

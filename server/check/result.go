@@ -12,6 +12,7 @@ type (
 	Result struct {
 		Name     string
 		Label    string
+		Link     string
 		Previous string
 		Current  string
 	}

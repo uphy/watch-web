@@ -1,6 +1,7 @@
 FROM golang:1.13 as server-builder
 WORKDIR /go/src/github.com/uphy/watch-web/server
 COPY server .
+RUN go get -u github.com/markbates/pkger/cmd/pkger && pkger -o resources
 RUN CGO_ENABLED=0 GOOS=linux go build -o /server
 RUN CGO_ENABLED=0 GOOS=linux go get -u github.com/itchyny/gojq/cmd/gojq
 
