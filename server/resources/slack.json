@@ -1,0 +1,31 @@
+{
+    "text": "<{{ res.Link }}|{{ .res.Label }}> has been updated",
+    "blocks": [],
+    "attachments": [
+        {
+            "color": "#0000FF",
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*Changes:*\n```\n{{ .changes }}```"
+                    }
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Previous:*\n{{ .res.Previous }}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Current:*\n{{ .res.Current }}"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

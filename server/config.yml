@@ -3,21 +3,23 @@ jobs:
   ur-greenhills:
     schedule: "@every 10m"
     source:
-      command:
+      shell:
         command: ur 688
-        label: UR
+    label: グリーンヒルズ東久留米
+    link: https://www.ur-net.go.jp/chintai/kanto/tokyo/20_6880.html
     actions:
       - slack:
           url: '{{ env "SLACK_WEBHOOK_URL" }}'
   ur-kiyose:
     schedule: "@every 10m"
     source:
-      command:
+      shell:
         command: ur 399
-        label: UR
+    label: 清瀬駅前ハイツ
+    link: https://www.ur-net.go.jp/chintai/kanto/tokyo/20_3990.html
     actions:
       - slack:
           url: '{{ env "SLACK_WEBHOOK_URL" }}'
 store:
-#  redis:
-#    redistogo: '{{ env "REDISTOGO_URL" }}'
+  redis:
+    redistogo: '{{ env "REDISTOGO_URL" }}'

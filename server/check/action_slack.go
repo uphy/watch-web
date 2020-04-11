@@ -2,16 +2,22 @@ package check
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
+	"text/template"
+
+	"github.com/uphy/watch-web/server/resources"
 )
 
 type (
 	slackPayload struct {
-		Text string `json:"text"`
+		Text        string        `json:"text"`
+		Blocks      []interface{} `json:"blocks"`
+		Attachments []struct {
+			Color  string        `json:"color"`
+			Blocks []interface{} `json:""`
+		}
 	}
 	SlackAction struct {
 		URL string `json:"url"`
@@ -27,18 +33,15 @@ func (s *SlackAction) Run(res *Result) error {
 	if !changes.Changed() {
 		return nil
 	}
-	payload := &slackPayload{
-		Text: fmt.Sprintf(`Updated %s
-
-%s
-%s
-`, res.Name, changes.String(), res.Label),
-	}
-	body, err := json.Marshal(payload)
-	if err != nil {
+	tmpl := template.Must(template.New("slack-template").Parse(resources.SlackTemplate))
+	buf := new(bytes.Buffer)
+	if err := tmpl.Execute(buf, map[string]interface{}{
+		"res":     res,
+		"changes": changes,
+	}); err != nil {
 		return err
 	}
-	resp, err := http.Post(s.URL, "application/json", bytes.NewReader(body))
+	resp, err := http.Post(s.URL, "application/json", bytes.NewReader(buf.Bytes()))
 	if err != nil {
 		return err
 	}

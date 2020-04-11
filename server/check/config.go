@@ -18,13 +18,15 @@ type (
 		Store      *StoreConfig         `json:"store"`
 	}
 	JobConfig struct {
+		Label    string         `json:"label"`
+		Link     string         `json:"link"`
 		Source   *SourceConfig  `json:"source,omitempty"`
 		Schedule string         `json:"schedule,omitempty"`
 		Actions  []ActionConfig `json:"actions,omitempty"`
 	}
 	SourceConfig struct {
-		DOM     *DOMSource     `json:"dom,omitempty"`
-		Command *CommandSource `json:"command,omitempty"`
+		DOM   *DOMSource   `json:"dom,omitempty"`
+		Shell *ShellSource `json:"shell,omitempty"`
 	}
 	ActionConfig struct {
 		Slack      *SlackAction      `json:"slack,omitempty"`
@@ -109,7 +111,7 @@ func (c *Config) NewExecutor() (*Executor, error) {
 			}
 			actions = append(actions, action)
 		}
-		e.AddJob(name, job.Schedule, source, actions...)
+		e.AddJob(name, job.Schedule, job.Label, job.Link, source, actions...)
 	}
 	return e, nil
 }
@@ -118,8 +120,8 @@ func (s *SourceConfig) Source() (Source, error) {
 	if s.DOM != nil {
 		return s.DOM, nil
 	}
-	if s.Command != nil {
-		return s.Command, nil
+	if s.Shell != nil {
+		return s.Shell, nil
 	}
 	return nil, errors.New("no source defined")
 }

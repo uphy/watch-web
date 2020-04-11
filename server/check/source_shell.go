@@ -8,24 +8,24 @@ import (
 )
 
 type (
-	CommandSource struct {
+	ShellSource struct {
 		Command   string `json:"command"`
 		LabelText string `json:"label"`
 	}
 )
 
-func NewCommandSource(command, label string) *CommandSource {
-	return &CommandSource{
+func NewShellSourcee(command, label string) *ShellSource {
+	return &ShellSource{
 		Command:   command,
 		LabelText: label,
 	}
 }
 
-func (c *CommandSource) Label() string {
+func (c *ShellSource) Label() string {
 	return c.LabelText
 }
 
-func (c *CommandSource) Fetch() (string, error) {
+func (c *ShellSource) Fetch() (string, error) {
 	cmd := exec.Command("sh", "-c", c.Command)
 	for _, env := range os.Environ() {
 		if strings.HasPrefix(env, "PATH=") {
