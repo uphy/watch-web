@@ -1,0 +1,28 @@
+# Define template for remove duplicate settings
+discard: >
+  {{- define "ur" }}
+  ur-{{ index . 0 }}-{{ index . 1 }}:
+    schedule: "@every 10m"
+    source:
+      shell:
+        command: ur {{ index . 0 }} {{ index . 1 }}
+    label: "{{ index . 2 }}"
+    link: https://www.ur-net.go.jp/chintai/kanto/tokyo/{{ index . 0 }}_{{ index . 1 }}0.html
+    actions:
+      - slack:
+          url: '{{ env "SLACK_WEBHOOK_URL" }}'
+  {{ end }}
+initial_run: true
+jobs:
+  # {{ template "ur" sliceOf "20" "688" "グリーンヒルズ東久留米" }}
+  # {{ template "ur" sliceOf "20" "399" "清瀬駅前ハイツ" }}
+  # {{ template "ur" sliceOf "20" "465" "グリーンプラザ高松＜光が丘＞" }}
+  # {{ template "ur" sliceOf "20" "391" "光が丘パークタウン いちょう通り八番街" }}
+  # {{ template "ur" sliceOf "20" "455" "光が丘パークタウン 大通り中央" }}
+  # {{ template "ur" sliceOf "20" "410" "光が丘パークタウン 四季の香弐番街" }}
+  # {{ template "ur" sliceOf "20" "369" "光が丘パークタウン 大通り南" }}
+  # {{ template "ur" sliceOf "20" "350" "光が丘パークタウン 公園南" }}
+  # {{ template "ur" sliceOf "20" "435" "光が丘パークタウン プロムナード十番街" }}
+store:
+  redis:
+    redistogo: '{{ env "REDISTOGO_URL" }}'

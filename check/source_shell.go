@@ -39,9 +39,6 @@ func (c *ShellSource) Fetch() (string, error) {
 			cmd.Env = append(cmd.Env, env)
 		}
 	}
-	//cmd.Env = []string{"PATH=/Users/ishikura/dev/github.com/uphy/watch-web/server/scripts:" + os.Getenv("PATH")}
-	// fmt.Println(cmd.Env)
-	// cmd.Env = append([]string{"PATH=" + path}, os.Environ()...)
 	b, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", err

@@ -65,6 +65,9 @@ func LoadConfigFile(file string) (*Config, error) {
 			}
 			return value
 		},
+		"sliceOf": func(values ...string) []string {
+			return values
+		},
 	}
 	tmpl, err := template.New("t").Funcs(funcs).Parse(string(data))
 	if err != nil {

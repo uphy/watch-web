@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/uphy/watch-web/server/check"
+	"github.com/uphy/watch-web/check"
+	"github.com/uphy/watch-web/resources"
 )
 
 func main() {
@@ -72,7 +74,7 @@ func run() error {
 		}
 		return ctx.NoContent(200)
 	})
-	e.Static("/", "./static")
+	e.GET("/*", echo.WrapHandler(http.FileServer(resources.HttpStatic)))
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

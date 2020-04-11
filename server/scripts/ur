@@ -1,9 +1,0 @@
-#!/bin/sh
-
-DANCHI=$1
-
-echo $DANCHI > hoge
-curl -sS https://chintai.sumai.ur-net.go.jp/chintai/api/bukken/detail/detail_bukken_room/ \
-     -d "shisya=20&danchi=$DANCHI&shikibetu=0&orderByField=0&orderBySort=0&pageIndex=0&pageIndex=0&sp=" \
-     | grep -v '^null$' \
-     | gojq -r '.[] | "\(.id) \(.name)"'
