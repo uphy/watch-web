@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/uphy/watch-web/check"
+	"github.com/uphy/watch-web/config"
 	"github.com/uphy/watch-web/resources"
 )
 
@@ -19,11 +20,11 @@ func main() {
 }
 
 func run() error {
-	config, err := check.LoadConfigFile("./config.yml")
+	conf, err := config.LoadConfigFile("./config.yml")
 	if err != nil {
 		return err
 	}
-	exe, err := config.NewExecutor()
+	exe, err := conf.NewExecutor()
 	if err != nil {
 		return err
 	}

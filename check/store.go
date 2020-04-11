@@ -2,8 +2,6 @@ package check
 
 import (
 	"encoding/json"
-	"log"
-	"net/url"
 
 	"github.com/go-redis/redis/v7"
 )
@@ -29,47 +27,8 @@ type (
 	}
 )
 
-func newStore(config *StoreConfig) Store {
-	if config != nil && config.Redis != nil {
-		password := ""
-		addr := ""
-		if config.Redis.Address != nil {
-			if config.Redis.Password != nil {
-				password = *config.Redis.Password
-			}
-			addr = *config.Redis.Address
-		} else if config.Redis.RedisToGo != nil {
-			var err error
-			addr, password, err = parseRedisToGoURL(*config.Redis.RedisToGo)
-			if err != nil {
-				log.Println(err)
-				return nil
-			}
-		}
-		if addr != "" {
-			return &RedisStore{
-				redis.NewClient(&redis.Options{
-					Addr:     addr,
-					Password: password,
-				}),
-			}
-		}
-	}
-	return &NullStore{}
-}
-
-func parseRedisToGoURL(redisToGo string) (addr string, password string, err error) {
-	var redisInfo *url.URL
-	redisInfo, err = url.Parse(redisToGo)
-	if err != nil {
-		return
-	}
-
-	addr = redisInfo.Host
-	if redisInfo.User != nil {
-		password, _ = redisInfo.User.Password()
-	}
-	return
+func NewRedisStore(client *redis.Client) *RedisStore {
+	return &RedisStore{client}
 }
 
 func (s *NullStore) GetJob(name string, job *Job) error {

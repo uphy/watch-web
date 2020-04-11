@@ -13,7 +13,7 @@ type (
 	Executor struct {
 		c          *cron.Cron
 		Jobs       []*Job
-		initialRun bool
+		InitialRun bool
 		store      Store
 	}
 	Source interface {
@@ -68,7 +68,7 @@ func (e *Executor) AddJob(name, schedule, label, link string, source Source, act
 }
 
 func (e *Executor) Start() {
-	if e.initialRun {
+	if e.InitialRun {
 		go e.checkAll()
 	}
 

@@ -1,4 +1,4 @@
-package check
+package config
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 	"text/template"
 
 	"github.com/ghodss/yaml"
+	"github.com/uphy/watch-web/check"
 )
 
 type (
@@ -25,14 +26,13 @@ type (
 		Actions  []ActionConfig `json:"actions,omitempty"`
 	}
 	SourceConfig struct {
-		DOM   *DOMSource   `json:"dom,omitempty"`
-		Shell *ShellSource `json:"shell,omitempty"`
+		DOM   *check.DOMSource   `json:"dom,omitempty"`
+		Shell *check.ShellSource `json:"shell,omitempty"`
 	}
 	ActionConfig struct {
-		Slack      *SlackAction      `json:"slack,omitempty"`
-		LINENotify *LINENotifyAction `json:"line_notify,omitempty"`
+		Slack      *check.SlackAction      `json:"slack,omitempty"`
+		LINENotify *check.LINENotifyAction `json:"line_notify,omitempty"`
 	}
-
 	StoreConfig struct {
 		Redis *RedisConfig `json:"redis,omitempty"`
 	}
@@ -95,31 +95,7 @@ func (c *Config) Save(w io.Writer) error {
 	return err
 }
 
-func (c *Config) NewExecutor() (*Executor, error) {
-	store := newStore(c.Store)
-	e := NewExecutor(store)
-	if c.InitialRun != nil {
-		e.initialRun = *c.InitialRun
-	}
-	for name, job := range c.Jobs {
-		source, err := job.Source.Source()
-		if err != nil {
-			return nil, err
-		}
-		actions := []Action{}
-		for _, a := range job.Actions {
-			action, err := a.Action()
-			if err != nil {
-				return nil, err
-			}
-			actions = append(actions, action)
-		}
-		e.AddJob(name, job.Schedule, job.Label, job.Link, source, actions...)
-	}
-	return e, nil
-}
-
-func (s *SourceConfig) Source() (Source, error) {
+func (s *SourceConfig) Source() (check.Source, error) {
 	if s.DOM != nil {
 		return s.DOM, nil
 	}
@@ -129,7 +105,7 @@ func (s *SourceConfig) Source() (Source, error) {
 	return nil, errors.New("no source defined")
 }
 
-func (a *ActionConfig) Action() (Action, error) {
+func (a *ActionConfig) Action() (check.Action, error) {
 	if a.Slack != nil {
 		return a.Slack, nil
 	}
