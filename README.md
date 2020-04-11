@@ -11,9 +11,12 @@ $ git checkout master
 $ git push
 ```
 
+- Use Heroku Redis(Redis To Go)
+- Use Heroku Scheduler for executing periodically
+
 ## Develop
 
 ```sh
-$ 
+$ make
 ```
-Comment out the `store` config because the pre-defined `config.yml` stores to Heroku Redis(Redis To Go)
+

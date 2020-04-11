@@ -16,19 +16,6 @@ type (
 		initialRun bool
 		store      Store
 	}
-	Job struct {
-		Name     string `json:"name"`
-		source   Source
-		actions  []Action
-		Link     string     `json:"link,omitempty"`
-		Label    string     `json:"label,omitempty"`
-		Previous *string    `json:"previous,omitempty"`
-		Status   Status     `json:"status"`
-		Error    error      `json:"error,omitempty"`
-		Last     *time.Time `json:"last,omitempty"`
-		Count    int        `json:"count"`
-		store    Store
-	}
 	Source interface {
 		Fetch() (string, error)
 		Label() string
@@ -37,12 +24,6 @@ type (
 		Run(result *Result) error
 	}
 	Status string
-)
-
-const (
-	StatusRunning Status = "running"
-	StatusOK      Status = "ok"
-	StatusError   Status = "error"
 )
 
 func init() {
@@ -102,39 +83,40 @@ func (e *Executor) checkAll() {
 
 func (j *Job) Check() {
 	log.Printf("Running job: %s", j.Name)
+	// Restore job status
+	if err := j.store.GetJob(j.Name, j); err != nil {
+		j.failed("failed to get previous job status", err)
+	}
+
 	now := time.Now()
 	j.Last = &now
 	j.Count++
-
 	j.Status = StatusRunning
+	j.Error = nil
+
+	// Get current value
 	current, err := j.source.Fetch()
 	if err != nil {
-		j.Error = err
-		j.Status = StatusError
-		log.Printf("Failed to fetch %s: %v", j.Name, err)
+		j.failed("failed to fetch", err)
 		return
 	}
 	current = strings.Trim(current, " \t\n")
-	prev, err := j.store.Get(j.Name)
-	if err != nil {
-		log.Println("failed to get previous value: ", err)
-		return
-	}
 
-	if prev != nil {
-		result := &Result{j.Name, j.Label, j.Link, *prev, current}
+	// Do action
+	if j.Previous != nil {
+		result := &Result{j.Name, j.Label, j.Link, *j.Previous, current}
 		if err := j.doActions(result); err != nil {
-			j.Status = StatusError
-			j.Error = err
-			log.Printf("Failed to perform action %s: %v", j.Name, err)
+			j.failed("failed to perform action", err)
 		}
 	}
-	if err := j.store.Set(j.Name, current); err != nil {
-		log.Println("failed to set current value: ", err)
-		return
-	}
+
+	// Store job status
 	j.Previous = &current
 	j.Status = StatusOK
+	if err := j.store.SetJob(j.Name, j); err != nil {
+		j.failed("failed to store current value", err)
+		return
+	}
 	log.Printf("Finished job: %s", j.Name)
 }
 

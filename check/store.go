@@ -1,6 +1,7 @@
 package check
 
 import (
+	"encoding/json"
 	"log"
 	"net/url"
 
@@ -11,14 +12,20 @@ const redisPrefix = "v:"
 
 type (
 	Store interface {
-		Get(name string) (*string, error)
-		Set(name string, value string) error
+		GetJob(name string, job *Job) error
+		SetJob(name string, job *Job) error
 	}
-	MemoryStore struct {
-		store map[string]string
+	NullStore struct {
 	}
 	RedisStore struct {
 		client *redis.Client
+	}
+	RedisJob struct {
+		LastUpdatedSec int64   `json:"l"`
+		Value          *string `json:"v"`
+		Error          *string `json:"e"`
+		Status         string  `json:"s"`
+		Count          int     `json:"c"`
 	}
 )
 
@@ -48,7 +55,7 @@ func newStore(config *StoreConfig) Store {
 			}
 		}
 	}
-	return &MemoryStore{make(map[string]string)}
+	return &NullStore{}
 }
 
 func parseRedisToGoURL(redisToGo string) (addr string, password string, err error) {
@@ -65,30 +72,42 @@ func parseRedisToGoURL(redisToGo string) (addr string, password string, err erro
 	return
 }
 
-func (s *MemoryStore) Get(name string) (*string, error) {
-	v, exist := s.store[name]
-	if !exist {
-		return nil, nil
-	}
-	return &v, nil
-}
-
-func (s *MemoryStore) Set(name string, value string) error {
-	s.store[name] = value
+func (s *NullStore) GetJob(name string, job *Job) error {
 	return nil
 }
 
-func (s *RedisStore) Get(name string) (*string, error) {
-	v, err := s.client.Get(redisPrefix + name).Result()
-	if err != nil {
-		if err == redis.Nil {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return &v, nil
+func (s *NullStore) SetJob(name string, job *Job) error {
+	return nil
 }
 
-func (s *RedisStore) Set(name string, value string) error {
-	return s.client.Set(redisPrefix+name, value, 0).Err()
+func (s *RedisStore) GetJob(name string, job *Job) error {
+	b, err := s.client.Get(redisPrefix + name).Result()
+	if err != nil {
+		if err == redis.Nil {
+			return nil
+		}
+		return err
+	}
+	var redisJob RedisJob
+	if err := json.Unmarshal([]byte(b), &redisJob); err != nil {
+		return err
+	}
+	job.Error = redisJob.Error
+	job.Status = Status(redisJob.Status)
+	job.Count = redisJob.Count
+	job.Previous = redisJob.Value
+	return nil
+}
+
+func (s *RedisStore) SetJob(name string, job *Job) error {
+	b, err := json.Marshal(&RedisJob{
+		Error:  job.Error,
+		Status: string(job.Status),
+		Count:  job.Count,
+		Value:  job.Previous,
+	})
+	if err != nil {
+		return err
+	}
+	return s.client.Set(redisPrefix+name, string(b), 0).Err()
 }

@@ -12,7 +12,7 @@ discard: >
       - slack:
           url: '{{ env "SLACK_WEBHOOK_URL" }}'
   {{ end }}
-initial_run: false
+initial_run: true
 jobs:
   # {{ template "ur" sliceOf "20" "688" "グリーンヒルズ東久留米" }}
   # {{ template "ur" sliceOf "20" "399" "清瀬駅前ハイツ" }}
