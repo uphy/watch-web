@@ -39,11 +39,13 @@ func newStore(config *StoreConfig) Store {
 				return nil
 			}
 		}
-		return &RedisStore{
-			redis.NewClient(&redis.Options{
-				Addr:     addr,
-				Password: password,
-			}),
+		if addr != "" {
+			return &RedisStore{
+				redis.NewClient(&redis.Options{
+					Addr:     addr,
+					Password: password,
+				}),
+			}
 		}
 	}
 	return &MemoryStore{make(map[string]string)}

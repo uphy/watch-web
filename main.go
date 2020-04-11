@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -41,10 +42,24 @@ func run() error {
 		return ctx.JSON(200, jobs)
 	})
 	e.POST("/api/jobs/check-all", func(ctx echo.Context) error {
-		for _, j := range exe.Jobs {
-			j.Check()
+		v, err := ctx.FormParams()
+		if err != nil {
+			return err
 		}
-		return ctx.JSON(200, exe.Jobs)
+		p := v.Get("pattern")
+		ptn, err := regexp.Compile(p)
+		if err != nil {
+			return err
+		}
+		checked := make([]*check.Job, 0)
+		for _, j := range exe.Jobs {
+			if !ptn.Match([]byte(j.Name)) {
+				continue
+			}
+			j.Check()
+			checked = append(checked, j)
+		}
+		return ctx.JSON(200, checked)
 	})
 	e.GET("/api/jobs/:name", func(ctx echo.Context) error {
 		name := ctx.Param("name")
