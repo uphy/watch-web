@@ -1,19 +1,18 @@
-# Define template for remove duplicate settings
-discard: >
-  {{- define "ur" }}
-  ur-{{ index . 0 }}-{{ index . 1 }}:
+initial_run: true
+jobs:
+  - id: ur-{{ .shisya }}-{{ .danchi }}
     schedule: "@every 10m"
     source:
       shell:
-        command: ur {{ index . 0 }} {{ index . 1 }}
-    label: "{{ index . 2 }}"
-    link: https://www.ur-net.go.jp/chintai/kanto/tokyo/{{ index . 0 }}_{{ index . 1 }}0.html
+        command: ur {{ .shisya }} {{ .danchi }}
+    label: "{{ .name }}"
+    link: https://www.ur-net.go.jp/chintai/kanto/tokyo/{{ .shisya }}_{{ .danchi }}0.html
     actions:
       - slack:
           url: '{{ env "SLACK_WEBHOOK_URL" }}'
-  {{ end }}
-initial_run: true
-jobs:
+    params:
+      - { shisya: 20, danchi: 688, name: "グリーンヒルズ東久留米" }
+      - { shisya: 20, danchi: 399, name: "清瀬駅前ハイツ" }
   # {{ template "ur" sliceOf "20" "688" "グリーンヒルズ東久留米" }}
   # {{ template "ur" sliceOf "20" "399" "清瀬駅前ハイツ" }}
   # {{ template "ur" sliceOf "20" "465" "グリーンプラザ高松＜光が丘＞" }}
