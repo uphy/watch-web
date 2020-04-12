@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/ghodss/yaml"
+	"github.com/uphy/watch-web/check"
 )
 
 type (
@@ -23,36 +24,6 @@ type (
 		Schedule  TemplateString `json:"schedule,omitempty"`
 		Actions   []ActionConfig `json:"actions,omitempty"`
 		WithItems []interface{}  `json:"with_items,omitempty"`
-	}
-	SourceConfig struct {
-		DOM   *DOMSourceConfig   `json:"dom,omitempty"`
-		Shell *ShellSourceConfig `json:"shell,omitempty"`
-	}
-	DOMSourceConfig struct {
-		URL      TemplateString  `json:"url"`
-		Selector TemplateString  `json:"selector"`
-		Encoding *TemplateString `json:"encoding"`
-	}
-	ShellSourceConfig struct {
-		Command *TemplateString `json:"command"`
-	}
-	ActionConfig struct {
-		Slack      *SlackActionConfig      `json:"slack,omitempty"`
-		LINENotify *LINENotifyActionConfig `json:"line_notify,omitempty"`
-	}
-	SlackActionConfig struct {
-		URL TemplateString `json:"url"`
-	}
-	LINENotifyActionConfig struct {
-		AccessToken TemplateString `json:"access_token"`
-	}
-	StoreConfig struct {
-		Redis *RedisConfig `json:"redis,omitempty"`
-	}
-	RedisConfig struct {
-		Address   *TemplateString `json:"address"`
-		Password  *TemplateString `json:"password"`
-		RedisToGo *TemplateString `json:"redistogo"`
 	}
 )
 
@@ -82,4 +53,20 @@ func (c *Config) Save(w io.Writer) error {
 	}
 	_, err = io.Copy(w, bytes.NewReader(data))
 	return err
+}
+
+func (c *Config) NewExecutor() (*check.Executor, error) {
+	ctx := NewRootContext()
+	store, err := newStore(ctx, c.Store)
+	if err != nil {
+		return nil, err
+	}
+	e := check.NewExecutor(store)
+	if c.InitialRun != nil {
+		e.InitialRun = *c.InitialRun
+	}
+	for _, jobConfig := range c.Jobs {
+		jobConfig.addTo(ctx, e)
+	}
+	return e, nil
 }

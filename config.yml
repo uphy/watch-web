@@ -1,4 +1,4 @@
-initial_run: false
+initial_run: true
 jobs:
   - id: ur-{{ .item.shisya }}-{{ .item.danchi }}
     schedule: "@every 10m"
