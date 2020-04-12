@@ -19,6 +19,9 @@ func (c *CLI) start() cli.Command {
 			cli.BoolFlag{
 				Name: "a,api",
 			},
+			cli.BoolFlag{
+				Name: "ns,no-schedule",
+			},
 			cli.IntFlag{
 				Name:   "p,port",
 				Value:  8080,
@@ -27,16 +30,21 @@ func (c *CLI) start() cli.Command {
 		},
 		Action: func(ctx *cli.Context) error {
 			enableAPI := ctx.Bool("api")
+			enableSchedule := !ctx.Bool("no-schedule")
 			exe, err := c.config.NewExecutor()
 			if err != nil {
 				return err
 			}
 
 			if !enableAPI {
-				exe.Run()
+				if enableSchedule {
+					exe.Run()
+				}
 				return nil
 			}
-			go exe.Run()
+			if enableSchedule {
+				go exe.Run()
+			}
 
 			port := ctx.Int("port")
 			e := echo.New()

@@ -25,4 +25,4 @@ COPY --from=server-builder /go/bin/gojq /usr/bin/
 COPY config.yml .
 COPY scripts/ ./scripts/
 EXPOSE 8080
-ENTRYPOINT ["./watch-web", "start", "--api"]
+ENTRYPOINT ["./watch-web", "start", "--api", "--no-schedule"]
