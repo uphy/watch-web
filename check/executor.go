@@ -73,7 +73,7 @@ func (e *Executor) Run() {
 }
 
 func (e *Executor) checkAll() {
-	ch := make(chan struct{}, 3)
+	ch := make(chan struct{}, 1)
 	wg := new(sync.WaitGroup)
 	for _, job := range e.Jobs {
 		wg.Add(1)
