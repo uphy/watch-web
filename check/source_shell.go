@@ -9,20 +9,14 @@ import (
 
 type (
 	ShellSource struct {
-		Command   string `json:"command"`
-		LabelText string `json:"label"`
+		Command string
 	}
 )
 
-func NewShellSourcee(command, label string) *ShellSource {
+func NewShellSource(command string) *ShellSource {
 	return &ShellSource{
-		Command:   command,
-		LabelText: label,
+		Command: command,
 	}
-}
-
-func (c *ShellSource) Label() string {
-	return c.LabelText
 }
 
 func (c *ShellSource) Fetch() (string, error) {

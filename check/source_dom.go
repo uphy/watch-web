@@ -2,15 +2,11 @@ package check
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
-
-	"golang.org/x/text/encoding/japanese"
 
 	"golang.org/x/text/encoding"
 
@@ -19,24 +15,18 @@ import (
 
 type (
 	DOMSource struct {
-		URL      string    `json:"url"`
-		Selector string    `json:"selector"`
-		Encoding *Encoding `json:"encoding"`
-	}
-	Encoding struct {
-		encoding.Encoding
+		URL      string
+		Selector string
+		Encoding encoding.Encoding
 	}
 )
 
-func NewDOMSource(url, selector string) *DOMSource {
+func NewDOMSource(url, selector string, encoding encoding.Encoding) *DOMSource {
 	return &DOMSource{
 		URL:      url,
 		Selector: selector,
+		Encoding: encoding,
 	}
-}
-
-func (d *DOMSource) Label() string {
-	return fmt.Sprintf("URL: %s", d.URL)
 }
 
 func (d *DOMSource) Fetch() (string, error) {
@@ -69,17 +59,4 @@ func (d *DOMSource) Fetch() (string, error) {
 		buf.WriteString(text)
 	})
 	return buf.String(), nil
-}
-
-func (i *Encoding) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	switch s {
-	case "Shift_JIS", "sjis":
-		*i = Encoding{japanese.ShiftJIS}
-		return nil
-	}
-	return errors.New("unsupported encoding: " + s)
 }

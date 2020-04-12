@@ -54,7 +54,7 @@ func run() error {
 		}
 		checked := make([]*check.Job, 0)
 		for _, j := range exe.Jobs {
-			if !ptn.Match([]byte(j.Name)) {
+			if !ptn.Match([]byte(j.ID)) {
 				continue
 			}
 			j.Check()

@@ -7,17 +7,17 @@ class Client {
         maxRedirects: 0
     })
 
-    async getJob(name: string): Promise<any> {
-        let job = await this.client.get(`jobs/${name}`)
+    async getJob(id: string): Promise<any> {
+        let job = await this.client.get(`jobs/${id}`)
         return job.data;
     }
 
-    async checkJob(name: string) {
-        await this.client.post(`jobs/${name}/check`)
+    async checkJob(id: string) {
+        await this.client.post(`jobs/${id}/check`)
     }
 
-    async testJobActions(name: string) {
-        await this.client.post(`jobs/${name}/test-actions`)
+    async testJobActions(id: string) {
+        await this.client.post(`jobs/${id}/test-actions`)
     }
 
     async listJobs(): Promise<any[]> {

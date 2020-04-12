@@ -10,7 +10,7 @@ import (
 
 type (
 	Result struct {
-		Name     string
+		JobID    string
 		Label    string
 		Link     string
 		Previous string

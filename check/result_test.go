@@ -6,7 +6,7 @@ import (
 
 func TestResult(t *testing.T) {
 	result := &Result{
-		Name:     "test",
+		JobID:    "test",
 		Previous: "aaa\nbbb",
 		Current:  "aaa\nbbb\nccc",
 	}

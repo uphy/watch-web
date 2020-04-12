@@ -1,19 +1,19 @@
 <template>
   <v-container fluid>
-    <v-list two-line dark>
-      <v-list-tile v-for="job in jobs" :key="job.name" @click="openDialog(job.name)">
+    <v-list two-line>
+      <v-list-tile v-for="job in jobs" :key="job.id" @click="openDialog(job.id)">
         <v-list-tile-avatar>
           <v-icon :class="[job.class]">{{ job.icon }}</v-icon>
         </v-list-tile-avatar>
 
         <v-list-tile-content>
-          <v-list-tile-title>{{ job.name }}</v-list-tile-title>
+          <v-list-tile-title>{{ job.label }}</v-list-tile-title>
           <v-list-tile-sub-title>{{ job.description }}</v-list-tile-sub-title>
         </v-list-tile-content>
 
         <v-list-tile-action>
           <v-btn icon ripple>
-            <v-icon color="grey lighten-1">info</v-icon>
+            <v-icon>info</v-icon>
           </v-btn>
         </v-list-tile-action>
       </v-list-tile>
@@ -23,9 +23,9 @@
     <v-dialog v-model="dialog" max-width="500">
       <v-card>
         <v-card-title class="headline">
-          {{ job.name }}
-          <v-btn icon ripple @click="checkJob(job.name)">
-            <v-icon color="grey lighten-1">autorenew</v-icon>
+          {{ job.label }}
+          <v-btn icon ripple @click="checkJob(job.id)">
+            <v-icon>autorenew</v-icon>
           </v-btn>
         </v-card-title>
 
@@ -35,17 +35,20 @@
               <v-text-field readonly disabled v-model="job.status" label="Status"></v-text-field>
               <v-text-field readonly disabled v-model="job.last" label="Last execution"></v-text-field>
               <v-text-field readonly disabled v-model="job.count" label="Total executions"></v-text-field>
+              <a :href="job.link" target="_blank">Link: {{ job.label }}</a>
             </v-container>
           </v-form>
           <v-expansion-panel>
             <v-expansion-panel-content>
               <div slot="header">Previous text</div>
               <v-card>
-                <v-card-text>{{ job.previous }}</v-card-text>
+                <v-card-text>
+                  <pre>{{ job.previous }}</pre>
+                </v-card-text>
               </v-card>
             </v-expansion-panel-content>
           </v-expansion-panel>
-          <a @click="testJobActions(job.name)">Test alert</a>
+          <a @click="testJobActions(job.id)">Test alert</a>
         </v-card-text>
 
         <v-card-actions>
@@ -66,7 +69,7 @@ export default class App extends Vue {
   jobs: any[] = [];
   dialog: boolean = false;
   job: any = {
-    name: "job2",
+    id: "job2",
     description: "Updated on 2018/8/17",
     last: "2018/8/17",
     previous: "aiueo"
@@ -96,20 +99,20 @@ export default class App extends Vue {
     });
     this.jobs = jobs;
   }
-  async openDialog(name: string) {
-    this.job = await client.getJob(name);
+  async openDialog(id: string) {
+    this.job = await client.getJob(id);
     this.dialog = true;
   }
   closeDialog() {
     this.dialog = false;
   }
-  async checkJob(name: string) {
-    await client.checkJob(name);
-    this.job = await client.getJob(name);
+  async checkJob(id: string) {
+    await client.checkJob(id);
+    this.job = await client.getJob(id);
     this.updateList();
   }
-  async testJobActions(name:string){
-    await client.testJobActions(name);
+  async testJobActions(id:string){
+    await client.testJobActions(id);
   }
 }
 </script>

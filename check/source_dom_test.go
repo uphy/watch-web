@@ -5,7 +5,7 @@ import (
 )
 
 func TestDOMSource(t *testing.T) {
-	source := NewDOMSource("https://www.taylorguitars.jp/events/", ".next_event")
+	source := NewDOMSource("https://www.taylorguitars.jp/events/", ".next_event", nil)
 	res, err := source.Fetch()
 	if err != nil {
 		t.Error(err)

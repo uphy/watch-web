@@ -13,8 +13,10 @@ const (
 )
 
 type (
+	// Job struct represents the scheduled job.
+	// Public fields should be with `json` tag because this struct is also used as DTO.
 	Job struct {
-		Name     string `json:"name"`
+		ID       string `json:"id"`
 		source   Source
 		actions  []Action
 		Link     string     `json:"link,omitempty"`
@@ -33,5 +35,5 @@ func (j *Job) failed(msg string, err error) {
 	errorString := errw.Error()
 	j.Error = &errorString
 	j.Status = StatusError
-	log.Printf("%s: name=%s, err=%v", msg, j.Name, errw)
+	log.Printf("%s: id=%s, err=%v", msg, j.ID, errw)
 }

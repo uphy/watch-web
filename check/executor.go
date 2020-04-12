@@ -18,7 +18,6 @@ type (
 	}
 	Source interface {
 		Fetch() (string, error)
-		Label() string
 	}
 	Action interface {
 		Run(result *Result) error
@@ -37,21 +36,21 @@ func NewExecutor(store Store) *Executor {
 	}
 }
 
-func (e *Executor) Job(name string) *Job {
+func (e *Executor) Job(id string) *Job {
 	for _, j := range e.Jobs {
-		if j.Name == name {
+		if j.ID == id {
 			return j
 		}
 	}
 	return nil
 }
 
-func (e *Executor) AddJob(name, schedule, label, link string, source Source, action ...Action) error {
+func (e *Executor) AddJob(id, schedule, label, link string, source Source, action ...Action) error {
 	if schedule == "" {
 		schedule = "@every 1h"
 	}
 	job := &Job{
-		Name:     name,
+		ID:       id,
 		source:   source,
 		actions:  action,
 		Label:    label,
@@ -62,6 +61,7 @@ func (e *Executor) AddJob(name, schedule, label, link string, source Source, act
 		store:    e.store,
 	}
 	e.Jobs = append(e.Jobs, job)
+	log.Printf("Job added: id=%s, label=%s", id, label)
 	return e.c.AddFunc(schedule, func() {
 		job.Check()
 	})
@@ -82,9 +82,9 @@ func (e *Executor) checkAll() {
 }
 
 func (j *Job) Check() {
-	log.Printf("Running job: %s", j.Name)
+	log.Printf("Running job: %s", j.ID)
 	// Restore job status
-	if err := j.store.GetJob(j.Name, j); err != nil {
+	if err := j.store.GetJob(j.ID, j); err != nil {
 		j.failed("failed to get previous job status", err)
 	}
 
@@ -104,7 +104,7 @@ func (j *Job) Check() {
 
 	// Do action
 	if j.Previous != nil {
-		result := &Result{j.Name, j.Label, j.Link, *j.Previous, current}
+		result := &Result{j.ID, j.Label, j.Link, *j.Previous, current}
 		if err := j.doActions(result); err != nil {
 			j.failed("failed to perform action", err)
 		}
@@ -113,16 +113,16 @@ func (j *Job) Check() {
 	// Store job status
 	j.Previous = &current
 	j.Status = StatusOK
-	if err := j.store.SetJob(j.Name, j); err != nil {
+	if err := j.store.SetJob(j.ID, j); err != nil {
 		j.failed("failed to store current value", err)
 		return
 	}
-	log.Printf("Finished job: %s", j.Name)
+	log.Printf("Finished job: %s", j.ID)
 }
 
 func (j *Job) TestActions() error {
 	return j.doActions(&Result{
-		Name:     j.Name,
+		JobID:    j.ID,
 		Label:    "test action",
 		Link:     "https://google.com",
 		Previous: "This is test action.",

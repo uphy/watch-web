@@ -13,9 +13,13 @@ type (
 		Text string `json:"text"`
 	}
 	LINENotifyAction struct {
-		AccessToken string `json:"access_token"`
+		AccessToken string
 	}
 )
+
+func NewLINENotifyAction(accessToken string) *LINENotifyAction {
+	return &LINENotifyAction{accessToken}
+}
 
 func (a *LINENotifyAction) Run(res *Result) error {
 	changes := res.Diff()
@@ -26,7 +30,7 @@ func (a *LINENotifyAction) Run(res *Result) error {
 
 %s
 %s
-`, res.Name, changes.String(), res.Label)
+`, res.JobID, changes.String(), res.Label)
 	form := url.Values{}
 	form.Add("message", message)
 	req, err := http.NewRequest("POST", "https://notify-api.line.me/api/notify", strings.NewReader(form.Encode()))

@@ -12,7 +12,7 @@ import (
 
 type (
 	SlackAction struct {
-		URL string `json:"url"`
+		URL string
 	}
 )
 

@@ -1,27 +1,25 @@
-initial_run: true
+initial_run: false
 jobs:
-  - id: ur-{{ .shisya }}-{{ .danchi }}
+  - id: ur-{{ .item.shisya }}-{{ .item.danchi }}
     schedule: "@every 10m"
     source:
       shell:
-        command: ur {{ .shisya }} {{ .danchi }}
-    label: "{{ .name }}"
-    link: https://www.ur-net.go.jp/chintai/kanto/tokyo/{{ .shisya }}_{{ .danchi }}0.html
+        command: ur {{ .item.shisya }} {{ .item.danchi }}
+    label: "{{ .item.name }}"
+    link: https://www.ur-net.go.jp/chintai/kanto/tokyo/{{ .item.shisya }}_{{ .item.danchi }}0.html
     actions:
       - slack:
           url: '{{ env "SLACK_WEBHOOK_URL" }}'
-    params:
+    with_items:
       - { shisya: 20, danchi: 688, name: "グリーンヒルズ東久留米" }
       - { shisya: 20, danchi: 399, name: "清瀬駅前ハイツ" }
-  # {{ template "ur" sliceOf "20" "688" "グリーンヒルズ東久留米" }}
-  # {{ template "ur" sliceOf "20" "399" "清瀬駅前ハイツ" }}
-  # {{ template "ur" sliceOf "20" "465" "グリーンプラザ高松＜光が丘＞" }}
-  # {{ template "ur" sliceOf "20" "391" "光が丘パークタウン いちょう通り八番街" }}
-  # {{ template "ur" sliceOf "20" "455" "光が丘パークタウン 大通り中央" }}
-  # {{ template "ur" sliceOf "20" "410" "光が丘パークタウン 四季の香弐番街" }}
-  # {{ template "ur" sliceOf "20" "369" "光が丘パークタウン 大通り南" }}
-  # {{ template "ur" sliceOf "20" "350" "光が丘パークタウン 公園南" }}
-  # {{ template "ur" sliceOf "20" "435" "光が丘パークタウン プロムナード十番街" }}
+      - { shisya: 20, danchi: 465, name: "グリーンプラザ高松＜光が丘＞" }
+      - { shisya: 20, danchi: 391, name: "光が丘パークタウン いちょう通り八番街" }
+      - { shisya: 20, danchi: 455, name: "光が丘パークタウン 大通り中央" }
+      - { shisya: 20, danchi: 410, name: "光が丘パークタウン 四季の香弐番街" }
+      - { shisya: 20, danchi: 369, name: "光が丘パークタウン 大通り南" }
+      - { shisya: 20, danchi: 350, name: "光が丘パークタウン 公園南" }
+      - { shisya: 20, danchi: 435, name: "光が丘パークタウン プロムナード十番街" }
 store:
   redis:
     redistogo: '{{ env "REDISTOGO_URL" }}'

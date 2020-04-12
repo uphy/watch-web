@@ -1,19 +1,19 @@
 <template>
-  <v-app dark>
-    <v-toolbar app clipped-left dark>
-      <v-toolbar-title>uphy watch</v-toolbar-title>
+  <v-app>
+    <v-toolbar app clipped-left>
+      <v-toolbar-title>watch bot console</v-toolbar-title>
     </v-toolbar>
     <v-content>
       <v-card>
         <v-container fluid grid-list-lg>
           <v-layout row wrap>
             <v-flex xs12>
-              <v-card color="blue-grey darken-3">
+              <v-card>
                 <v-card-title primary-title>
                   <div class="headline">
                     Jobs
                     <v-btn icon ripple @click="reloadJobs()">
-                      <v-icon color="grey lighten-1">autorenew</v-icon>
+                      <v-icon>autorenew</v-icon>
                     </v-btn>
                   </div>
                   <Jobs ref="jobs" />
