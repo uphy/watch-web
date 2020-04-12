@@ -3,6 +3,7 @@ package check
 import (
 	"log"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -72,9 +73,18 @@ func (e *Executor) Run() {
 }
 
 func (e *Executor) checkAll() {
+	ch := make(chan struct{}, 3)
+	wg := new(sync.WaitGroup)
 	for _, job := range e.Jobs {
-		go job.Check()
+		wg.Add(1)
+		ch <- struct{}{}
+		go func(job *Job) {
+			defer wg.Done()
+			job.Check()
+			<-ch
+		}(job)
 	}
+	wg.Wait()
 }
 
 func (j *Job) RestoreState() error {
