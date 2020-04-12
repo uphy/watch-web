@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/uphy/watch-web/check"
 )
@@ -54,7 +53,6 @@ func (c *JobConfig) addOne(ctx *TemplateContext, e *check.Executor) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("source: id=%s, %#v\n", c.ID, source)
 	actions := []check.Action{}
 	for _, actionConfig := range c.Actions {
 		action, err := actionConfig.Action(ctx)

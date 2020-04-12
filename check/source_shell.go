@@ -1,6 +1,7 @@
 package check
 
 import (
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,6 +21,7 @@ func NewShellSource(command string) *ShellSource {
 }
 
 func (c *ShellSource) Fetch() (string, error) {
+	log.Printf("shell: command=%s", c.Command)
 	cmd := exec.Command("sh", "-c", c.Command)
 	for _, env := range os.Environ() {
 		if strings.HasPrefix(env, "PATH=") {
