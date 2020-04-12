@@ -6,7 +6,7 @@ COPY frontend .
 RUN yarn
 RUN yarn build
 
-FROM golang:1.13-alpine as server-builder
+FROM golang:1.13-stretch as server-builder
 WORKDIR /go/src/github.com/uphy/watch-web
 # Build app
 COPY . .
