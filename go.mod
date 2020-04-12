@@ -16,6 +16,7 @@ require (
 	github.com/markbates/pkger v0.15.1
 	github.com/robfig/cron v1.2.0
 	github.com/sergi/go-diff v1.0.0
+	github.com/urfave/cli v1.22.4
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	golang.org/x/text v0.3.2
 )

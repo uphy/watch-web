@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/uphy/watch-web/check"
 	"golang.org/x/text/encoding"
@@ -95,6 +94,5 @@ func (t *TemplateSource) Fetch() (string, error) {
 	t.ctx.PushScope()
 	defer t.ctx.PopScope()
 	t.ctx.Set("output", s)
-	fmt.Println(t.template.Evaluate(t.ctx))
 	return t.template.Evaluate(t.ctx)
 }

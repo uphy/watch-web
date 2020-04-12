@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"strconv"
 
 	"github.com/ghodss/yaml"
 	"github.com/uphy/watch-web/check"
@@ -12,9 +13,9 @@ import (
 
 type (
 	Config struct {
-		Jobs       []JobConfig  `json:"jobs"`
-		InitialRun *bool        `json:"initial_run,omitempty"`
-		Store      *StoreConfig `json:"store"`
+		Jobs       []JobConfig     `json:"jobs"`
+		InitialRun *TemplateString `json:"initial_run,omitempty"`
+		Store      *StoreConfig    `json:"store"`
 	}
 	JobConfig struct {
 		ID        TemplateString `json:"id"`
@@ -63,7 +64,15 @@ func (c *Config) NewExecutor() (*check.Executor, error) {
 	}
 	e := check.NewExecutor(store)
 	if c.InitialRun != nil {
-		e.InitialRun = *c.InitialRun
+		initialRun, err := c.InitialRun.Evaluate(ctx)
+		if err != nil {
+			return nil, err
+		}
+		ini, err := strconv.ParseBool(initialRun)
+		if err != nil {
+			return nil, err
+		}
+		e.InitialRun = ini
 	}
 	for _, jobConfig := range c.Jobs {
 		jobConfig.addTo(ctx, e)

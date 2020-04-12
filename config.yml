@@ -1,4 +1,4 @@
-initial_run: false
+initial_run: '{{ env "INITIAL_RUN" | default "false" }}'
 jobs:
   - id: ur-{{ .item.shisya }}-{{ .item.danchi }}
     schedule: "@every 10m"

@@ -23,7 +23,7 @@ var funcs = map[string]interface{}{
 	"env": func(name string) string {
 		return os.Getenv(name)
 	},
-	"default": func(value string, defaultValue string) string {
+	"default": func(defaultValue string, value string) string {
 		if value == "" {
 			return defaultValue
 		}

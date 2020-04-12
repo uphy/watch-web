@@ -12,7 +12,7 @@ import (
 type (
 	Executor struct {
 		c          *cron.Cron
-		Jobs       []*Job
+		Jobs       map[string]*Job
 		InitialRun bool
 		store      Store
 	}
@@ -33,16 +33,12 @@ func NewExecutor(store Store) *Executor {
 	return &Executor{
 		c:     cron.New(),
 		store: store,
+		Jobs:  make(map[string]*Job),
 	}
 }
 
 func (e *Executor) Job(id string) *Job {
-	for _, j := range e.Jobs {
-		if j.ID == id {
-			return j
-		}
-	}
-	return nil
+	return e.Jobs[id]
 }
 
 func (e *Executor) AddJob(id, schedule, label, link string, source Source, action ...Action) error {
@@ -61,19 +57,18 @@ func (e *Executor) AddJob(id, schedule, label, link string, source Source, actio
 		store:    e.store,
 	}
 	job.RestoreState()
-	e.Jobs = append(e.Jobs, job)
-	log.Printf("Job added: id=%s, label=%s", id, label)
+	e.Jobs[id] = job
 	return e.c.AddFunc(schedule, func() {
 		job.Check()
 	})
 }
 
-func (e *Executor) Start() {
+func (e *Executor) Run() {
 	if e.InitialRun {
 		go e.checkAll()
 	}
 
-	e.c.Start()
+	e.c.Run()
 }
 
 func (e *Executor) checkAll() {
@@ -140,7 +135,7 @@ func (j *Job) Check() (result *Result) {
 	j.Previous = &current
 	j.Status = StatusOK
 	j.StoreState()
-	log.Printf("Finished job: %s", j.ID)
+	log.Printf("Finished job: id=%s, result=%v", j.ID, result)
 	return
 }
 
