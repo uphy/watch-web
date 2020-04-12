@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"text/template"
 )
 
@@ -33,6 +34,9 @@ var funcs = map[string]interface{}{
 		return values
 	},
 	"json": func(jsonString string) (interface{}, error) {
+		if strings.Trim(jsonString, " ") == "" {
+			return make(map[string]interface{}), nil
+		}
 		var v interface{}
 		if err := json.Unmarshal([]byte(jsonString), &v); err != nil {
 			return nil, err
