@@ -2,6 +2,7 @@ package check
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/go-redis/redis/v7"
 )
@@ -55,6 +56,8 @@ func (s *RedisStore) GetJob(name string, job *Job) error {
 	job.Status = Status(redisJob.Status)
 	job.Count = redisJob.Count
 	job.Previous = redisJob.Value
+	lastUpdated := time.Unix(redisJob.LastUpdatedSec, 0)
+	job.Last = &lastUpdated
 	return nil
 }
 

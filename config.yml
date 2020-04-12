@@ -31,6 +31,18 @@ jobs:
       - { shisya: 20, danchi: 369, name: "光が丘パークタウン 大通り南" }
       - { shisya: 20, danchi: 350, name: "光が丘パークタウン 公園南" }
       - { shisya: 20, danchi: 435, name: "光が丘パークタウン プロムナード十番街" }
+  - id: amazon-{{ .item.id }}
+    schedule: "@every 10m"
+    source:
+      shell:
+        command: curl -sSL https://www.amazon.co.jp/dp/{{ .item.id }}/ | gzip -d | grep '"priceblock_ourprice"' | sed -e 's/.*>\(.*\)<.*/\1/'
+    label: '{{ .item.name }}'
+    link: https://www.amazon.co.jp/dp/{{ .item.id }}/
+    actions:
+      - slack:
+          url: '{{ env "SLACK_WEBHOOK_URL" }}'
+    with_items:
+      - { id: 'B07H56HB8T', name: 'TOPVISION プロジェクター' }
 store:
   redis:
     redistogo: '{{ env "REDISTOGO_URL" }}'
