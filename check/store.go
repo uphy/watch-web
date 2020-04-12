@@ -60,10 +60,11 @@ func (s *RedisStore) GetJob(name string, job *Job) error {
 
 func (s *RedisStore) SetJob(name string, job *Job) error {
 	b, err := json.Marshal(&RedisJob{
-		Error:  job.Error,
-		Status: string(job.Status),
-		Count:  job.Count,
-		Value:  job.Previous,
+		Error:          job.Error,
+		Status:         string(job.Status),
+		Count:          job.Count,
+		Value:          job.Previous,
+		LastUpdatedSec: job.Last.Local().Unix(),
 	})
 	if err != nil {
 		return err
