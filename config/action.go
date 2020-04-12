@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/uphy/watch-web/check"
 )
@@ -10,12 +11,15 @@ type (
 	ActionConfig struct {
 		Slack      *SlackActionConfig      `json:"slack,omitempty"`
 		LINENotify *LINENotifyActionConfig `json:"line_notify,omitempty"`
+		Console    *ConsoleActionConfig    `json:"console"`
 	}
 	SlackActionConfig struct {
 		URL TemplateString `json:"url"`
 	}
 	LINENotifyActionConfig struct {
 		AccessToken TemplateString `json:"access_token"`
+	}
+	ConsoleActionConfig struct {
 	}
 )
 
@@ -25,6 +29,10 @@ func (a *ActionConfig) Action(ctx *TemplateContext) (check.Action, error) {
 	}
 	if a.LINENotify != nil {
 		return a.LINENotify.Action(ctx)
+	}
+	fmt.Println(a.Console)
+	if a.Console != nil {
+		return check.NewConsoleAction(), nil
 	}
 	return nil, errors.New("no action defined")
 }

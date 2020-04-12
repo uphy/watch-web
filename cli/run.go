@@ -19,9 +19,7 @@ func (c *CLI) run() cli.Command {
 				return err
 			}
 			if all {
-				for _, job := range exe.Jobs {
-					job.Check()
-				}
+				exe.CheckAll()
 			} else {
 				for _, id := range ctx.Args() {
 					exe.Job(id).Check()

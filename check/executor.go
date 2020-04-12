@@ -66,13 +66,13 @@ func (e *Executor) AddJob(id, schedule, label, link string, source Source, actio
 
 func (e *Executor) Run() {
 	if e.InitialRun {
-		go e.checkAll()
+		go e.CheckAll()
 	}
 
 	e.c.Run()
 }
 
-func (e *Executor) checkAll() {
+func (e *Executor) CheckAll() {
 	ch := make(chan struct{}, 1)
 	wg := new(sync.WaitGroup)
 	for _, job := range e.Jobs {
@@ -92,6 +92,7 @@ func (j *Job) RestoreState() error {
 		j.failed("failed to get previous job status", err)
 		return err
 	}
+	log.Printf("restored: %#v", j)
 	return nil
 }
 
@@ -100,6 +101,7 @@ func (j *Job) StoreState() error {
 		j.failed("failed to store current value", err)
 		return err
 	}
+	log.Printf("stored: %#v", j)
 	return nil
 }
 
@@ -123,6 +125,7 @@ func (j *Job) Check() (result *Result) {
 		j.failed("failed to fetch", err)
 		return
 	}
+	log.Printf("fetched: id=%s, value=%s", j.ID, current)
 	current = strings.Trim(current, " \t\n")
 
 	// make result

@@ -23,7 +23,7 @@ type (
 		Link      TemplateString `json:"link"`
 		Source    *SourceConfig  `json:"source,omitempty"`
 		Schedule  TemplateString `json:"schedule,omitempty"`
-		Actions   []ActionConfig `json:"actions,omitempty"`
+		Actions   []ActionConfig `json:"actions"`
 		WithItems []interface{}  `json:"with_items,omitempty"`
 	}
 )
