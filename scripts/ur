@@ -6,4 +6,4 @@ DANCHI=$2
 curl -sS https://chintai.sumai.ur-net.go.jp/chintai/api/bukken/detail/detail_bukken_room/ \
      -d "shisya=$SHISYA&danchi=$DANCHI&shikibetu=0&orderByField=0&orderBySort=0&pageIndex=0&pageIndex=0&sp=" \
      | grep -v '^null$' \
-     | gojq -r '.[] | "\(.name)(\(.type)): \(.rent_normal)"'
+     | gojq -r '.[] | "\(.name)(\(.type)): \(.rent) (normal: \(.rent_normal))"'
