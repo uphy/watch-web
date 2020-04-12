@@ -98,7 +98,7 @@ func (j *Job) StoreState() error {
 	return nil
 }
 
-func (j *Job) Check() {
+func (j *Job) Check() (result *Result) {
 	log.Printf("Running job: %s", j.ID)
 	j.RestoreState()
 
@@ -120,9 +120,17 @@ func (j *Job) Check() {
 	}
 	current = strings.Trim(current, " \t\n")
 
+	// make result
+	var previous string
+	if j.Previous != nil {
+		previous = *j.Previous
+	} else {
+		previous = ""
+	}
+	result = &Result{j.ID, j.Label, j.Link, previous, current}
+
 	// Do action
 	if j.Previous != nil {
-		result := &Result{j.ID, j.Label, j.Link, *j.Previous, current}
 		if err := j.doActions(result); err != nil {
 			j.failed("failed to perform action", err)
 		}
@@ -133,6 +141,7 @@ func (j *Job) Check() {
 	j.Status = StatusOK
 	j.StoreState()
 	log.Printf("Finished job: %s", j.ID)
+	return
 }
 
 func (j *Job) TestActions() error {

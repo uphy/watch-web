@@ -76,8 +76,8 @@ func run() error {
 		if job == nil {
 			return echo.NewHTTPError(404, "specified job is not exist")
 		}
-		job.Check()
-		return ctx.NoContent(200)
+		result := job.Check()
+		return ctx.JSON(200, result)
 	})
 	e.POST("/api/jobs/:name/test-actions", func(ctx echo.Context) error {
 		name := ctx.Param("name")

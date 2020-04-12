@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/uphy/watch-web/check"
 	"golang.org/x/text/encoding"
@@ -10,8 +11,9 @@ import (
 
 type (
 	SourceConfig struct {
-		DOM   *DOMSourceConfig   `json:"dom,omitempty"`
-		Shell *ShellSourceConfig `json:"shell,omitempty"`
+		DOM      *DOMSourceConfig   `json:"dom,omitempty"`
+		Shell    *ShellSourceConfig `json:"shell,omitempty"`
+		Template *TemplateString    `json:"template,omitempty"`
 	}
 	DOMSourceConfig struct {
 		URL      TemplateString  `json:"url"`
@@ -21,16 +23,34 @@ type (
 	ShellSourceConfig struct {
 		Command *TemplateString `json:"command"`
 	}
+	TemplateSource struct {
+		template TemplateString
+		ctx      *TemplateContext
+		source   check.Source
+	}
 )
 
 func (s *SourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
+	// load raw source
+	var source check.Source
+	var err error
 	if s.DOM != nil {
-		return s.DOM.Source(ctx)
+		source, err = s.DOM.Source(ctx)
+	} else if s.Shell != nil {
+		source, err = s.Shell.Source(ctx)
 	}
-	if s.Shell != nil {
-		return s.Shell.Source(ctx)
+	if err != nil {
+		return nil, err
 	}
-	return nil, errors.New("no source defined")
+	if source == nil {
+		return nil, errors.New("no source defined")
+	}
+
+	// wrap with template source
+	if s.Template != nil {
+		source = &TemplateSource{*s.Template, ctx, source}
+	}
+	return source, nil
 }
 
 func (d *DOMSourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
@@ -65,4 +85,16 @@ func (d *ShellSourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
 		return nil, err
 	}
 	return check.NewShellSource(command), nil
+}
+
+func (t *TemplateSource) Fetch() (string, error) {
+	s, err := t.source.Fetch()
+	if err != nil {
+		return "", err
+	}
+	t.ctx.PushScope()
+	defer t.ctx.PopScope()
+	t.ctx.Set("output", s)
+	fmt.Println(t.template.Evaluate(t.ctx))
+	return t.template.Evaluate(t.ctx)
 }

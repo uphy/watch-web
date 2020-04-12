@@ -19,4 +19,3 @@ $ git push
 ```sh
 $ make
 ```
-

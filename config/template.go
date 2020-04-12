@@ -2,6 +2,7 @@ package config
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"text/template"
@@ -30,6 +31,13 @@ var funcs = map[string]interface{}{
 	},
 	"sliceOf": func(values ...string) []string {
 		return values
+	},
+	"json": func(jsonString string) (interface{}, error) {
+		var v interface{}
+		if err := json.Unmarshal([]byte(jsonString), &v); err != nil {
+			return nil, err
+		}
+		return v, nil
 	},
 }
 

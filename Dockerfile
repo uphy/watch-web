@@ -1,10 +1,10 @@
-FROM node:8.11 as frontend-builder
+FROM node:10 as frontend-builder
 WORKDIR /app
 COPY frontend .
 RUN yarn
 RUN yarn build
 
-FROM golang:1.13 as server-builder
+FROM golang:1.13-alpine as server-builder
 WORKDIR /go/src/github.com/uphy/watch-web
 # Build app
 COPY . .
