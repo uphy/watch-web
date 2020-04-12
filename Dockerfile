@@ -17,7 +17,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /watch-web
 RUN CGO_ENABLED=0 GOOS=linux go get -u github.com/itchyny/gojq/cmd/gojq
 
 FROM alpine
-RUN apk add --no-cache ca-certificates curl && update-ca-certificates
+RUN apk add --no-cache ca-certificates curl gzip && update-ca-certificates
 WORKDIR /app
 COPY --from=server-builder /watch-web .
 COPY --from=server-builder /go/bin/gojq /usr/bin/
