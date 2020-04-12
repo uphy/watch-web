@@ -60,6 +60,7 @@ func (e *Executor) AddJob(id, schedule, label, link string, source Source, actio
 		Error:    nil,
 		store:    e.store,
 	}
+	job.RestoreState()
 	e.Jobs = append(e.Jobs, job)
 	log.Printf("Job added: id=%s, label=%s", id, label)
 	return e.c.AddFunc(schedule, func() {
@@ -81,9 +82,26 @@ func (e *Executor) checkAll() {
 	}
 }
 
+func (j *Job) RestoreState() error {
+	if err := j.store.GetJob(j.ID, j); err != nil {
+		j.failed("failed to get previous job status", err)
+		return err
+	}
+	return nil
+}
+
+func (j *Job) StoreState() error {
+	if err := j.store.SetJob(j.ID, j); err != nil {
+		j.failed("failed to store current value", err)
+		return err
+	}
+	return nil
+}
+
 func (j *Job) Check() {
 	log.Printf("Running job: %s", j.ID)
-	// Restore job status
+	j.RestoreState()
+
 	if err := j.store.GetJob(j.ID, j); err != nil {
 		j.failed("failed to get previous job status", err)
 	}
@@ -113,10 +131,7 @@ func (j *Job) Check() {
 	// Store job status
 	j.Previous = &current
 	j.Status = StatusOK
-	if err := j.store.SetJob(j.ID, j); err != nil {
-		j.failed("failed to store current value", err)
-		return
-	}
+	j.StoreState()
 	log.Printf("Finished job: %s", j.ID)
 }
 
