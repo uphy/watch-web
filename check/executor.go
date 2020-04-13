@@ -92,7 +92,7 @@ func (j *Job) RestoreState() error {
 		j.failed("failed to get previous job status", err)
 		return err
 	}
-	log.Printf("restored: %#v", j)
+	log.Printf("restored: %v", j)
 	return nil
 }
 
@@ -101,7 +101,7 @@ func (j *Job) StoreState() error {
 		j.failed("failed to store current value", err)
 		return err
 	}
-	log.Printf("stored: %#v", j)
+	log.Printf("stored: %v", j)
 	return nil
 }
 

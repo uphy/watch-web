@@ -22,11 +22,6 @@ type (
 	ShellSourceConfig struct {
 		Command *TemplateString `json:"command"`
 	}
-	TemplateSource struct {
-		template TemplateString
-		ctx      *TemplateContext
-		source   check.Source
-	}
 )
 
 func (s *SourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
@@ -43,11 +38,6 @@ func (s *SourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
 	}
 	if source == nil {
 		return nil, errors.New("no source defined")
-	}
-
-	// wrap with template source
-	if s.Template != nil {
-		source = &TemplateSource{*s.Template, ctx, source}
 	}
 	return source, nil
 }
@@ -84,15 +74,4 @@ func (d *ShellSourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
 		return nil, err
 	}
 	return check.NewShellSource(command), nil
-}
-
-func (t *TemplateSource) Fetch() (string, error) {
-	s, err := t.source.Fetch()
-	if err != nil {
-		return "", err
-	}
-	t.ctx.PushScope()
-	defer t.ctx.PopScope()
-	t.ctx.Set("output", s)
-	return t.template.Evaluate(t.ctx)
 }

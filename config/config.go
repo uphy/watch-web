@@ -22,6 +22,7 @@ type (
 		Label     TemplateString `json:"label"`
 		Link      TemplateString `json:"link"`
 		Source    *SourceConfig  `json:"source,omitempty"`
+		Filters   FiltersConfig  `json:"filters,omitempty"`
 		Schedule  TemplateString `json:"schedule,omitempty"`
 		Actions   []ActionConfig `json:"actions"`
 		WithItems []interface{}  `json:"with_items,omitempty"`

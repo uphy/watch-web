@@ -37,3 +37,11 @@ func (j *Job) failed(msg string, err error) {
 	j.Status = StatusError
 	log.Printf("%s: id=%s, err=%v", msg, j.ID, errw)
 }
+
+func (j *Job) String() string {
+	prev := ""
+	if j.Previous != nil {
+		prev = *j.Previous
+	}
+	return fmt.Sprintf("Job[id=%s, label=%s, source=%s, actions=%s, status=%s, error=%v, last=%v, count=%d, previous=%v]", j.ID, j.Label, j.source, j.actions, j.Status, j.Error, j.Last, j.Count, prev)
+}

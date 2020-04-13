@@ -1,6 +1,7 @@
 package check
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -40,4 +41,8 @@ func (c *ShellSource) Fetch() (string, error) {
 		return "", err
 	}
 	return string(b), nil
+}
+
+func (c *ShellSource) String() string {
+	return fmt.Sprintf("Shell[command=%s]", c.Command)
 }

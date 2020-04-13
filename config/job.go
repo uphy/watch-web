@@ -53,6 +53,11 @@ func (c *JobConfig) addOne(ctx *TemplateContext, e *check.Executor) error {
 	if err != nil {
 		return err
 	}
+	if src, err := c.Filters.Filters(ctx, source); err != nil {
+		return err
+	} else {
+		source = src
+	}
 	actions := []check.Action{}
 	for _, actionConfig := range c.Actions {
 		action, err := actionConfig.Action(ctx)
