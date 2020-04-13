@@ -1,5 +1,5 @@
 {
-    "text": "<{{ .res.Link }}|{{ .res.Label }}> has been updated",
+    "text": "<!channel> <{{ .res.Link }}|{{ .res.Label }}> has been updated",
     "blocks": [],
     "attachments": [
         {
