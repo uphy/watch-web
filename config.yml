@@ -36,7 +36,8 @@ jobs:
     schedule: "@every 10m"
     source:
       shell:
-        command: curl -sSL https://www.amazon.co.jp/dp/{{ .item.id }}/ | gzip -d | grep '"priceblock_ourprice"' | sed -e 's/.*>\(.*\)<.*/\1/'
+        command: |
+          curl -H 'Accept: text/html' -sSL https://www.amazon.co.jp/dp/{{ .item.id }}/ | grep '"priceblock_ourprice"' | sed -e 's/.*>\(.*\)<.*/\1/'
     label: '{{ .item.name }}'
     link: https://www.amazon.co.jp/dp/{{ .item.id }}/
     actions:
