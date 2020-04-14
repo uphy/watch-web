@@ -38,6 +38,8 @@ jobs:
       shell:
         command: |
           curl --compressed -sSL https://www.amazon.co.jp/dp/{{ .item.id }}/
+      empty: fail
+      retry: 3
     filters:
       - dom: '#priceblock_saleprice'
       - template: '{{ (.source|json).text }}'

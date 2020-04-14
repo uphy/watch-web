@@ -2,17 +2,25 @@ package config
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/uphy/watch-web/check"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
 )
 
+const (
+	EmptyActionAccept EmptyAction = "accept"
+	EmptyActionFail   EmptyAction = "fail"
+)
+
 type (
+	EmptyAction  string
 	SourceConfig struct {
-		DOM      *DOMSourceConfig   `json:"dom,omitempty"`
-		Shell    *ShellSourceConfig `json:"shell,omitempty"`
-		Template *TemplateString    `json:"template,omitempty"`
+		DOM         *DOMSourceConfig   `json:"dom,omitempty"`
+		Shell       *ShellSourceConfig `json:"shell,omitempty"`
+		EmptyAction *EmptyAction       `json:"empty,omitempty"`
+		Retry       *int               `json:"retry,omitempty"`
 	}
 	DOMSourceConfig struct {
 		URL      TemplateString  `json:"url"`
@@ -21,6 +29,11 @@ type (
 	}
 	ShellSourceConfig struct {
 		Command *TemplateString `json:"command"`
+	}
+	SourceWithRetry struct {
+		source      check.Source
+		emptyAction *EmptyAction
+		retry       *int
 	}
 )
 
@@ -39,7 +52,8 @@ func (s *SourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
 	if source == nil {
 		return nil, errors.New("no source defined")
 	}
-	return source, nil
+	// wrap source for retry
+	return &SourceWithRetry{source, s.EmptyAction, s.Retry}, nil
 }
 
 func (d *DOMSourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
@@ -74,4 +88,39 @@ func (d *ShellSourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
 		return nil, err
 	}
 	return check.NewShellSource(command), nil
+}
+
+func (s *SourceWithRetry) Fetch() (string, error) {
+	if s.retry == nil {
+		return s.fetch()
+	}
+	retry := *s.retry
+	var err error
+	for i := 0; i <= retry; i++ {
+		var v string
+		v, err = s.fetch()
+		if err != nil {
+			continue
+		}
+		return v, nil
+	}
+	return "", fmt.Errorf("too many retries: lastError=%w", err)
+}
+
+func (s *SourceWithRetry) fetch() (string, error) {
+	value, err := s.source.Fetch()
+	if err != nil {
+		return "", err
+	}
+
+	if s.emptyAction == nil || *s.emptyAction == EmptyActionAccept {
+		return value, nil
+	}
+	if *s.emptyAction == EmptyActionFail {
+		if len(value) == 0 {
+			return "", errors.New("empty value")
+		}
+		return value, nil
+	}
+	return "", fmt.Errorf("unsupported empty action: %s", *s.emptyAction)
 }
