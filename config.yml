@@ -34,17 +34,17 @@ jobs:
       - { shisya: 20, danchi: 435, name: "光が丘パークタウン プロムナード十番街" }
   - id: amazon-{{ .item.id }}
     schedule: "@every 10m"
+    label: '{{ .item.name }}'
+    link: https://www.amazon.co.jp/dp/{{ .item.id }}/
     source:
       shell:
         command: |
           curl --compressed -sSL https://www.amazon.co.jp/dp/{{ .item.id }}/
+      filters:
+        - dom: '#priceblock_saleprice'
+        - template: '{{ (.source|json).text }}'
       empty: fail
       retry: 3
-    filters:
-      - dom: '#priceblock_saleprice'
-      - template: '{{ (.source|json).text }}'
-    label: '{{ .item.name }}'
-    link: https://www.amazon.co.jp/dp/{{ .item.id }}/
     actions:
       - slack:
           url: '{{ env "SLACK_WEBHOOK_URL" }}'

@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"fmt"
+	"math"
+	"time"
 
 	"github.com/uphy/watch-web/check"
 	"golang.org/x/text/encoding"
@@ -17,10 +19,12 @@ const (
 type (
 	EmptyAction  string
 	SourceConfig struct {
-		DOM         *DOMSourceConfig   `json:"dom,omitempty"`
-		Shell       *ShellSourceConfig `json:"shell,omitempty"`
-		EmptyAction *EmptyAction       `json:"empty,omitempty"`
-		Retry       *int               `json:"retry,omitempty"`
+		DOM     *DOMSourceConfig   `json:"dom,omitempty"`
+		Shell   *ShellSourceConfig `json:"shell,omitempty"`
+		Filters FiltersConfig      `json:"filters,omitempty"`
+
+		EmptyAction *EmptyAction `json:"empty,omitempty"`
+		Retry       *int         `json:"retry,omitempty"`
 	}
 	DOMSourceConfig struct {
 		URL      TemplateString  `json:"url"`
@@ -51,6 +55,13 @@ func (s *SourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
 	}
 	if source == nil {
 		return nil, errors.New("no source defined")
+	}
+	// wrap source for filters
+	if len(s.Filters) > 0 {
+		source, err = s.Filters.Filters(ctx, source)
+		if err != nil {
+			return nil, err
+		}
 	}
 	// wrap source for retry
 	return &SourceWithRetry{source, s.EmptyAction, s.Retry}, nil
@@ -99,10 +110,12 @@ func (s *SourceWithRetry) Fetch() (string, error) {
 	for i := 0; i <= retry; i++ {
 		var v string
 		v, err = s.fetch()
-		if err != nil {
-			continue
+		if err == nil {
+			return v, nil
 		}
-		return v, nil
+
+		waitSeconds := 1 + int(math.Pow(2, float64(i)))
+		time.Sleep(time.Second * time.Duration(waitSeconds))
 	}
 	return "", fmt.Errorf("too many retries: lastError=%w", err)
 }
