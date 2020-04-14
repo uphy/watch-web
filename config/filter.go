@@ -1,9 +1,12 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/uphy/watch-web/check"
 )
 
@@ -11,8 +14,8 @@ type (
 	FiltersConfig []FilterConfig
 	FilterConfig  struct {
 		Template *TemplateString `json:"template,omitempty"`
+		DOM      *TemplateString `json:"dom,omitempty"`
 	}
-
 	FilterSource struct {
 		source  check.Source
 		filters []Filter
@@ -23,6 +26,9 @@ type (
 	TemplateFilter struct {
 		template TemplateString
 		ctx      *TemplateContext
+	}
+	DOMFilter struct {
+		selecter string
 	}
 )
 
@@ -44,6 +50,13 @@ func (f FiltersConfig) Filters(ctx *TemplateContext, source check.Source) (check
 func (f *FilterConfig) Filter(ctx *TemplateContext) (Filter, error) {
 	if f.Template != nil {
 		return &TemplateFilter{*f.Template, ctx}, nil
+	}
+	if f.DOM != nil {
+		selector, err := f.DOM.Evaluate(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return &DOMFilter{selector}, nil
 	}
 	return nil, errors.New("no filters defined")
 }
@@ -80,4 +93,34 @@ func (t *TemplateFilter) Filter(s string) (string, error) {
 
 func (t *TemplateFilter) String() string {
 	return fmt.Sprintf("Template[template=%v]", t.template)
+}
+
+func (t *DOMFilter) Filter(s string) (string, error) {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(s))
+	if err != nil {
+		return "", err
+	}
+	result := make(map[string]interface{})
+	selection := doc.Find(t.selecter)
+
+	nodes := make([]interface{}, 0)
+	for _, node := range selection.Nodes {
+		var v = make(map[string]interface{})
+		v["data"] = node.Data
+		for _, a := range node.Attr {
+			v[a.Key] = a.Val
+		}
+		nodes = append(nodes, v)
+	}
+	result["text"] = selection.Text()
+	result["nodes"] = nodes
+	b, err := json.Marshal(result)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
+}
+
+func (t *DOMFilter) String() string {
+	return fmt.Sprintf("DOM[selector=%v]", t.selecter)
 }

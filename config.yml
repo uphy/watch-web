@@ -37,7 +37,10 @@ jobs:
     source:
       shell:
         command: |
-          curl -H 'Accept: text/html' -sSL https://www.amazon.co.jp/dp/{{ .item.id }}/ | grep '"priceblock_ourprice"' | sed -e 's/.*>\(.*\)<.*/\1/'
+          curl --compressed -sSL https://www.amazon.co.jp/dp/{{ .item.id }}/
+    filters:
+      - dom: '#priceblock_saleprice'
+      - template: '{{ (.source|json).text }}'
     label: '{{ .item.name }}'
     link: https://www.amazon.co.jp/dp/{{ .item.id }}/
     actions:
