@@ -11,8 +11,7 @@ func TestResult(t *testing.T) {
 		Current:  "aaa\nbbb\nccc",
 	}
 	if result.Diff().String() != `  aaa
-- bbb
-+ bbb
+  bbb
 + ccc
 ` {
 		t.Fail()

@@ -22,8 +22,10 @@ type (
 )
 
 func (r *Result) Diff() *Diff {
+	prev := strings.Trim(r.Previous, " \t\n") + "\n"
+	current := strings.Trim(r.Current, " \t\n") + "\n"
 	d := diffmatchpatch.New()
-	a, b, c := d.DiffLinesToChars(r.Previous, r.Current)
+	a, b, c := d.DiffLinesToChars(prev, current)
 	diffs := d.DiffMain(a, b, false)
 	diff := d.DiffCharsToLines(diffs, c)
 	return &Diff{diff}
