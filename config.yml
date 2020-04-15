@@ -5,18 +5,18 @@ jobs:
     source:
       shell:
         command: ur {{ .item.shisya }} {{ .item.danchi }}
-    filters:
-      - template: |
-          {{ range .source|json -}}
-          {{   .name }}({{ .type }}): {{ .rent }}
-          {{-  if .system }}(
-          {{-    range $index, $s := .system }}
-          {{-      if $index }}, {{end}}
-          {{-      $s.制度名 }}
-          {{-    end }})
-          {{-  end -}}
-          [共益費 {{ .commonfee }}{{ if .rent_normal }}, 通常 {{ .rent_normal }}{{ end }}]
-          {{ end -}}
+      filters:
+        - template: |
+            {{ range .source|json -}}
+            {{   .name }}({{ .type }}): {{ .rent }}
+            {{-  if .system }}(
+            {{-    range $index, $s := .system }}
+            {{-      if $index }}, {{end}}
+            {{-      $s.制度名 }}
+            {{-    end }})
+            {{-  end -}}
+            [共益費 {{ .commonfee }}{{ if .rent_normal }}, 通常 {{ .rent_normal }}{{ end }}]
+            {{ end -}}
     label: "{{ .item.name }}"
     link: https://www.ur-net.go.jp/chintai/kanto/tokyo/{{ .item.shisya }}_{{ .item.danchi }}0.html
     actions:
