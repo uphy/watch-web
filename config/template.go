@@ -43,6 +43,21 @@ var funcs = map[string]interface{}{
 		}
 		return v, nil
 	},
+	"jsonFormat": func(jsonString string) (string, error) {
+		var v interface{}
+		if err := json.Unmarshal([]byte(jsonString), &v); err != nil {
+			return "", err
+		}
+		b, _ := json.MarshalIndent(v, "", "   ")
+		return string(b), nil
+	},
+	"truncate": func(length int, s string) string {
+		runes := []rune(s)
+		if len(runes) > length {
+			return string(runes[0:length]) + "..."
+		}
+		return s
+	},
 }
 
 func (t TemplateString) Evaluate(ctx *TemplateContext) (string, error) {
