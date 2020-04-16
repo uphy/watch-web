@@ -7,7 +7,6 @@ require (
 	github.com/andybalholm/cascadia v1.1.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/go-redis/redis/v7 v7.2.0
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v0.0.0-20180717150148-3d5d8f294aa0
@@ -18,7 +17,5 @@ require (
 	github.com/sergi/go-diff v1.0.0
 	github.com/urfave/cli v1.22.4
 	github.com/valyala/fasttemplate v1.1.0 // indirect
-	golang.org/x/net v0.0.0-20190923162816-aa69164e4478
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e
 )

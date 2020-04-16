@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/uphy/watch-web/config"
 	"github.com/urfave/cli"
 )
@@ -25,7 +27,7 @@ func New() *CLI {
 		configFile := ctx.String("config")
 		conf, err := config.LoadConfigFile(configFile)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to load config file: %w", err)
 		}
 		c.config = conf
 		return nil

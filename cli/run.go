@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/urfave/cli"
 )
 
@@ -16,7 +18,7 @@ func (c *CLI) run() cli.Command {
 			all := ctx.Bool("all")
 			exe, err := c.config.NewExecutor()
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to create executor: %w", err)
 			}
 			if all {
 				exe.CheckAll()

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/uphy/watch-web/check"
+	"github.com/uphy/watch-web/value"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
 )
@@ -101,39 +102,53 @@ func (d *ShellSourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
 	return check.NewShellSource(command), nil
 }
 
-func (s *SourceWithRetry) Fetch() (string, error) {
+func (s *SourceWithRetry) Fetch() (value.Value, error) {
 	if s.retry == nil {
 		return s.fetch()
 	}
 	retry := *s.retry
 	var err error
 	for i := 0; i <= retry; i++ {
-		var v string
+		var v value.Value
 		v, err = s.fetch()
 		if err == nil {
 			return v, nil
 		}
 
-		waitSeconds := 1 + int(math.Pow(2, float64(i)))
-		time.Sleep(time.Second * time.Duration(waitSeconds))
+		if i < retry {
+			waitSeconds := 1 + int(math.Pow(2, float64(i)))
+			time.Sleep(time.Second * time.Duration(waitSeconds))
+		}
 	}
-	return "", fmt.Errorf("too many retries: lastError=%w", err)
+	return nil, fmt.Errorf("too many retries: lastError=%w", err)
 }
 
-func (s *SourceWithRetry) fetch() (string, error) {
-	value, err := s.source.Fetch()
+func (s *SourceWithRetry) fetch() (value.Value, error) {
+	v, err := s.source.Fetch()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if s.emptyAction == nil || *s.emptyAction == EmptyActionAccept {
-		return value, nil
+		return v, nil
 	}
 	if *s.emptyAction == EmptyActionFail {
-		if len(value) == 0 {
-			return "", errors.New("empty value")
+		if v.Empty() {
+			return nil, errors.New("empty value")
 		}
-		return value, nil
+		return v, nil
 	}
-	return "", fmt.Errorf("unsupported empty action: %s", *s.emptyAction)
+	return nil, fmt.Errorf("unsupported empty action: %s", *s.emptyAction)
+}
+
+func (s *SourceWithRetry) String() string {
+	var emptyAction = ""
+	var retry = ""
+	if s.emptyAction != nil {
+		emptyAction = string(*s.emptyAction)
+	}
+	if s.retry != nil {
+		retry = fmt.Sprint(*s.retry)
+	}
+	return fmt.Sprintf("Retry[source=%v, retry=%v, emptyAction=%v]", s.source, retry, emptyAction)
 }

@@ -43,6 +43,14 @@ var funcs = map[string]interface{}{
 		}
 		return v, nil
 	},
+	"dom": func(selector, html string) (interface{}, error) {
+		// this returns parsed DOM as map(json object value)
+		v, err := parseDOM(html, selector)
+		if err != nil {
+			return nil, err
+		}
+		return v.Interface(), nil
+	},
 }
 
 func (t TemplateString) Evaluate(ctx *TemplateContext) (string, error) {

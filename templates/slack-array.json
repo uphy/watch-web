@@ -1,0 +1,71 @@
+{
+    "text": "<!channel> <{{ .res.Link }}|{{ .res.Label }}> has been updated",
+    "blocks": [],
+    "attachments": [
+        {
+            "color": "#0000FF",
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*[Added]* <https://google.com|Item 1>\nthis is description"
+                    }
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Type:*\nComputer (laptop)"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": "*When:*\nSubmitted Aut 10"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Last Update:*\nMar 10, 2015 (3 years, 5 months)"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Reason:*\nAll vowel keys aren't working."
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Specs:*\n\"Cheetah Pro 15\" - Fast, really fast\""
+                        }
+                    ]
+                },
+                {
+                    "type": "image",
+                    "title": {
+                        "type": "plain_text",
+                        "text": "Example Image",
+                        "emoji": true
+                    },
+                    "image_url": "https://api.slack.com/img/blocks/bkb_template_images/goldengate.png",
+                    "alt_text": "Example Image"
+                },
+                {
+                    "type": "divider"
+                }
+            ]
+        },
+        {
+            "color": "#FF0000",
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*[Removed]*\n~Item1~"
+                    }
+                },
+                {
+                    "type": "divider"
+                }
+            ]
+        }
+    ]
+}

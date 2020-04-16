@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/uphy/watch-web/value"
 )
 
 type (
@@ -21,14 +23,14 @@ func NewShellSource(command string) *ShellSource {
 	}
 }
 
-func (c *ShellSource) Fetch() (string, error) {
+func (c *ShellSource) Fetch() (value.Value, error) {
 	log.Printf("shell: command=%s", c.Command)
 	cmd := exec.Command("sh", "-c", c.Command)
 	for _, env := range os.Environ() {
 		if strings.HasPrefix(env, "PATH=") {
 			dir, err := os.Getwd()
 			if err != nil {
-				return "", err
+				return nil, err
 			}
 			paths := []string{filepath.Join(dir, "scripts")}
 			cmd.Env = append(cmd.Env, "PATH="+strings.Join(paths, ":")+":"+env[5:])
@@ -38,9 +40,9 @@ func (c *ShellSource) Fetch() (string, error) {
 	}
 	b, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(b), nil
+	return value.String(string(b)), nil
 }
 
 func (c *ShellSource) String() string {

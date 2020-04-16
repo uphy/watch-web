@@ -42,7 +42,7 @@ jobs:
           curl --compressed -sSL https://www.amazon.co.jp/dp/{{ .item.id }}/
       filters:
         - dom: '#priceblock_saleprice'
-        - template: '{{ (.source|json).text }}'
+        - template: '{{ .source.text }}'
       empty: fail
       retry: 3
     actions:

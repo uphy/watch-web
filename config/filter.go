@@ -1,27 +1,40 @@
 package config
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/uphy/watch-web/check"
+	"github.com/uphy/watch-web/value"
+)
+
+const (
+	JSONTransformSourceTypeAuto   = "auto"
+	JSONTransformSourceTypeArray  = "array"
+	JSONTransformSourceTypeObject = "object"
+	JSONTransformSourceTypeRaw    = "raw"
 )
 
 type (
 	FiltersConfig []FilterConfig
 	FilterConfig  struct {
-		Template *TemplateString `json:"template,omitempty"`
-		DOM      *TemplateString `json:"dom,omitempty"`
+		Template      *TemplateString `json:"template,omitempty"`
+		DOM           *TemplateString `json:"dom,omitempty"`
+		JSONTransform *struct {
+			Type      *JSONTransformSourceType  `json:"type,omitempty"`
+			Transform map[string]TemplateString `json:"transform,omitempty"`
+		} `json:"json_transform,omitempty"`
 	}
+	JSONTransformSourceType string
+
 	FilterSource struct {
 		source  check.Source
 		filters []Filter
 	}
 	Filter interface {
-		Filter(s string) (string, error)
+		Filter(v value.Value) (value.Value, error)
 	}
 	TemplateFilter struct {
 		template TemplateString
@@ -29,6 +42,11 @@ type (
 	}
 	DOMFilter struct {
 		selecter string
+	}
+	JSONTransformFilter struct {
+		sourceType JSONTransformSourceType
+		transform  map[string]TemplateString
+		ctx        *TemplateContext
 	}
 )
 
@@ -58,50 +76,63 @@ func (f *FilterConfig) Filter(ctx *TemplateContext) (Filter, error) {
 		}
 		return &DOMFilter{selector}, nil
 	}
+	if f.JSONTransform != nil {
+		var t JSONTransformSourceType
+		if f.JSONTransform.Type != nil {
+			t = *f.JSONTransform.Type
+		} else {
+			t = JSONTransformSourceTypeAuto
+		}
+		return &JSONTransformFilter{t, f.JSONTransform.Transform, ctx}, nil
+	}
 	return nil, errors.New("no filters defined")
 }
 
-func (f *FilterSource) Fetch() (string, error) {
-	s, err := f.source.Fetch()
+func (f *FilterSource) Fetch() (value.Value, error) {
+	v, err := f.source.Fetch()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	for _, filter := range f.filters {
-		filtered, err := filter.Filter(s)
+		filtered, err := filter.Filter(v)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		s = filtered
+		v = filtered
 	}
-	return s, nil
+	return v, nil
 }
 
 func (f *FilterSource) String() string {
 	return fmt.Sprintf("Filter[source=%v, filters=%v]", f.source, f.filters)
 }
 
-func (t *TemplateFilter) Filter(s string) (string, error) {
+func (t *TemplateFilter) Filter(v value.Value) (value.Value, error) {
 	t.ctx.PushScope()
 	defer t.ctx.PopScope()
-	t.ctx.Set("source", s)
+	t.ctx.Set("source", v.Interface())
 	evaluated, err := t.template.Evaluate(t.ctx)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return evaluated, nil
+	return value.Auto(evaluated), nil
 }
 
 func (t *TemplateFilter) String() string {
 	return fmt.Sprintf("Template[template=%v]", t.template)
 }
 
-func (t *DOMFilter) Filter(s string) (string, error) {
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(s))
+func (t *DOMFilter) Filter(v value.Value) (value.Value, error) {
+	return parseDOM(v.String(), t.selecter)
+}
+
+func parseDOM(html string, selector string) (value.Value, error) {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	result := make(map[string]interface{})
-	selection := doc.Find(t.selecter)
+	selection := doc.Find(selector)
 
 	nodes := make([]interface{}, 0)
 	for _, node := range selection.Nodes {
@@ -114,13 +145,60 @@ func (t *DOMFilter) Filter(s string) (string, error) {
 	}
 	result["text"] = selection.Text()
 	result["nodes"] = nodes
-	b, err := json.Marshal(result)
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
+	return value.NewJSONObjectValue(result), nil
 }
 
 func (t *DOMFilter) String() string {
 	return fmt.Sprintf("DOM[selector=%v]", t.selecter)
+}
+
+func (t *JSONTransformFilter) Filter(v value.Value) (value.Value, error) {
+	// auto detect source type
+	var sourceType = t.sourceType
+	if sourceType == JSONTransformSourceTypeAuto {
+		s := v.String()
+		if strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]") {
+			sourceType = JSONTransformSourceTypeArray
+		} else if strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}") {
+			sourceType = JSONTransformSourceTypeObject
+		} else {
+			sourceType = JSONTransformSourceTypeRaw
+		}
+	}
+	// parse source based on type
+	var source []interface{}
+	hasMultiElements := false
+	switch sourceType {
+	case JSONTransformSourceTypeArray:
+		source = v.JSONArray()
+		hasMultiElements = true
+	case JSONTransformSourceTypeObject:
+		source = []interface{}{v.JSONObject()}
+	case JSONTransformSourceTypeRaw:
+		source = []interface{}{v.Interface()}
+	default:
+		return nil, fmt.Errorf("unsupported transform source type: %v", sourceType)
+	}
+	// transform
+	var transformed []interface{}
+	for _, src := range source {
+		t.ctx.PushScope()
+		t.ctx.Set("source", src)
+		elm := make(map[string]string)
+		for k, tmpl := range t.transform {
+			evaluated, err := tmpl.Evaluate(t.ctx)
+			if err != nil {
+				t.ctx.PopScope()
+				return nil, err
+			}
+			elm[k] = evaluated
+		}
+		transformed = append(transformed, elm)
+		t.ctx.PopScope()
+	}
+	// return
+	if hasMultiElements {
+		return value.NewJSONArrayValue(transformed), nil
+	}
+	return value.NewJSONObjectValue(transformed[0].(map[string]interface{})), nil
 }

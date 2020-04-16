@@ -11,6 +11,7 @@ import (
 	"golang.org/x/text/encoding"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/uphy/watch-web/value"
 )
 
 type (
@@ -29,14 +30,14 @@ func NewDOMSource(url, selector string, encoding encoding.Encoding) *DOMSource {
 	}
 }
 
-func (d *DOMSource) Fetch() (string, error) {
+func (d *DOMSource) Fetch() (value.Value, error) {
 	resp, err := http.Get(d.URL)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		return "", errors.New("unexpected status code: " + strconv.Itoa(resp.StatusCode))
+		return nil, errors.New("unexpected status code: " + strconv.Itoa(resp.StatusCode))
 	}
 	var reader io.Reader
 	reader = resp.Body
@@ -45,7 +46,7 @@ func (d *DOMSource) Fetch() (string, error) {
 	}
 	doc, err := goquery.NewDocumentFromReader(reader)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	buf := new(bytes.Buffer)
@@ -58,5 +59,5 @@ func (d *DOMSource) Fetch() (string, error) {
 
 		buf.WriteString(text)
 	})
-	return buf.String(), nil
+	return value.String(buf.String()), nil
 }

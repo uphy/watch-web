@@ -2,12 +2,12 @@ package check
 
 import (
 	"log"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/robfig/cron"
+	"github.com/uphy/watch-web/value"
 )
 
 type (
@@ -18,7 +18,7 @@ type (
 		store      Store
 	}
 	Source interface {
-		Fetch() (string, error)
+		Fetch() (value.Value, error)
 	}
 	Action interface {
 		Run(result *Result) error
@@ -125,8 +125,7 @@ func (j *Job) Check() (result *Result) {
 		j.failed("failed to fetch", err)
 		return
 	}
-	log.Printf("fetched: id=%s, value=%s", j.ID, current)
-	current = strings.Trim(current, " \t\n")
+	log.Printf("fetched: id=%s, value=%s", j.ID, current.String())
 
 	// make result
 	var previous string
@@ -135,7 +134,8 @@ func (j *Job) Check() (result *Result) {
 	} else {
 		previous = ""
 	}
-	result = &Result{j.ID, j.Label, j.Link, previous, current}
+	currentString := current.String()
+	result = &Result{j.ID, j.Label, j.Link, previous, currentString}
 
 	// Do action
 	if j.Previous != nil {
@@ -145,7 +145,7 @@ func (j *Job) Check() (result *Result) {
 	}
 
 	// Store job status
-	j.Previous = &current
+	j.Previous = &currentString
 	j.Status = StatusOK
 	j.StoreState()
 	log.Printf("Finished job: id=%s, result=%v", j.ID, result)

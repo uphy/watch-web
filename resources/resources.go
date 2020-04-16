@@ -11,7 +11,7 @@ var SlackTemplate string
 var HttpStatic pkger.Dir
 
 func init() {
-	f, err := pkger.Open("/resources/slack.json")
+	f, err := pkger.Open("/templates/slack.json")
 	if err != nil {
 		log.Fatal(err)
 	}
