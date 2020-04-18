@@ -11,22 +11,23 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
 	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/config/template"
 )
 
 type (
 	Config struct {
-		Jobs       []JobConfig     `json:"jobs"`
-		InitialRun *TemplateString `json:"initial_run,omitempty"`
-		Store      *StoreConfig    `json:"store"`
+		Jobs       []JobConfig              `json:"jobs"`
+		InitialRun *template.TemplateString `json:"initial_run,omitempty"`
+		Store      *StoreConfig             `json:"store"`
 	}
 	JobConfig struct {
-		ID        TemplateString `json:"id"`
-		Label     TemplateString `json:"label"`
-		Link      TemplateString `json:"link"`
-		Source    *SourceConfig  `json:"source,omitempty"`
-		Schedule  TemplateString `json:"schedule,omitempty"`
-		Actions   []ActionConfig `json:"actions"`
-		WithItems []interface{}  `json:"with_items,omitempty"`
+		ID        template.TemplateString `json:"id"`
+		Label     template.TemplateString `json:"label"`
+		Link      template.TemplateString `json:"link"`
+		Source    *SourceConfig           `json:"source,omitempty"`
+		Schedule  template.TemplateString `json:"schedule,omitempty"`
+		Actions   []ActionConfig          `json:"actions"`
+		WithItems []interface{}           `json:"with_items,omitempty"`
 	}
 )
 
@@ -59,7 +60,7 @@ func (c *Config) Save(w io.Writer) error {
 }
 
 func (c *Config) NewExecutor(log *logrus.Logger) (*check.Executor, error) {
-	ctx := NewRootContext()
+	ctx := template.NewRootContext()
 	store, err := newStore(ctx, c.Store)
 	if err != nil {
 		return nil, err

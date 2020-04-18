@@ -1,4 +1,4 @@
-package config
+package template
 
 import (
 	"bytes"
@@ -7,6 +7,10 @@ import (
 	"os"
 	"strings"
 	"text/template"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/uphy/watch-web/pkg/value"
+	"golang.org/x/net/html"
 )
 
 type (
@@ -45,7 +49,7 @@ var funcs = map[string]interface{}{
 	},
 	"dom": func(selector, html string) (interface{}, error) {
 		// this returns parsed DOM as map(json object value)
-		v, err := parseDOM(html, selector)
+		v, err := ParseDOM(html, selector)
 		if err != nil {
 			return nil, err
 		}
@@ -120,4 +124,40 @@ func (c *templateScope) get() map[string]interface{} {
 		return vars
 	}
 	return c.variables
+}
+
+func ParseDOM(html string, selector string) (value.Value, error) {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[string]interface{})
+	selection := doc.Find(selector)
+
+	nodes := make([]interface{}, 0)
+	for _, node := range selection.Nodes {
+		var v = nodeToMap(node)
+		nodes = append(nodes, v)
+	}
+	result["text"] = selection.Text()
+	selectedHTML, _ := selection.Html()
+	result["html"] = selectedHTML
+	result["nodes"] = nodes
+	return value.NewJSONObjectValue(result), nil
+}
+
+func nodeToMap(n *html.Node) map[string]interface{} {
+	var v = make(map[string]interface{})
+	v["data"] = n.Data
+	for _, a := range n.Attr {
+		v[a.Key] = a.Val
+	}
+	children := make([]interface{}, 0)
+	if n.FirstChild != nil {
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			children = append(children, nodeToMap(c))
+		}
+	}
+	v["children"] = children
+	return v
 }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/config/template"
 	"github.com/uphy/watch-web/pkg/value"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
@@ -28,13 +29,13 @@ type (
 		Retry       *int         `json:"retry,omitempty"`
 	}
 	DOMSourceConfig struct {
-		URL      TemplateString  `json:"url"`
-		Selector TemplateString  `json:"selector"`
-		Encoding *TemplateString `json:"encoding"`
+		URL      template.TemplateString  `json:"url"`
+		Selector template.TemplateString  `json:"selector"`
+		Encoding *template.TemplateString `json:"encoding"`
 	}
 	ShellSourceConfig struct {
-		Command *TemplateString  `json:"command"`
-		Type    *value.ValueType `json:"type,omitempty"`
+		Command *template.TemplateString `json:"command"`
+		Type    *value.ValueType         `json:"type,omitempty"`
 	}
 	SourceWithRetry struct {
 		source      check.Source
@@ -43,7 +44,7 @@ type (
 	}
 )
 
-func (s *SourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
+func (s *SourceConfig) Source(ctx *template.TemplateContext) (check.Source, error) {
 	// load raw source
 	var source check.Source
 	var err error
@@ -69,7 +70,7 @@ func (s *SourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
 	return &SourceWithRetry{source, s.EmptyAction, s.Retry}, nil
 }
 
-func (d *DOMSourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
+func (d *DOMSourceConfig) Source(ctx *template.TemplateContext) (check.Source, error) {
 	var encoding encoding.Encoding
 	if d.Encoding != nil {
 		enc, err := d.Encoding.Evaluate(ctx)
@@ -95,7 +96,7 @@ func (d *DOMSourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
 	return source, nil
 }
 
-func (d *ShellSourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
+func (d *ShellSourceConfig) Source(ctx *template.TemplateContext) (check.Source, error) {
 	command, err := d.Command.Evaluate(ctx)
 	if err != nil {
 		return nil, err

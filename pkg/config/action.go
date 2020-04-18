@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/config/template"
 )
 
 type (
@@ -14,16 +15,16 @@ type (
 		Console    *ConsoleActionConfig    `json:"console"`
 	}
 	SlackActionConfig struct {
-		URL TemplateString `json:"url"`
+		URL template.TemplateString `json:"url"`
 	}
 	LINENotifyActionConfig struct {
-		AccessToken TemplateString `json:"access_token"`
+		AccessToken template.TemplateString `json:"access_token"`
 	}
 	ConsoleActionConfig struct {
 	}
 )
 
-func (a *ActionConfig) Action(ctx *TemplateContext) (check.Action, error) {
+func (a *ActionConfig) Action(ctx *template.TemplateContext) (check.Action, error) {
 	if a.Slack != nil {
 		return a.Slack.Action(ctx)
 	}
@@ -37,7 +38,7 @@ func (a *ActionConfig) Action(ctx *TemplateContext) (check.Action, error) {
 	return nil, errors.New("no action defined")
 }
 
-func (s *SlackActionConfig) Action(ctx *TemplateContext) (check.Action, error) {
+func (s *SlackActionConfig) Action(ctx *template.TemplateContext) (check.Action, error) {
 	url, err := s.URL.Evaluate(ctx)
 	if err != nil {
 		return nil, err
@@ -45,7 +46,7 @@ func (s *SlackActionConfig) Action(ctx *TemplateContext) (check.Action, error) {
 	return check.NewSlackAction(url), nil
 }
 
-func (s *LINENotifyActionConfig) Action(ctx *TemplateContext) (check.Action, error) {
+func (s *LINENotifyActionConfig) Action(ctx *template.TemplateContext) (check.Action, error) {
 	token, err := s.AccessToken.Evaluate(ctx)
 	if err != nil {
 		return nil, err

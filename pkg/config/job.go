@@ -4,9 +4,10 @@ import (
 	"fmt"
 
 	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/config/template"
 )
 
-func (c *JobConfig) addTo(ctx *TemplateContext, e *check.Executor) ([]*check.Job, error) {
+func (c *JobConfig) addTo(ctx *template.TemplateContext, e *check.Executor) ([]*check.Job, error) {
 	jobs := make([]*check.Job, 0)
 	if len(c.WithItems) == 0 {
 		job, err := c.addOne(ctx, e)
@@ -34,12 +35,12 @@ func (c *JobConfig) addTo(ctx *TemplateContext, e *check.Executor) ([]*check.Job
 	return jobs, nil
 }
 
-func evaluateItemAsTemplate(ctx *TemplateContext, v interface{}) (interface{}, error) {
+func evaluateItemAsTemplate(ctx *template.TemplateContext, v interface{}) (interface{}, error) {
 	m, ok := v.(map[string]interface{})
 	if ok {
 		evaluated := make(map[string]interface{})
 		for key, value := range m {
-			ekey, err := TemplateString(key).Evaluate(ctx)
+			ekey, err := template.TemplateString(key).Evaluate(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -51,14 +52,14 @@ func evaluateItemAsTemplate(ctx *TemplateContext, v interface{}) (interface{}, e
 		}
 		return evaluated, nil
 	}
-	e, err := TemplateString(fmt.Sprint(v)).Evaluate(ctx)
+	e, err := template.TemplateString(fmt.Sprint(v)).Evaluate(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return e, nil
 }
 
-func (c *JobConfig) addOne(ctx *TemplateContext, e *check.Executor) (*check.Job, error) {
+func (c *JobConfig) addOne(ctx *template.TemplateContext, e *check.Executor) (*check.Job, error) {
 	source, err := c.Source.Source(ctx)
 	if err != nil {
 		return nil, err

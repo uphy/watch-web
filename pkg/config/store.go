@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-redis/redis/v7"
 	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/config/template"
 )
 
 type (
@@ -12,13 +13,13 @@ type (
 		Redis *RedisConfig `json:"redis,omitempty"`
 	}
 	RedisConfig struct {
-		Address   *TemplateString `json:"address"`
-		Password  *TemplateString `json:"password"`
-		RedisToGo *TemplateString `json:"redistogo"`
+		Address   *template.TemplateString `json:"address"`
+		Password  *template.TemplateString `json:"password"`
+		RedisToGo *template.TemplateString `json:"redistogo"`
 	}
 )
 
-func newStore(ctx *TemplateContext, config *StoreConfig) (check.Store, error) {
+func newStore(ctx *template.TemplateContext, config *StoreConfig) (check.Store, error) {
 	if config != nil && config.Redis != nil {
 		password := ""
 		addr := ""
