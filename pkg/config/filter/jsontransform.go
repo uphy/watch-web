@@ -18,50 +18,12 @@ const (
 
 type (
 	JSONTransformSourceType string
-	TemplateFilter          struct {
-		template template.TemplateString
-		ctx      *template.TemplateContext
-	}
-	DOMFilter struct {
-		selecter string
-	}
-	JSONTransformFilter struct {
+	JSONTransformFilter     struct {
 		sourceType JSONTransformSourceType
 		transform  map[string]template.TemplateString
 		ctx        *template.TemplateContext
 	}
 )
-
-func NewTemplateFilter(template template.TemplateString, ctx *template.TemplateContext) *TemplateFilter {
-	return &TemplateFilter{template, ctx}
-}
-
-func (t *TemplateFilter) Filter(ctx *check.JobContext, v value.Value) (value.Value, error) {
-	t.ctx.PushScope()
-	defer t.ctx.PopScope()
-	t.ctx.Set("source", v)
-	evaluated, err := t.template.Evaluate(t.ctx)
-	if err != nil {
-		return nil, err
-	}
-	return value.Auto(evaluated), nil
-}
-
-func (t *TemplateFilter) String() string {
-	return fmt.Sprintf("Template[template=%v]", t.template)
-}
-
-func NewDOMFilter(selector string) *DOMFilter {
-	return &DOMFilter{selector}
-}
-
-func (t *DOMFilter) Filter(ctx *check.JobContext, v value.Value) (value.Value, error) {
-	return template.ParseDOM(v.String(), t.selecter)
-}
-
-func (t *DOMFilter) String() string {
-	return fmt.Sprintf("DOM[selector=%v]", t.selecter)
-}
 
 func NewJSONTransformFilter(sourceType JSONTransformSourceType, transform map[string]template.TemplateString, ctx *template.TemplateContext) *JSONTransformFilter {
 	return &JSONTransformFilter{sourceType, transform, ctx}
