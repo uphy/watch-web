@@ -27,6 +27,17 @@ type (
 	}
 )
 
+func ConvertInterfaceAs(i interface{}, valueType ValueType) (Value, error) {
+	if s, ok := i.(string); ok {
+		return ConvertAs(s, valueType)
+	}
+	b, err := json.Marshal(i)
+	if err != nil {
+		return nil, err
+	}
+	return ConvertAs(string(b), valueType)
+}
+
 func ConvertAs(s string, valueType ValueType) (Value, error) {
 	switch valueType {
 	case ValueTypeJSONObject:

@@ -21,9 +21,10 @@ const (
 type (
 	EmptyAction  string
 	SourceConfig struct {
-		DOM     *DOMSourceConfig   `json:"dom,omitempty"`
-		Shell   *ShellSourceConfig `json:"shell,omitempty"`
-		Filters FiltersConfig      `json:"filters,omitempty"`
+		DOM      *DOMSourceConfig   `json:"dom,omitempty"`
+		Shell    *ShellSourceConfig `json:"shell,omitempty"`
+		Constant interface{}        `json:"constant",omitempty`
+		Filters  FiltersConfig      `json:"filters,omitempty"`
 
 		EmptyAction *EmptyAction `json:"empty,omitempty"`
 		Retry       *int         `json:"retry,omitempty"`
@@ -35,7 +36,6 @@ type (
 	}
 	ShellSourceConfig struct {
 		Command *template.TemplateString `json:"command"`
-		Type    *value.ValueType         `json:"type,omitempty"`
 	}
 	SourceWithRetry struct {
 		source      check.Source
@@ -52,6 +52,8 @@ func (s *SourceConfig) Source(ctx *template.TemplateContext) (check.Source, erro
 		source, err = s.DOM.Source(ctx)
 	} else if s.Shell != nil {
 		source, err = s.Shell.Source(ctx)
+	} else if s.Constant != nil {
+		source = check.NewConstantSource(s.Constant)
 	}
 	if err != nil {
 		return nil, err
@@ -101,14 +103,7 @@ func (d *ShellSourceConfig) Source(ctx *template.TemplateContext) (check.Source,
 	if err != nil {
 		return nil, err
 	}
-	return check.NewShellSource(command, d.valueType()), nil
-}
-
-func (s *ShellSourceConfig) valueType() value.ValueType {
-	if s.Type == nil {
-		return value.ValueTypeString
-	}
-	return *s.Type
+	return check.NewShellSource(command), nil
 }
 
 func (s *SourceWithRetry) Fetch(ctx *check.JobContext) (value.Value, error) {

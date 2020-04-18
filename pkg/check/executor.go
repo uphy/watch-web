@@ -116,12 +116,13 @@ func (j *Job) StoreState() error {
 	return nil
 }
 
-func (j *Job) Check() (res *result.Result) {
+func (j *Job) Check() (res *result.Result, err error) {
 	j.ctx.Log.Info("Running job.")
 	j.RestoreState()
 
-	if err := j.store.GetJob(j.ID, j); err != nil {
+	if err = j.store.GetJob(j.ID, j); err != nil {
 		j.failed("failed to get previous job status", err)
+		return
 	}
 
 	now := time.Now()
@@ -138,10 +139,10 @@ func (j *Job) Check() (res *result.Result) {
 	}
 	j.ctx.Log.WithFields(logrus.Fields{
 		"current": fmt.Sprintf("%#v", current),
-	}).Debug("Fetched job result.Result.")
-	j.ctx.Log.Info("Fetched job result.Result.")
+	}).Debug("Fetched job result.")
+	j.ctx.Log.Info("Fetched job result.")
 
-	// make result.Result
+	// make result
 	var previous string
 	if j.Previous != nil {
 		previous = *j.Previous
@@ -153,7 +154,7 @@ func (j *Job) Check() (res *result.Result) {
 
 	// Do action
 	if j.Previous != nil {
-		if err := j.doActions(res); err != nil {
+		if err = j.doActions(res); err != nil {
 			j.failed("failed to perform action", err)
 		}
 	}
@@ -162,7 +163,7 @@ func (j *Job) Check() (res *result.Result) {
 	j.Previous = &currentString
 	j.Status = StatusOK
 	j.StoreState()
-	j.ctx.Log.WithField("result.Result", fmt.Sprintf("%#v", res)).Debug("Finished job.")
+	j.ctx.Log.WithField("result", fmt.Sprintf("%#v", res)).Debug("Finished job.")
 	j.ctx.Log.Info("Finished job.")
 	return
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	"github.com/uphy/watch-web/pkg/check"
 	"github.com/uphy/watch-web/pkg/config/filter"
 	"github.com/uphy/watch-web/pkg/config/template"
@@ -15,8 +16,9 @@ type (
 	FilterConfig  struct {
 		Template      *template.TemplateString `json:"template,omitempty"`
 		DOM           *template.TemplateString `json:"dom,omitempty"`
+		JSONArray     *struct{}                `json:"json_array,omitempty"`
+		JSONObject    *struct{}                `json:"json_object,omitempty"`
 		JSONTransform *struct {
-			Type      *filter.JSONTransformSourceType    `json:"type,omitempty"`
 			Transform map[string]template.TemplateString `json:"transform,omitempty"`
 		} `json:"json_transform,omitempty"`
 	}
@@ -57,13 +59,13 @@ func (f *FilterConfig) Filter(ctx *template.TemplateContext) (Filter, error) {
 		return filter.NewDOMFilter(selector), nil
 	}
 	if f.JSONTransform != nil {
-		var t filter.JSONTransformSourceType
-		if f.JSONTransform.Type != nil {
-			t = *f.JSONTransform.Type
-		} else {
-			t = filter.JSONTransformSourceTypeAuto
-		}
-		return filter.NewJSONTransformFilter(t, f.JSONTransform.Transform, ctx), nil
+		return filter.NewJSONTransformFilter(f.JSONTransform.Transform, ctx), nil
+	}
+	if f.JSONObject != nil {
+		return filter.NewJSONObjectFilter(), nil
+	}
+	if f.JSONArray != nil {
+		return filter.NewJSONArrayFilter(), nil
 	}
 	return nil, errors.New("no filters defined")
 }
@@ -73,11 +75,19 @@ func (f *FilterSource) Fetch(ctx *check.JobContext) (value.Value, error) {
 	if err != nil {
 		return nil, err
 	}
+	ctx.Log.WithField("source", v).Debug("Start filter chain.")
 	for _, filter := range f.filters {
 		filtered, err := filter.Filter(ctx, v)
 		if err != nil {
+			ctx.Log.WithFields(logrus.Fields{
+				"filter": fmt.Sprintf("%#v", filter),
+			}).Debug("Failed to filtered value.")
 			return nil, err
 		}
+		ctx.Log.WithFields(logrus.Fields{
+			"filter":   fmt.Sprintf("%#v", filter),
+			"filtered": filtered,
+		}).Debug("Filtered value.")
 		v = filtered
 	}
 	return v, nil

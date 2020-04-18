@@ -70,7 +70,11 @@ var funcs = map[string]interface{}{
 
 func (t TemplateString) Evaluate(ctx *TemplateContext) (string, error) {
 	var buf = new(bytes.Buffer)
-	if err := template.Must(template.New("template-string").Funcs(funcs).Parse(string(t))).Execute(buf, ctx.Get()); err != nil {
+	tmpl, err := template.New("template-string").Funcs(funcs).Parse(string(t))
+	if err != nil {
+		return "", fmt.Errorf("cannot parse template: template=%v, error=%w", t, err)
+	}
+	if err := tmpl.Execute(buf, ctx.Get()); err != nil {
 		return "", fmt.Errorf("cannot evaluate %s: %w", t, err)
 	}
 	return buf.String(), nil

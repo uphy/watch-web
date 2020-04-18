@@ -93,7 +93,10 @@ func (c *CLI) start() cli.Command {
 				if job == nil {
 					return echo.NewHTTPError(404, "specified job is not exist")
 				}
-				result := job.Check()
+				result, err := job.Check()
+				if err != nil {
+					return echo.NewHTTPError(500, "failed to check: "+err.Error())
+				}
 				return ctx.JSON(200, result)
 			})
 			e.POST("/api/jobs/:name/test-actions", func(ctx echo.Context) error {

@@ -2,80 +2,59 @@ package filter
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/uphy/watch-web/pkg/check"
 	"github.com/uphy/watch-web/pkg/config/template"
 	"github.com/uphy/watch-web/pkg/value"
 )
 
-const (
-	JSONTransformSourceTypeAuto   = "auto"
-	JSONTransformSourceTypeArray  = "array"
-	JSONTransformSourceTypeObject = "object"
-	JSONTransformSourceTypeRaw    = "raw"
-)
-
 type (
-	JSONTransformSourceType string
-	JSONTransformFilter     struct {
-		sourceType JSONTransformSourceType
-		transform  map[string]template.TemplateString
-		ctx        *template.TemplateContext
+	transform           map[string]template.TemplateString
+	JSONTransformFilter struct {
+		transform transform
+		ctx       *template.TemplateContext
 	}
 )
 
-func NewJSONTransformFilter(sourceType JSONTransformSourceType, transform map[string]template.TemplateString, ctx *template.TemplateContext) *JSONTransformFilter {
-	return &JSONTransformFilter{sourceType, transform, ctx}
+func NewJSONTransformFilter(transform map[string]template.TemplateString, ctx *template.TemplateContext) *JSONTransformFilter {
+	return &JSONTransformFilter{transform, ctx}
+}
+
+func (t transform) transform(ctx *template.TemplateContext, v value.Value) (value.Value, error) {
+	ctx.PushScope()
+	ctx.Set("source", v.Interface())
+	defer ctx.PopScope()
+
+	var transformed = make(map[string]interface{})
+	for k, tmpl := range t {
+		evaluated, err := tmpl.Evaluate(ctx)
+		if err != nil {
+			return nil, err
+		}
+		transformed[k] = evaluated
+	}
+	return value.NewJSONObjectValue(transformed), nil
 }
 
 func (t *JSONTransformFilter) Filter(ctx *check.JobContext, v value.Value) (value.Value, error) {
-	// auto detect source type
-	var sourceType = t.sourceType
-	if sourceType == JSONTransformSourceTypeAuto {
-		s := v.String()
-		if strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]") {
-			sourceType = JSONTransformSourceTypeArray
-		} else if strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}") {
-			sourceType = JSONTransformSourceTypeObject
-		} else {
-			sourceType = JSONTransformSourceTypeRaw
-		}
-	}
-	// parse source based on type
-	var source []interface{}
-	hasMultiElements := false
-	switch sourceType {
-	case JSONTransformSourceTypeArray:
-		source = v.JSONArray()
-		hasMultiElements = true
-	case JSONTransformSourceTypeObject:
-		source = []interface{}{v.JSONObject()}
-	case JSONTransformSourceTypeRaw:
-		source = []interface{}{v.Interface()}
-	default:
-		return nil, fmt.Errorf("unsupported transform source type: %v", sourceType)
-	}
-	// transform
-	var transformed []interface{}
-	for _, src := range source {
-		t.ctx.PushScope()
-		t.ctx.Set("source", src)
-		elm := make(map[string]string)
-		for k, tmpl := range t.transform {
-			evaluated, err := tmpl.Evaluate(t.ctx)
+	switch v.Type() {
+	case value.ValueTypeString, value.ValueTypeJSONObject:
+		return t.transform.transform(t.ctx, v)
+	case value.ValueTypeJSONArray:
+		var result = make([]interface{}, 0)
+		for _, elm := range v.JSONArray() {
+			value, err := value.ConvertInterfaceAs(elm, value.ValueTypeJSONObject)
 			if err != nil {
-				t.ctx.PopScope()
 				return nil, err
 			}
-			elm[k] = evaluated
+			transformed, err := t.transform.transform(t.ctx, value)
+			if err != nil {
+				return nil, err
+			}
+			result = append(result, transformed.Interface())
 		}
-		transformed = append(transformed, elm)
-		t.ctx.PopScope()
+		return value.NewJSONArrayValue(result), nil
+	default:
+		return nil, fmt.Errorf("unsupported value type: %s", v.Type())
 	}
-	// return
-	if hasMultiElements {
-		return value.NewJSONArrayValue(transformed), nil
-	}
-	return value.NewJSONObjectValue(transformed[0].(map[string]interface{})), nil
 }
