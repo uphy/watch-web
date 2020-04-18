@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/robfig/cron"
 	"github.com/sirupsen/logrus"
-	"github.com/uphy/watch-web/value"
+	"github.com/uphy/watch-web/pkg/value"
 )
 
 type (

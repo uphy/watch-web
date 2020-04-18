@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
-	"github.com/uphy/watch-web/cli"
+	"github.com/uphy/watch-web/pkg/cli"
 )
 
 func main() {

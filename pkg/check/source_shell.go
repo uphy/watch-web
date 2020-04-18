@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/uphy/watch-web/value"
+	"github.com/uphy/watch-web/pkg/value"
 )
 
 type (

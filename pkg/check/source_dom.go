@@ -11,7 +11,7 @@ import (
 	"golang.org/x/text/encoding"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/uphy/watch-web/value"
+	"github.com/uphy/watch-web/pkg/value"
 )
 
 type (

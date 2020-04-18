@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/uphy/watch-web/check"
+	"github.com/uphy/watch-web/pkg/check"
 )
 
 func (c *JobConfig) addTo(ctx *TemplateContext, e *check.Executor) ([]*check.Job, error) {

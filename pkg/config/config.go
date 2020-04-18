@@ -10,7 +10,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
-	"github.com/uphy/watch-web/check"
+	"github.com/uphy/watch-web/pkg/check"
 )
 
 type (

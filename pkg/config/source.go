@@ -6,8 +6,8 @@ import (
 	"math"
 	"time"
 
-	"github.com/uphy/watch-web/check"
-	"github.com/uphy/watch-web/value"
+	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/value"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
 )

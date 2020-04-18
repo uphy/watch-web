@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/uphy/watch-web/check"
+	"github.com/uphy/watch-web/pkg/check"
 )
 
 type (

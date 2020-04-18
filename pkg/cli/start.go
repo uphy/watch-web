@@ -7,8 +7,8 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/uphy/watch-web/check"
-	"github.com/uphy/watch-web/resources"
+	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/resources"
 	"github.com/urfave/cli"
 )
 

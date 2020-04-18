@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/uphy/watch-web/resources"
+	"github.com/uphy/watch-web/pkg/resources"
 )
 
 type (

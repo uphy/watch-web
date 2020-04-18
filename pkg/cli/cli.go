@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
-	"github.com/uphy/watch-web/check"
-	"github.com/uphy/watch-web/config"
+	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/config"
 	"github.com/urfave/cli"
 )
 
