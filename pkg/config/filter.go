@@ -35,7 +35,7 @@ type (
 		filters []Filter
 	}
 	Filter interface {
-		Filter(v value.Value) (value.Value, error)
+		Filter(ctx *check.JobContext, v value.Value) (value.Value, error)
 	}
 	TemplateFilter struct {
 		template TemplateString
@@ -95,7 +95,7 @@ func (f *FilterSource) Fetch(ctx *check.JobContext) (value.Value, error) {
 		return nil, err
 	}
 	for _, filter := range f.filters {
-		filtered, err := filter.Filter(v)
+		filtered, err := filter.Filter(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -108,7 +108,7 @@ func (f *FilterSource) String() string {
 	return fmt.Sprintf("Filter[source=%v, filters=%v]", f.source, f.filters)
 }
 
-func (t *TemplateFilter) Filter(v value.Value) (value.Value, error) {
+func (t *TemplateFilter) Filter(ctx *check.JobContext, v value.Value) (value.Value, error) {
 	t.ctx.PushScope()
 	defer t.ctx.PopScope()
 	t.ctx.Set("source", v)
@@ -123,7 +123,7 @@ func (t *TemplateFilter) String() string {
 	return fmt.Sprintf("Template[template=%v]", t.template)
 }
 
-func (t *DOMFilter) Filter(v value.Value) (value.Value, error) {
+func (t *DOMFilter) Filter(ctx *check.JobContext, v value.Value) (value.Value, error) {
 	return parseDOM(v.String(), t.selecter)
 }
 
@@ -167,7 +167,7 @@ func (t *DOMFilter) String() string {
 	return fmt.Sprintf("DOM[selector=%v]", t.selecter)
 }
 
-func (t *JSONTransformFilter) Filter(v value.Value) (value.Value, error) {
+func (t *JSONTransformFilter) Filter(ctx *check.JobContext, v value.Value) (value.Value, error) {
 	// auto detect source type
 	var sourceType = t.sourceType
 	if sourceType == JSONTransformSourceTypeAuto {

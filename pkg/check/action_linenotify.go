@@ -23,7 +23,7 @@ func NewLINENotifyAction(accessToken string) *LINENotifyAction {
 	return &LINENotifyAction{accessToken}
 }
 
-func (a *LINENotifyAction) Run(res *result.Result) error {
+func (a *LINENotifyAction) Run(ctx *JobContext, res *result.Result) error {
 	changes := res.Diff()
 	if !changes.Changed() {
 		return nil

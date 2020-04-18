@@ -21,7 +21,7 @@ func NewSlackAction(webhookURL string) *SlackAction {
 	return &SlackAction{webhookURL}
 }
 
-func (s *SlackAction) Run(res *result.Result) error {
+func (s *SlackAction) Run(ctx *JobContext, res *result.Result) error {
 	changes := res.Diff()
 	if !changes.Changed() {
 		return nil

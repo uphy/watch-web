@@ -25,7 +25,7 @@ type (
 		Fetch(ctx *JobContext) (value.Value, error)
 	}
 	Action interface {
-		Run(result *result.Result) error
+		Run(ctx *JobContext, result *result.Result) error
 	}
 	Status string
 )
@@ -180,7 +180,7 @@ func (j *Job) TestActions() error {
 func (j *Job) doActions(result *result.Result) error {
 	var errs error
 	for _, action := range j.actions {
-		if err := action.Run(result); err != nil {
+		if err := action.Run(j.ctx, result); err != nil {
 			errs = multierror.Append(errs, err)
 		}
 	}

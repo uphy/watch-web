@@ -15,7 +15,7 @@ func NewConsoleAction() *ConsoleAction {
 	return &ConsoleAction{}
 }
 
-func (s *ConsoleAction) Run(res *result.Result) error {
+func (s *ConsoleAction) Run(ctx *JobContext, res *result.Result) error {
 	changes := res.Diff()
 
 	fmt.Println("--------------------------------------------------------------------------------")
