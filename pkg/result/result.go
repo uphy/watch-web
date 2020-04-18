@@ -1,6 +1,8 @@
 package result
 
 import (
+	"fmt"
+
 	"github.com/uphy/watch-web/pkg/value"
 )
 
@@ -26,6 +28,15 @@ func New(jobId string, label string, link string, previous string, current strin
 	}
 }
 
-func (r *Result) Diff() *Diff {
-	return diff(r.Previous, r.Current)
+func (r *Result) Diff() (*DiffResult, error) {
+	switch r.ValueType {
+	case value.ValueTypeString:
+		return Diff(r.Previous, r.Current), nil
+	case value.ValueTypeJSONObject:
+		return DiffJSONObject(r.Previous, r.Current)
+	case value.ValueTypeJSONArray:
+		return DiffJSONArray(r.Previous, r.Current)
+	default:
+		return nil, fmt.Errorf("unsupported value type: %v", r.ValueType)
+	}
 }

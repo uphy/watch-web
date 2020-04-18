@@ -2,6 +2,7 @@ package result
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -9,12 +10,12 @@ import (
 )
 
 type (
-	Diff struct {
+	DiffResult struct {
 		diff []diffmatchpatch.Diff
 	}
 )
 
-func diff(v1, v2 string) *Diff {
+func Diff(v1, v2 string) *DiffResult {
 	v1 = strings.Trim(v1, " \t\n")
 	if len(v1) > 0 {
 		v1 = v1 + "\n"
@@ -28,10 +29,71 @@ func diff(v1, v2 string) *Diff {
 	a, b, c := d.DiffLinesToChars(v1, v2)
 	diffs := d.DiffMain(a, b, false)
 	diff := d.DiffCharsToLines(diffs, c)
-	return &Diff{diff}
+	return &DiffResult{diff}
 }
 
-func (d *Diff) Changed() bool {
+func DiffJSONArray(jsonArray1, jsonArray2 string) (*DiffResult, error) {
+	v1, err := splitJSONArray(jsonArray1)
+	if err != nil {
+		return nil, err
+	}
+	v2, err := splitJSONArray(jsonArray2)
+	if err != nil {
+		return nil, err
+	}
+	return Diff(v1, v2), nil
+}
+
+// splitJSONArray splits the input json array string into elements separated with line break.
+func splitJSONArray(jsonArray string) (string, error) {
+	var v []interface{}
+	if err := json.Unmarshal([]byte(jsonArray), &v); err != nil {
+		return "", err
+	}
+	var s []string
+	for _, elm := range v {
+		b, err := json.Marshal(elm)
+		if err != nil {
+			return "", err
+		}
+		s = append(s, string(b))
+	}
+	return strings.Join(s, "\n"), nil
+}
+
+func DiffJSONObject(jsonObject1, jsonObject2 string) (*DiffResult, error) {
+	v1, err := splitJSONObject(jsonObject1)
+	if err != nil {
+		return nil, err
+	}
+	v2, err := splitJSONObject(jsonObject2)
+	if err != nil {
+		return nil, err
+	}
+	return Diff(v1, v2), nil
+}
+
+// splitJSONObject splits the input json object string into single field objects separated with line break
+func splitJSONObject(jsonObject string) (string, error) {
+	var obj map[string]interface{}
+	if err := json.Unmarshal([]byte(jsonObject), &obj); err != nil {
+		return "", err
+	}
+	var s []string
+	for k, v := range obj {
+		m := map[string]interface{}{
+			k: v,
+		}
+		b, err := json.Marshal(m)
+		if err != nil {
+			return "", err
+		}
+		s = append(s, string(b))
+	}
+	return strings.Join(s, "\n"), nil
+}
+
+func (d *DiffResult) Changed() bool {
 	if len(d.diff) == 0 {
 		return false
 	}
@@ -44,7 +106,7 @@ func (d *Diff) Changed() bool {
 	return false
 }
 
-func (d *Diff) String() string {
+func (d *DiffResult) String() string {
 	w := new(bytes.Buffer)
 	for _, diff := range d.diff {
 		text := diff.Text

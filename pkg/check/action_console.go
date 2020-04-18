@@ -16,7 +16,10 @@ func NewConsoleAction() *ConsoleAction {
 }
 
 func (s *ConsoleAction) Run(ctx *JobContext, res *result.Result) error {
-	changes := res.Diff()
+	changes, err := res.Diff()
+	if err != nil {
+		return err
+	}
 
 	fmt.Println("--------------------------------------------------------------------------------")
 	fmt.Printf("%s (%s)\n", res.Label, res.JobID)
