@@ -8,6 +8,7 @@ import (
 	"text/template"
 
 	"github.com/uphy/watch-web/pkg/resources"
+	"github.com/uphy/watch-web/pkg/result"
 )
 
 type (
@@ -20,7 +21,7 @@ func NewSlackAction(webhookURL string) *SlackAction {
 	return &SlackAction{webhookURL}
 }
 
-func (s *SlackAction) Run(res *Result) error {
+func (s *SlackAction) Run(res *result.Result) error {
 	changes := res.Diff()
 	if !changes.Changed() {
 		return nil

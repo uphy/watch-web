@@ -1,4 +1,4 @@
-package check
+package result
 
 import (
 	"bytes"
@@ -20,6 +20,16 @@ type (
 		diff []diffmatchpatch.Diff
 	}
 )
+
+func New(jobId string, label string, link string, previous string, current string) *Result {
+	return &Result{
+		JobID:    jobId,
+		Label:    label,
+		Link:     link,
+		Previous: previous,
+		Current:  current,
+	}
+}
 
 func (r *Result) Diff() *Diff {
 	prev := strings.Trim(r.Previous, " \t\n") + "\n"

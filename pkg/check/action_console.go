@@ -2,6 +2,8 @@ package check
 
 import (
 	"fmt"
+
+	"github.com/uphy/watch-web/pkg/result"
 )
 
 type (
@@ -13,7 +15,7 @@ func NewConsoleAction() *ConsoleAction {
 	return &ConsoleAction{}
 }
 
-func (s *ConsoleAction) Run(res *Result) error {
+func (s *ConsoleAction) Run(res *result.Result) error {
 	changes := res.Diff()
 
 	fmt.Println("--------------------------------------------------------------------------------")

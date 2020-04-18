@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/uphy/watch-web/pkg/result"
 )
 
 type (
@@ -21,7 +23,7 @@ func NewLINENotifyAction(accessToken string) *LINENotifyAction {
 	return &LINENotifyAction{accessToken}
 }
 
-func (a *LINENotifyAction) Run(res *Result) error {
+func (a *LINENotifyAction) Run(res *result.Result) error {
 	changes := res.Diff()
 	if !changes.Changed() {
 		return nil

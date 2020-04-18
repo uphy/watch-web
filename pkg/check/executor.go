@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/robfig/cron"
 	"github.com/sirupsen/logrus"
+	"github.com/uphy/watch-web/pkg/result"
 	"github.com/uphy/watch-web/pkg/value"
 )
 
@@ -24,7 +25,7 @@ type (
 		Fetch(ctx *JobContext) (value.Value, error)
 	}
 	Action interface {
-		Run(result *Result) error
+		Run(result *result.Result) error
 	}
 	Status string
 )
@@ -115,7 +116,7 @@ func (j *Job) StoreState() error {
 	return nil
 }
 
-func (j *Job) Check() (result *Result) {
+func (j *Job) Check() (res *result.Result) {
 	j.ctx.Log.Info("Running job.")
 	j.RestoreState()
 
@@ -137,10 +138,10 @@ func (j *Job) Check() (result *Result) {
 	}
 	j.ctx.Log.WithFields(logrus.Fields{
 		"current": fmt.Sprintf("%#v", current),
-	}).Debug("Fetched job result.")
-	j.ctx.Log.Info("Fetched job result.")
+	}).Debug("Fetched job result.Result.")
+	j.ctx.Log.Info("Fetched job result.Result.")
 
-	// make result
+	// make result.Result
 	var previous string
 	if j.Previous != nil {
 		previous = *j.Previous
@@ -148,11 +149,11 @@ func (j *Job) Check() (result *Result) {
 		previous = ""
 	}
 	currentString := current.String()
-	result = &Result{j.ID, j.Label, j.Link, previous, currentString}
+	res = result.New(j.ID, j.Label, j.Link, previous, currentString)
 
 	// Do action
 	if j.Previous != nil {
-		if err := j.doActions(result); err != nil {
+		if err := j.doActions(res); err != nil {
 			j.failed("failed to perform action", err)
 		}
 	}
@@ -161,13 +162,13 @@ func (j *Job) Check() (result *Result) {
 	j.Previous = &currentString
 	j.Status = StatusOK
 	j.StoreState()
-	j.ctx.Log.WithField("result", fmt.Sprintf("%#v", result)).Debug("Finished job.")
+	j.ctx.Log.WithField("result.Result", fmt.Sprintf("%#v", res)).Debug("Finished job.")
 	j.ctx.Log.Info("Finished job.")
 	return
 }
 
 func (j *Job) TestActions() error {
-	return j.doActions(&Result{
+	return j.doActions(&result.Result{
 		JobID:    j.ID,
 		Label:    "test action",
 		Link:     "https://google.com",
@@ -176,7 +177,7 @@ func (j *Job) TestActions() error {
 	})
 }
 
-func (j *Job) doActions(result *Result) error {
+func (j *Job) doActions(result *result.Result) error {
 	var errs error
 	for _, action := range j.actions {
 		if err := action.Run(result); err != nil {
