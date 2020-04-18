@@ -8,6 +8,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/uphy/watch-web/check"
 	"github.com/uphy/watch-web/value"
+	"golang.org/x/net/html"
 )
 
 const (
@@ -136,11 +137,7 @@ func parseDOM(html string, selector string) (value.Value, error) {
 
 	nodes := make([]interface{}, 0)
 	for _, node := range selection.Nodes {
-		var v = make(map[string]interface{})
-		v["data"] = node.Data
-		for _, a := range node.Attr {
-			v[a.Key] = a.Val
-		}
+		var v = nodeToMap(node)
 		nodes = append(nodes, v)
 	}
 	result["text"] = selection.Text()
@@ -148,6 +145,22 @@ func parseDOM(html string, selector string) (value.Value, error) {
 	result["html"] = selectedHTML
 	result["nodes"] = nodes
 	return value.NewJSONObjectValue(result), nil
+}
+
+func nodeToMap(n *html.Node) map[string]interface{} {
+	var v = make(map[string]interface{})
+	v["data"] = n.Data
+	for _, a := range n.Attr {
+		v[a.Key] = a.Val
+	}
+	children := make([]interface{}, 0)
+	if n.FirstChild != nil {
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			children = append(children, nodeToMap(c))
+		}
+	}
+	v["children"] = children
+	return v
 }
 
 func (t *DOMFilter) String() string {

@@ -16,5 +16,6 @@ require (
 	github.com/sergi/go-diff v1.0.0
 	github.com/urfave/cli v1.22.4
 	github.com/valyala/fasttemplate v1.1.0 // indirect
+	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	golang.org/x/text v0.3.2
 )
