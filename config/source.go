@@ -33,7 +33,8 @@ type (
 		Encoding *TemplateString `json:"encoding"`
 	}
 	ShellSourceConfig struct {
-		Command *TemplateString `json:"command"`
+		Command *TemplateString  `json:"command"`
+		Type    *value.ValueType `json:"type,omitempty"`
 	}
 	SourceWithRetry struct {
 		source      check.Source
@@ -99,7 +100,14 @@ func (d *ShellSourceConfig) Source(ctx *TemplateContext) (check.Source, error) {
 	if err != nil {
 		return nil, err
 	}
-	return check.NewShellSource(command), nil
+	return check.NewShellSource(command, d.valueType()), nil
+}
+
+func (s *ShellSourceConfig) valueType() value.ValueType {
+	if s.Type == nil {
+		return value.ValueTypeString
+	}
+	return *s.Type
 }
 
 func (s *SourceWithRetry) Fetch() (value.Value, error) {

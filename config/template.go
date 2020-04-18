@@ -51,6 +51,9 @@ var funcs = map[string]interface{}{
 		}
 		return v.Interface(), nil
 	},
+	"trim": func(s string) string {
+		return strings.Trim(s, " 　\t\r\n")
+	},
 }
 
 func (t TemplateString) Evaluate(ctx *TemplateContext) (string, error) {

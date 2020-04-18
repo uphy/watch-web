@@ -3,11 +3,19 @@ jobs:
   - id: ur-{{ .item.shisya }}-{{ .item.danchi }}
     schedule: "@every 10m"
     source:
+      # シェルコマンドを実行する。実行結果はデフォルトでは文字列になる。
       shell:
+        # 実行するコマンド
         command: ur {{ .item.shisya }} {{ .item.danchi }}
+        # 実行結果をjson_arrayとして解釈
+        # !!!削除予定!!!
+        type: json_array
+      # sourceを変換するフィルタ定義。0個以上指定可能。
       filters:
+        # templateでsource valueを文字列として変換する
+        # template内で、source valueは `.source` として参照できる
         - template: |
-            {{ range .source|json -}}
+            {{ range .source.JSONArray -}}
             {{   .name }}({{ .type }}): {{ .rent }}
             {{-  if .system }}(
             {{-    range $index, $s := .system }}
@@ -22,6 +30,8 @@ jobs:
     actions:
       - slack:
           url: '{{ env "SLACK_WEBHOOK_URL" }}'
+    # ここで指定した要素数だけ、jobが複製される。
+    # job内で、各配列要素は `.item として参照できる。
     with_items:
       - { shisya: 20, danchi: 688, name: "グリーンヒルズ東久留米" }
       - { shisya: 20, danchi: 399, name: "清瀬駅前ハイツ" }
@@ -41,15 +51,34 @@ jobs:
         command: |
           curl --compressed -sSL https://www.amazon.co.jp/dp/{{ .item.id }}/
       filters:
-        - dom: '#priceblock_saleprice'
-        - template: '{{ .source.text }}'
+        # DOMを解釈して、json objectに変換
+        # 変換が難しい。微妙。。
+        # 開き直って、1要素だけ取得できるようにして、複数の値使うときは、template/json_transform使ってdom関数を呼び出すようにしたい
+        # そうしたらこれいらなくなる
+        - template: |
+            {{ $saleprice := (.source.String | dom "#priceblock_saleprice").text }}
+            {{ if $saleprice }}{{ $saleprice }}
+            {{ else }}
+            {{ (.source.String | dom "#priceblock_ourprice").text }}
+            {{ end }}
+      # デフォルトではfilteringしたあとのsourceの値が空でも空の値として継続する。
+      # failを設定した場合には、空の場合実行失敗とみなす。
       empty: fail
-      retry: 3
+      # sourceの収集中に失敗した場合、指定した回数リトライする。デフォルトではリトライしない。
+      retry: 0
     actions:
       - slack:
           url: '{{ env "SLACK_WEBHOOK_URL" }}'
     with_items:
       - { id: 'B07H56HB8T', name: 'TOPVISION プロジェクター' }
+# 各ジョブの現在の値を保存するストレージ
 store:
   redis:
+    # アドレスが空の場合には無効として、デフォルト(オンメモリ)に切り替える。
     redistogo: '{{ env "REDISTOGO_URL" }}'
+
+# 型についての方針
+# - プログラム側で暗黙的に型変換はやらないようにしたい。
+#   例えばshellのoutputはstringの方がわかりやすい。
+# - 変換するときはconfigの中でユーザーに明示的に変換させたい
+# - ユーザーが変換するときは基本的にエラーは出さず緩く変換したい。

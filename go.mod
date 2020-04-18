@@ -3,8 +3,7 @@ module github.com/uphy/watch-web
 go 1.13
 
 require (
-	github.com/PuerkitoBio/goquery v1.4.1
-	github.com/andybalholm/cascadia v1.1.0 // indirect
+	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-redis/redis/v7 v7.2.0

@@ -13,13 +13,15 @@ import (
 
 type (
 	ShellSource struct {
-		Command string
+		Command   string
+		ValueType value.ValueType
 	}
 )
 
-func NewShellSource(command string) *ShellSource {
+func NewShellSource(command string, valueType value.ValueType) *ShellSource {
 	return &ShellSource{
-		Command: command,
+		Command:   command,
+		ValueType: valueType,
 	}
 }
 
@@ -42,7 +44,7 @@ func (c *ShellSource) Fetch() (value.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	return value.String(string(b)), nil
+	return value.ConvertAs(string(b), c.ValueType)
 }
 
 func (c *ShellSource) String() string {

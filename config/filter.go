@@ -110,7 +110,7 @@ func (f *FilterSource) String() string {
 func (t *TemplateFilter) Filter(v value.Value) (value.Value, error) {
 	t.ctx.PushScope()
 	defer t.ctx.PopScope()
-	t.ctx.Set("source", v.Interface())
+	t.ctx.Set("source", v)
 	evaluated, err := t.template.Evaluate(t.ctx)
 	if err != nil {
 		return nil, err
@@ -144,6 +144,8 @@ func parseDOM(html string, selector string) (value.Value, error) {
 		nodes = append(nodes, v)
 	}
 	result["text"] = selection.Text()
+	selectedHTML, _ := selection.Html()
+	result["html"] = selectedHTML
 	result["nodes"] = nodes
 	return value.NewJSONObjectValue(result), nil
 }

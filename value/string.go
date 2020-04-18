@@ -12,6 +12,10 @@ func String(s string) Value {
 	return &StringValue{strings.Trim(s, " \t\n")}
 }
 
+func (s *StringValue) Type() ValueType {
+	return ValueTypeString
+}
+
 func (s *StringValue) JSONObject() map[string]interface{} {
 	return map[string]interface{}{
 		s.s: "",

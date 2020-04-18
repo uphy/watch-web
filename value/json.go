@@ -22,6 +22,10 @@ func NewJSONArrayValue(a []interface{}) Value {
 	return &JSONArrayValue{a}
 }
 
+func (j *JSONObjectValue) Type() ValueType {
+	return ValueTypeJSONObject
+}
+
 func (j *JSONObjectValue) JSONObject() map[string]interface{} {
 	return j.m
 }
@@ -44,6 +48,10 @@ func (j *JSONObjectValue) Interface() interface{} {
 
 func (j *JSONObjectValue) Empty() bool {
 	return len(j.m) == 0
+}
+
+func (j *JSONArrayValue) Type() ValueType {
+	return ValueTypeJSONArray
 }
 
 func (j *JSONArrayValue) JSONObject() map[string]interface{} {
