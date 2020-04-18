@@ -149,7 +149,7 @@ func (j *Job) Check() (res *result.Result) {
 		previous = ""
 	}
 	currentString := current.String()
-	res = result.New(j.ID, j.Label, j.Link, previous, currentString)
+	res = result.New(j.ID, j.Label, j.Link, previous, currentString, current.Type())
 
 	// Do action
 	if j.Previous != nil {
