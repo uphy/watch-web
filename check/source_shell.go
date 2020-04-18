@@ -2,7 +2,6 @@ package check
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -25,8 +24,8 @@ func NewShellSource(command string, valueType value.ValueType) *ShellSource {
 	}
 }
 
-func (c *ShellSource) Fetch() (value.Value, error) {
-	log.Printf("shell: command=%s", c.Command)
+func (c *ShellSource) Fetch(ctx *JobContext) (value.Value, error) {
+	ctx.Log.WithField("command", c.Command).Debug("Run shell command.")
 	cmd := exec.Command("sh", "-c", c.Command)
 	for _, env := range os.Environ() {
 		if strings.HasPrefix(env, "PATH=") {

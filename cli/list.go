@@ -12,7 +12,7 @@ func (c *CLI) list() cli.Command {
 	return cli.Command{
 		Name: "list",
 		Action: func(ctx *cli.Context) error {
-			exe, err := c.config.NewExecutor()
+			exe, err := c.newExecutor()
 			if err != nil {
 				return err
 			}

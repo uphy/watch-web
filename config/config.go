@@ -2,12 +2,14 @@ package config
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"strconv"
 
 	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 	"github.com/uphy/watch-web/check"
 )
 
@@ -56,13 +58,16 @@ func (c *Config) Save(w io.Writer) error {
 	return err
 }
 
-func (c *Config) NewExecutor() (*check.Executor, error) {
+func (c *Config) NewExecutor(log *logrus.Logger) (*check.Executor, error) {
 	ctx := NewRootContext()
 	store, err := newStore(ctx, c.Store)
 	if err != nil {
 		return nil, err
 	}
-	e := check.NewExecutor(store)
+	log.WithFields(logrus.Fields{
+		"store": fmt.Sprintf("%#v", store),
+	}).Info("Created store.")
+	e := check.NewExecutor(store, log)
 	if c.InitialRun != nil {
 		initialRun, err := c.InitialRun.Evaluate(ctx)
 		if err != nil {
@@ -75,7 +80,13 @@ func (c *Config) NewExecutor() (*check.Executor, error) {
 		e.InitialRun = ini
 	}
 	for _, jobConfig := range c.Jobs {
-		jobConfig.addTo(ctx, e)
+		jobs, err := jobConfig.addTo(ctx, e)
+		if err != nil {
+			return nil, err
+		}
+		log.WithFields(logrus.Fields{
+			"jobs": jobs,
+		}).Debug("Added jobs to executor.")
 	}
 	return e, nil
 }

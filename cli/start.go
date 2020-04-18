@@ -31,7 +31,7 @@ func (c *CLI) start() cli.Command {
 		Action: func(ctx *cli.Context) error {
 			enableAPI := ctx.Bool("api")
 			enableSchedule := !ctx.Bool("no-schedule")
-			exe, err := c.config.NewExecutor()
+			exe, err := c.newExecutor()
 			if err != nil {
 				return err
 			}

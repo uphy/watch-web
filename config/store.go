@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"net/url"
 
 	"github.com/go-redis/redis/v7"
@@ -43,7 +42,6 @@ func newStore(ctx *TemplateContext, config *StoreConfig) (check.Store, error) {
 			}
 			addr, password, err = parseRedisToGoURL(r)
 			if err != nil {
-				log.Println(err)
 				return nil, err
 			}
 		}

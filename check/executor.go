@@ -1,12 +1,14 @@
 package check
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/robfig/cron"
+	"github.com/sirupsen/logrus"
 	"github.com/uphy/watch-web/value"
 )
 
@@ -16,9 +18,10 @@ type (
 		Jobs       map[string]*Job
 		InitialRun bool
 		store      Store
+		log        *logrus.Logger
 	}
 	Source interface {
-		Fetch() (value.Value, error)
+		Fetch(ctx *JobContext) (value.Value, error)
 	}
 	Action interface {
 		Run(result *Result) error
@@ -30,11 +33,12 @@ func init() {
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 }
 
-func NewExecutor(store Store) *Executor {
+func NewExecutor(store Store, log *logrus.Logger) *Executor {
 	return &Executor{
 		c:     cron.New(),
 		store: store,
 		Jobs:  make(map[string]*Job),
+		log:   log,
 	}
 }
 
@@ -42,10 +46,13 @@ func (e *Executor) Job(id string) *Job {
 	return e.Jobs[id]
 }
 
-func (e *Executor) AddJob(id, schedule, label, link string, source Source, action ...Action) error {
+func (e *Executor) AddJob(id, schedule, label, link string, source Source, action ...Action) (*Job, error) {
 	if schedule == "" {
 		schedule = "@every 1h"
 	}
+	jobLogger := e.log.WithFields(logrus.Fields{
+		"id": id,
+	})
 	job := &Job{
 		ID:       id,
 		source:   source,
@@ -56,10 +63,11 @@ func (e *Executor) AddJob(id, schedule, label, link string, source Source, actio
 		Status:   StatusOK,
 		Error:    nil,
 		store:    e.store,
+		ctx:      &JobContext{jobLogger},
 	}
 	job.RestoreState()
 	e.Jobs[id] = job
-	return e.c.AddFunc(schedule, func() {
+	return job, e.c.AddFunc(schedule, func() {
 		job.Check()
 	})
 }
@@ -92,7 +100,8 @@ func (j *Job) RestoreState() error {
 		j.failed("failed to get previous job status", err)
 		return err
 	}
-	log.Printf("restored: %v", j)
+	j.ctx.Log.WithField("job", j).Debug("Restored job.")
+	j.ctx.Log.Info("Restored job.")
 	return nil
 }
 
@@ -101,12 +110,13 @@ func (j *Job) StoreState() error {
 		j.failed("failed to store current value", err)
 		return err
 	}
-	log.Printf("stored: %v", j)
+	j.ctx.Log.WithField("job", j).Debug("Stored job.")
+	j.ctx.Log.Info("Stored job.")
 	return nil
 }
 
 func (j *Job) Check() (result *Result) {
-	log.Printf("Running job: %s", j.ID)
+	j.ctx.Log.Info("Running job.")
 	j.RestoreState()
 
 	if err := j.store.GetJob(j.ID, j); err != nil {
@@ -120,12 +130,15 @@ func (j *Job) Check() (result *Result) {
 	j.Error = nil
 
 	// Get current value
-	current, err := j.source.Fetch()
+	current, err := j.source.Fetch(j.ctx)
 	if err != nil {
 		j.failed("failed to fetch", err)
 		return
 	}
-	log.Printf("fetched: id=%s, value=%s", j.ID, current.String())
+	j.ctx.Log.WithFields(logrus.Fields{
+		"current": fmt.Sprintf("%#v", current),
+	}).Debug("Fetched job result.")
+	j.ctx.Log.Info("Fetched job result.")
 
 	// make result
 	var previous string
@@ -148,7 +161,8 @@ func (j *Job) Check() (result *Result) {
 	j.Previous = &currentString
 	j.Status = StatusOK
 	j.StoreState()
-	log.Printf("Finished job: id=%s, result=%v", j.ID, result)
+	j.ctx.Log.WithField("result", fmt.Sprintf("%#v", result)).Debug("Finished job.")
+	j.ctx.Log.Info("Finished job.")
 	return
 }
 

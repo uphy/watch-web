@@ -110,15 +110,15 @@ func (s *ShellSourceConfig) valueType() value.ValueType {
 	return *s.Type
 }
 
-func (s *SourceWithRetry) Fetch() (value.Value, error) {
+func (s *SourceWithRetry) Fetch(ctx *check.JobContext) (value.Value, error) {
 	if s.retry == nil {
-		return s.fetch()
+		return s.fetch(ctx)
 	}
 	retry := *s.retry
 	var err error
 	for i := 0; i <= retry; i++ {
 		var v value.Value
-		v, err = s.fetch()
+		v, err = s.fetch(ctx)
 		if err == nil {
 			return v, nil
 		}
@@ -131,8 +131,8 @@ func (s *SourceWithRetry) Fetch() (value.Value, error) {
 	return nil, fmt.Errorf("too many retries: lastError=%w", err)
 }
 
-func (s *SourceWithRetry) fetch() (value.Value, error) {
-	v, err := s.source.Fetch()
+func (s *SourceWithRetry) fetch(ctx *check.JobContext) (value.Value, error) {
+	v, err := s.source.Fetch(ctx)
 	if err != nil {
 		return nil, err
 	}

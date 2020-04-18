@@ -6,22 +6,32 @@ import (
 	"github.com/uphy/watch-web/check"
 )
 
-func (c *JobConfig) addTo(ctx *TemplateContext, e *check.Executor) error {
+func (c *JobConfig) addTo(ctx *TemplateContext, e *check.Executor) ([]*check.Job, error) {
+	jobs := make([]*check.Job, 0)
 	if len(c.WithItems) == 0 {
-		return c.addOne(ctx, e)
-	}
-	for itemIndex, item := range c.WithItems {
-		evaluatedItem, err := evaluateItemAsTemplate(ctx, item)
+		job, err := c.addOne(ctx, e)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		ctx.PushScope()
-		ctx.Set("itemIndex", itemIndex)
-		ctx.Set("item", evaluatedItem)
-		c.addOne(ctx, e)
-		ctx.PopScope()
+		jobs = append(jobs, job)
+	} else {
+		for itemIndex, item := range c.WithItems {
+			evaluatedItem, err := evaluateItemAsTemplate(ctx, item)
+			if err != nil {
+				return nil, err
+			}
+			ctx.PushScope()
+			ctx.Set("itemIndex", itemIndex)
+			ctx.Set("item", evaluatedItem)
+			j, err := c.addOne(ctx, e)
+			if err != nil {
+				return nil, err
+			}
+			jobs = append(jobs, j)
+			ctx.PopScope()
+		}
 	}
-	return nil
+	return jobs, nil
 }
 
 func evaluateItemAsTemplate(ctx *TemplateContext, v interface{}) (interface{}, error) {
@@ -48,37 +58,38 @@ func evaluateItemAsTemplate(ctx *TemplateContext, v interface{}) (interface{}, e
 	return e, nil
 }
 
-func (c *JobConfig) addOne(ctx *TemplateContext, e *check.Executor) error {
+func (c *JobConfig) addOne(ctx *TemplateContext, e *check.Executor) (*check.Job, error) {
 	source, err := c.Source.Source(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	actions := []check.Action{}
 	for _, actionConfig := range c.Actions {
 		action, err := actionConfig.Action(ctx)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		actions = append(actions, action)
 	}
 	id, err := c.ID.Evaluate(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	schedule, err := c.Schedule.Evaluate(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	label, err := c.Label.Evaluate(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	link, err := c.Link.Evaluate(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if err := e.AddJob(id, schedule, label, link, source, actions...); err != nil {
-		return err
+	job, err := e.AddJob(id, schedule, label, link, source, actions...)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return job, nil
 }

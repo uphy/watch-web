@@ -89,8 +89,8 @@ func (f *FilterConfig) Filter(ctx *TemplateContext) (Filter, error) {
 	return nil, errors.New("no filters defined")
 }
 
-func (f *FilterSource) Fetch() (value.Value, error) {
-	v, err := f.source.Fetch()
+func (f *FilterSource) Fetch(ctx *check.JobContext) (value.Value, error) {
+	v, err := f.source.Fetch(ctx)
 	if err != nil {
 		return nil, err
 	}

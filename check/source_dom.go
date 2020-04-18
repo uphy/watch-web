@@ -30,7 +30,7 @@ func NewDOMSource(url, selector string, encoding encoding.Encoding) *DOMSource {
 	}
 }
 
-func (d *DOMSource) Fetch() (value.Value, error) {
+func (d *DOMSource) Fetch(ctx *JobContext) (value.Value, error) {
 	resp, err := http.Get(d.URL)
 	if err != nil {
 		return nil, err

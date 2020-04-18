@@ -2,8 +2,9 @@ package check
 
 import (
 	"fmt"
-	"log"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -27,6 +28,10 @@ type (
 		Last     *time.Time `json:"last,omitempty"`
 		Count    int        `json:"count"`
 		store    Store
+		ctx      *JobContext
+	}
+	JobContext struct {
+		Log *logrus.Entry
 	}
 )
 
@@ -35,7 +40,10 @@ func (j *Job) failed(msg string, err error) {
 	errorString := errw.Error()
 	j.Error = &errorString
 	j.Status = StatusError
-	log.Printf("%s: id=%s, err=%v", msg, j.ID, errw)
+	j.ctx.Log.WithFields(logrus.Fields{
+		"msg": msg,
+		"err": errw,
+	}).Error("Job execution failed.")
 }
 
 func (j *Job) String() string {

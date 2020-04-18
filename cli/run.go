@@ -16,7 +16,7 @@ func (c *CLI) run() cli.Command {
 		},
 		Action: func(ctx *cli.Context) error {
 			all := ctx.Bool("all")
-			exe, err := c.config.NewExecutor()
+			exe, err := c.newExecutor()
 			if err != nil {
 				return fmt.Errorf("failed to create executor: %w", err)
 			}
@@ -24,7 +24,8 @@ func (c *CLI) run() cli.Command {
 				exe.CheckAll()
 			} else {
 				for _, id := range ctx.Args() {
-					exe.Job(id).Check()
+					result := exe.Job(id).Check()
+					fmt.Println(result.Current)
 				}
 			}
 			return nil
