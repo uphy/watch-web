@@ -3,9 +3,11 @@ package result
 import (
 	"reflect"
 	"testing"
+
+	"github.com/uphy/watch-web/pkg/value"
 )
 
-func Test_diff(t *testing.T) {
+func TestDiffString(t *testing.T) {
 	type args struct {
 		v1 string
 		v2 string
@@ -13,34 +15,57 @@ func Test_diff(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want string
+		want StringDiffResult
 	}{
 		{
 			args: args{
 				v1: "aaa\nbbb",
 				v2: "aaa\nbbb\nccc",
 			},
-			want: "  aaa\n  bbb\n+ ccc\n",
+			want: StringDiffResult{
+				Line{
+					Text: "aaa",
+					Type: ChangeTypeEqual,
+				},
+				Line{
+					Text: "bbb",
+					Type: ChangeTypeEqual,
+				},
+				Line{
+					Text: "ccc",
+					Type: ChangeTypeInsert,
+				},
+			},
 		},
 		{
 			args: args{
 				v1: "",
 				v2: "aaa",
 			},
-			want: "+ aaa\n",
+			want: StringDiffResult{
+				Line{
+					Text: "aaa",
+					Type: ChangeTypeInsert,
+				},
+			},
 		},
 		{
 			args: args{
 				v1: "aaa",
 				v2: "",
 			},
-			want: "- aaa\n",
+			want: StringDiffResult{
+				Line{
+					Text: "aaa",
+					Type: ChangeTypeDelete,
+				},
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Diff(tt.args.v1, tt.args.v2); !reflect.DeepEqual(got.String(), tt.want) {
-				t.Errorf("Diff() = '%v', want '%v'", got.String(), tt.want)
+			if got := DiffString(tt.args.v1, tt.args.v2); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("DiffString() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -54,30 +79,34 @@ func TestDiffJSONArray(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    string
+		want    JSONArrayDiffResult
 		wantErr bool
 	}{
 		{
 			args: args{
-				`["a","b"]`,
-				`["a","b","c"]`,
+				jsonArray1: `[{"name":"a"},{"name":"b"}]`,
+				jsonArray2: `[{"name":"a"},{"name":"b"},{"name":"c"}]`,
 			},
-			want: `  "a"
-  "b"
-+ "c"
-`,
-			wantErr: false,
-		},
-		{
-			args: args{
-				`[{"name":"a"},{"name":"b"}]`,
-				`[{"name":"a"},{"name":"b"},{"name":"c"}]`,
+			want: JSONArrayDiffResult{
+				JSONArrayElement{
+					Object: value.JSONObject{
+						"name": "a",
+					},
+					Type: ChangeTypeEqual,
+				},
+				JSONArrayElement{
+					Object: value.JSONObject{
+						"name": "b",
+					},
+					Type: ChangeTypeEqual,
+				},
+				JSONArrayElement{
+					Object: value.JSONObject{
+						"name": "c",
+					},
+					Type: ChangeTypeInsert,
+				},
 			},
-			want: `  {"name":"a"}
-  {"name":"b"}
-+ {"name":"c"}
-`,
-			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
@@ -87,8 +116,8 @@ func TestDiffJSONArray(t *testing.T) {
 				t.Errorf("DiffJSONArray() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got.String(), tt.want) {
-				t.Errorf("DiffJSONArray() = %v, want %v", got.String(), tt.want)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("DiffJSONArray() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -102,20 +131,36 @@ func TestDiffJSONObject(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    string
+		want    JSONObjectDiffResult
 		wantErr bool
 	}{
 		{
 			args: args{
-				`{"name":"a","num":1}`,
-				`{"name":"a","num":2,"num2":3}`,
+				jsonObject1: `{"name":"a","num":1}`,
+				jsonObject2: `{"name":"a","num":2,"num2":3}`,
 			},
-			want: `  {"name":"a"}
-- {"num":1}
-+ {"num":2}
-+ {"num2":3}
-`,
-			wantErr: false,
+			want: JSONObjectDiffResult{
+				JSONField{
+					Name:  "name",
+					Value: "a",
+					Type:  ChangeTypeEqual,
+				},
+				JSONField{
+					Name:  "num",
+					Value: float64(1),
+					Type:  ChangeTypeDelete,
+				},
+				JSONField{
+					Name:  "num",
+					Value: float64(2),
+					Type:  ChangeTypeInsert,
+				},
+				JSONField{
+					Name:  "num2",
+					Value: float64(3),
+					Type:  ChangeTypeInsert,
+				},
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -125,8 +170,8 @@ func TestDiffJSONObject(t *testing.T) {
 				t.Errorf("DiffJSONObject() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got.String(), tt.want) {
-				t.Errorf("DiffJSONObject() = %v, want %v", got.String(), tt.want)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("DiffJSONObject() = %v, want %v", got, tt.want)
 			}
 		})
 	}

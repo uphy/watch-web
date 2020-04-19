@@ -15,7 +15,8 @@ type (
 		Console    *ConsoleActionConfig    `json:"console"`
 	}
 	SlackActionConfig struct {
-		URL template.TemplateString `json:"url"`
+		URL   template.TemplateString `json:"url"`
+		Debug bool                    `json:"debug"`
 	}
 	LINENotifyActionConfig struct {
 		AccessToken template.TemplateString `json:"access_token"`
@@ -43,7 +44,7 @@ func (s *SlackActionConfig) Action(ctx *template.TemplateContext) (check.Action,
 	if err != nil {
 		return nil, err
 	}
-	return check.NewSlackAction(url), nil
+	return check.NewSlackAction(url, s.Debug), nil
 }
 
 func (s *LINENotifyActionConfig) Action(ctx *template.TemplateContext) (check.Action, error) {

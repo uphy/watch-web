@@ -154,7 +154,7 @@ func (j *Job) Check() (res *result.Result, err error) {
 
 	// Do action
 	if j.Previous != nil {
-		if err = j.doActions(res); err != nil {
+		if err = j.DoActions(res); err != nil {
 			j.failed("failed to perform action", err)
 		}
 	}
@@ -169,7 +169,7 @@ func (j *Job) Check() (res *result.Result, err error) {
 }
 
 func (j *Job) TestActions() error {
-	return j.doActions(&result.Result{
+	return j.DoActions(&result.Result{
 		JobID:    j.ID,
 		Label:    "test action",
 		Link:     "https://google.com",
@@ -178,7 +178,7 @@ func (j *Job) TestActions() error {
 	})
 }
 
-func (j *Job) doActions(result *result.Result) error {
+func (j *Job) DoActions(result *result.Result) error {
 	var errs error
 	for _, action := range j.actions {
 		if err := action.Run(j.ctx, result); err != nil {

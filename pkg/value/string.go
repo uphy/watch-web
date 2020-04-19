@@ -16,13 +16,13 @@ func (s *StringValue) Type() ValueType {
 	return ValueTypeString
 }
 
-func (s *StringValue) JSONObject() map[string]interface{} {
+func (s *StringValue) JSONObject() JSONObject {
 	return map[string]interface{}{
 		s.s: "",
 	}
 }
 
-func (s *StringValue) JSONArray() []interface{} {
+func (s *StringValue) JSONArray() JSONArray {
 	return []interface{}{s.s}
 }
 

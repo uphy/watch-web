@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 )
 
@@ -19,12 +20,14 @@ type (
 	ValueType string
 	Value     interface {
 		Type() ValueType
-		JSONObject() map[string]interface{}
-		JSONArray() []interface{}
+		JSONObject() JSONObject
+		JSONArray() JSONArray
 		String() string
 		Interface() interface{}
 		Empty() bool
 	}
+	JSONObject map[string]interface{}
+	JSONArray  []interface{}
 )
 
 func ConvertInterfaceAs(i interface{}, valueType ValueType) (Value, error) {
@@ -91,4 +94,20 @@ func ParseJSONArray(s string) (Value, error) {
 		}
 	}
 	return nil, errors.New("not a json array")
+}
+
+func (j JSONObject) String() string {
+	b, err := json.Marshal(j)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
+}
+
+func (j JSONArray) String() string {
+	b, err := json.Marshal(j)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
 }

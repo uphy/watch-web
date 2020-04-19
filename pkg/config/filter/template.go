@@ -22,7 +22,7 @@ func NewTemplateFilter(template template.TemplateString, ctx *template.TemplateC
 func (t *TemplateFilter) Filter(ctx *check.JobContext, v value.Value) (value.Value, error) {
 	t.ctx.PushScope()
 	defer t.ctx.PopScope()
-	t.ctx.Set("source", v)
+	t.ctx.Set("source", v.Interface())
 	evaluated, err := t.template.Evaluate(t.ctx)
 	if err != nil {
 		return nil, err

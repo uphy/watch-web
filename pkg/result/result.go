@@ -28,10 +28,10 @@ func New(jobId string, label string, link string, previous string, current strin
 	}
 }
 
-func (r *Result) Diff() (*DiffResult, error) {
+func (r *Result) Diff() (DiffResult, error) {
 	switch r.ValueType {
 	case value.ValueTypeString:
-		return Diff(r.Previous, r.Current), nil
+		return DiffString(r.Previous, r.Current), nil
 	case value.ValueTypeJSONObject:
 		return DiffJSONObject(r.Previous, r.Current)
 	case value.ValueTypeJSONArray:

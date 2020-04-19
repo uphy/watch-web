@@ -5,18 +5,19 @@ jobs:
     source:
       # シェルコマンドを実行する。実行結果は文字列になる。
       shell:
-        # 実行するコマンド
+        # 実行するコマンド。APIがjson arrayを返してくれるが、shellなので実行結果は文字列
         command: ur {{ .item.shisya }} {{ .item.danchi }}
       # sourceを変換するフィルタ定義。0個以上指定可能。
       filters:
+        # sourceは文字列なので、json arrayに変換する。
         - json_array: {}
+        # json arrayの各要素をtransformによって変換する。
         - json_transform:
-            type: json_array
             transform:
               summary: '{{ .source.name }}({{ .source.type }})'
               description: |
-                {{ with .source }}
-                {{ .rent }}
+                {{- with .source }}
+                {{- .rent }}
                 {{-  if .system }}(
                 {{-    range $index, $s := .system }}
                 {{-      if $index }}, {{end}}
@@ -24,18 +25,25 @@ jobs:
                 {{-    end }})
                 {{-  end -}}
                 [共益費 {{ .commonfee }}{{ if .rent_normal }}, 通常 {{ .rent_normal }}{{ end }}]
-                {{ end }}
+                {{- end -}}
               link: 'https://www.ur-net.go.jp/{{ .source.roomDetailLinkSp }}'
               thumbnail: '{{ .source.madori }}'
-              system: |
-                {{-  if .source.system }}(
+              "制度": |
+                {{-  if .source.system }}
                 {{-    range $index, $s := .source.system }}
                 {{-      if $index }}, {{end}}
                 {{-      $s.制度名 }}
-                {{-    end }})
+                {{-    end }}
                 {{-  end -}}
+              "敷金": '{{ .source.shikikin }}'
+              "間取り": '{{ .source.type }}'
+              "平米数": '{{ .source.floorspace | match "(\\d+).*" }}㎡'
+              "階数": '{{ .source.floor }} / {{ .source.floorAll }}'
+    # 監視項目の固定の表示文字列
     label: "{{ .item.name }}"
+    # 監視項目のURL
     link: https://www.ur-net.go.jp/chintai/kanto/tokyo/{{ .item.shisya }}_{{ .item.danchi }}0.html
+    # 変更があったときに実施するアクション
     actions:
       - slack:
           url: '{{ env "SLACK_WEBHOOK_URL" }}'
@@ -60,21 +68,18 @@ jobs:
         command: |
           curl --compressed -sSL https://www.amazon.co.jp/dp/{{ .item.id }}/
       filters:
-        # DOMを解釈して、json objectに変換
-        # 変換が難しい。微妙。。
-        # 開き直って、1要素だけ取得できるようにして、複数の値使うときは、template/json_transform使ってdom関数を呼び出すようにしたい
-        # そうしたらこれいらなくなる
         - template: |
-            {{ $saleprice := (.source.String | dom "#priceblock_saleprice").text }}
-            {{ if $saleprice }}{{ $saleprice }}
-            {{ else }}
-            {{ (.source.String | dom "#priceblock_ourprice").text }}
-            {{ end }}
+            {{- $saleprice := (.source | dom "#priceblock_saleprice").text -}}
+            {{- if $saleprice }}{{ $saleprice -}}
+            {{- else -}}
+            {{- (.source | dom "#priceblock_ourprice").text -}}
+            {{- end -}}
+            ({{- (.source | dom "#availability>.a-size-medium").text | trim | replace "。" "" -}})
       # デフォルトではfilteringしたあとのsourceの値が空でも空の値として継続する。
       # failを設定した場合には、空の場合実行失敗とみなす。
       empty: fail
       # sourceの収集中に失敗した場合、指定した回数リトライする。デフォルトではリトライしない。
-      retry: 0
+      retry: 3
     actions:
       - slack:
           url: '{{ env "SLACK_WEBHOOK_URL" }}'

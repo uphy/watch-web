@@ -1,16 +1,11 @@
 package value
 
-import (
-	"encoding/json"
-	"log"
-)
-
 type (
 	JSONObjectValue struct {
-		m map[string]interface{}
+		m JSONObject
 	}
 	JSONArrayValue struct {
-		a []interface{}
+		a JSONArray
 	}
 )
 
@@ -26,20 +21,16 @@ func (j *JSONObjectValue) Type() ValueType {
 	return ValueTypeJSONObject
 }
 
-func (j *JSONObjectValue) JSONObject() map[string]interface{} {
+func (j *JSONObjectValue) JSONObject() JSONObject {
 	return j.m
 }
 
-func (j *JSONObjectValue) JSONArray() []interface{} {
+func (j *JSONObjectValue) JSONArray() JSONArray {
 	return []interface{}{j.m}
 }
 
 func (j *JSONObjectValue) String() string {
-	b, err := json.Marshal(j.m)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return string(b)
+	return j.m.String()
 }
 
 func (j *JSONObjectValue) Interface() interface{} {
@@ -54,22 +45,18 @@ func (j *JSONArrayValue) Type() ValueType {
 	return ValueTypeJSONArray
 }
 
-func (j *JSONArrayValue) JSONObject() map[string]interface{} {
+func (j *JSONArrayValue) JSONObject() JSONObject {
 	return map[string]interface{}{
 		"values": j.a,
 	}
 }
 
-func (j *JSONArrayValue) JSONArray() []interface{} {
+func (j *JSONArrayValue) JSONArray() JSONArray {
 	return j.a
 }
 
 func (j *JSONArrayValue) String() string {
-	b, err := json.Marshal(j.a)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return string(b)
+	return j.a.String()
 }
 
 func (j *JSONArrayValue) Interface() interface{} {

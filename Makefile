@@ -8,7 +8,7 @@ frontend: clean
 
 .PHONY: backend
 backend: frontend
-	pkger -o resources; \
+	pkger -o pkg/resources; \
 	go build -o build/watch-web; \
 	cp config.yml build; \
 	cp -rp scripts build

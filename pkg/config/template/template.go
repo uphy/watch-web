@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -65,6 +66,24 @@ var funcs = map[string]interface{}{
 			return string(runes[0:length]) + "..."
 		}
 		return s
+	},
+	"match": func(pattern string, s string) (string, error) {
+		r, err := regexp.Compile(pattern)
+		if err != nil {
+			return "", err
+		}
+		matches := r.FindStringSubmatch(s)
+		switch len(matches) {
+		case 0, 1:
+			return "<no match>", nil
+		case 2:
+			return matches[1], nil
+		default:
+			return fmt.Sprintf("<multiple matches:%v>", matches), nil
+		}
+	},
+	"replace": func(old, new, original string) string {
+		return strings.ReplaceAll(original, old, new)
 	},
 }
 
