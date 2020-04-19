@@ -131,7 +131,7 @@ func (e *Executor) Check(job *Job) (res *domain.Result, err error) {
 	}()
 
 	// make result
-	res = domain.NewResult(job.ID(), job.Info.Label, job.Info.Link, previous, currentString, current.Type())
+	res = domain.NewResult(job.Info, previous, currentString, current.Type())
 
 	// Do action
 	if !firstCheck {

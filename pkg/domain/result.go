@@ -15,11 +15,11 @@ type (
 	}
 )
 
-func NewResult(jobId string, label string, link string, previous string, current string, valueType ValueType) *Result {
+func NewResult(info *JobInfo, previous, current string, valueType ValueType) *Result {
 	return &Result{
-		JobID:     jobId,
-		Label:     label,
-		Link:      link,
+		JobID:     info.ID,
+		Label:     info.Label,
+		Link:      info.Link,
 		Previous:  previous,
 		Current:   current,
 		ValueType: valueType,
