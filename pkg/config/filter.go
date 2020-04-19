@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
-	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/uphy/watch-web/pkg/config/filter"
 	"github.com/uphy/watch-web/pkg/config/template"
 	"github.com/uphy/watch-web/pkg/value"
@@ -27,15 +27,15 @@ type (
 	}
 
 	FilterSource struct {
-		source  check.Source
+		source  watch.Source
 		filters []Filter
 	}
 	Filter interface {
-		Filter(ctx *check.JobContext, v value.Value) (value.Value, error)
+		Filter(ctx *watch.JobContext, v value.Value) (value.Value, error)
 	}
 )
 
-func (f FiltersConfig) Filters(ctx *template.TemplateContext, source check.Source) (check.Source, error) {
+func (f FiltersConfig) Filters(ctx *template.TemplateContext, source watch.Source) (watch.Source, error) {
 	if len(f) == 0 {
 		return source, nil
 	}
@@ -76,7 +76,7 @@ func (f *FilterConfig) Filter(ctx *template.TemplateContext) (Filter, error) {
 	return nil, errors.New("no filters defined")
 }
 
-func (f *FilterSource) Fetch(ctx *check.JobContext) (value.Value, error) {
+func (f *FilterSource) Fetch(ctx *watch.JobContext) (value.Value, error) {
 	v, err := f.source.Fetch(ctx)
 	if err != nil {
 		return nil, err

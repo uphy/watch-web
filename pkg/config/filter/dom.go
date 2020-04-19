@@ -3,7 +3,7 @@ package filter
 import (
 	"fmt"
 
-	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/uphy/watch-web/pkg/config/template"
 	"github.com/uphy/watch-web/pkg/value"
 )
@@ -18,7 +18,7 @@ func NewDOMFilter(selector string) *DOMFilter {
 	return &DOMFilter{selector}
 }
 
-func (t *DOMFilter) Filter(ctx *check.JobContext, v value.Value) (value.Value, error) {
+func (t *DOMFilter) Filter(ctx *watch.JobContext, v value.Value) (value.Value, error) {
 	return template.ParseDOM(v.String(), t.selecter)
 }
 

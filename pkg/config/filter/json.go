@@ -3,7 +3,7 @@ package filter
 import (
 	"fmt"
 
-	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/uphy/watch-web/pkg/value"
 )
 
@@ -18,7 +18,7 @@ func NewJSONArrayFilter() *JSONArrayFilter {
 	return &JSONArrayFilter{}
 }
 
-func (j *JSONArrayFilter) Filter(ctx *check.JobContext, v value.Value) (value.Value, error) {
+func (j *JSONArrayFilter) Filter(ctx *watch.JobContext, v value.Value) (value.Value, error) {
 	return value.ConvertAs(v.String(), value.ValueTypeJSONArray)
 }
 
@@ -30,7 +30,7 @@ func NewJSONObjectFilter() *JSONObjectFilter {
 	return &JSONObjectFilter{}
 }
 
-func (j *JSONObjectFilter) Filter(ctx *check.JobContext, v value.Value) (value.Value, error) {
+func (j *JSONObjectFilter) Filter(ctx *watch.JobContext, v value.Value) (value.Value, error) {
 	return value.ConvertAs(v.String(), value.ValueTypeJSONObject)
 }
 

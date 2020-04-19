@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
-	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/uphy/watch-web/pkg/config"
 	"github.com/urfave/cli"
 )
@@ -65,6 +65,6 @@ func (c *CLI) Run(args []string) error {
 	return c.app.Run(args)
 }
 
-func (c *CLI) newExecutor() (*check.Executor, error) {
+func (c *CLI) newExecutor() (*watch.Executor, error) {
 	return c.config.NewExecutor(c.log)
 }

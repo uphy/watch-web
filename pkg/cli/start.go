@@ -8,8 +8,8 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/uphy/watch-web/pkg/check"
 	"github.com/uphy/watch-web/pkg/resources"
+	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/urfave/cli"
 )
 
@@ -18,7 +18,7 @@ type (
 		ID     string       `json:"id"`
 		Link   string       `json:"link,omitempty"`
 		Label  string       `json:"label,omitempty"`
-		Status check.Status `json:"status"`
+		Status watch.Status `json:"status"`
 		Error  *string      `json:"error,omitempty"`
 		Last   *time.Time   `json:"last,omitempty"`
 		Count  int          `json:"count"`
@@ -29,15 +29,15 @@ type (
 	}
 )
 
-func getJob(exe *check.Executor, jobID string) (*JobDTO, error) {
+func getJob(exe *watch.Executor, jobID string) (*JobDTO, error) {
 	job := exe.Jobs[jobID]
 	status, err := exe.GetJobStatus(jobID)
 	if err != nil {
 		return nil, err
 	}
 	if status == nil {
-		status = &check.JobStatus{
-			Status: check.StatusOK,
+		status = &watch.JobStatus{
+			Status: watch.StatusOK,
 		}
 	}
 	return &JobDTO{
@@ -51,7 +51,7 @@ func getJob(exe *check.Executor, jobID string) (*JobDTO, error) {
 	}, nil
 }
 
-func getJobs(exe *check.Executor) ([]JobDTO, error) {
+func getJobs(exe *watch.Executor) ([]JobDTO, error) {
 	jobs := []JobDTO{}
 	for jobID := range exe.Jobs {
 		job, err := getJob(exe, jobID)
@@ -63,7 +63,7 @@ func getJobs(exe *check.Executor) ([]JobDTO, error) {
 	return jobs, nil
 }
 
-func getJobDetail(exe *check.Executor, jobID string) (*JobDetailDTO, error) {
+func getJobDetail(exe *watch.Executor, jobID string) (*JobDetailDTO, error) {
 	job, err := getJob(exe, jobID)
 	if err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ func (c *CLI) start() cli.Command {
 				if err != nil {
 					return err
 				}
-				checked := make([]*check.Job, 0)
+				checked := make([]*watch.Job, 0)
 				for _, j := range exe.Jobs {
 					if !ptn.Match([]byte(j.ID())) {
 						continue

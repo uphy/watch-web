@@ -3,7 +3,7 @@ package filter
 import (
 	"fmt"
 
-	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/uphy/watch-web/pkg/config/template"
 	"github.com/uphy/watch-web/pkg/value"
 )
@@ -36,7 +36,7 @@ func (t transform) transform(ctx *template.TemplateContext, v value.Value) (valu
 	return value.NewJSONObjectValue(transformed), nil
 }
 
-func (t *JSONTransformFilter) Filter(ctx *check.JobContext, v value.Value) (value.Value, error) {
+func (t *JSONTransformFilter) Filter(ctx *watch.JobContext, v value.Value) (value.Value, error) {
 	switch v.Type() {
 	case value.ValueTypeString, value.ValueTypeJSONObject:
 		return t.transform.transform(t.ctx, v)

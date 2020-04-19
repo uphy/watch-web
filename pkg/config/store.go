@@ -4,7 +4,7 @@ import (
 	"net/url"
 
 	"github.com/go-redis/redis/v7"
-	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/uphy/watch-web/pkg/config/template"
 )
 
@@ -19,7 +19,7 @@ type (
 	}
 )
 
-func newStore(ctx *template.TemplateContext, config *StoreConfig) (check.Store, error) {
+func newStore(ctx *template.TemplateContext, config *StoreConfig) (watch.Store, error) {
 	if config != nil && config.Redis != nil {
 		password := ""
 		addr := ""
@@ -51,10 +51,10 @@ func newStore(ctx *template.TemplateContext, config *StoreConfig) (check.Store, 
 				Addr:     addr,
 				Password: password,
 			})
-			return check.NewRedisStore(client), nil
+			return watch.NewRedisStore(client), nil
 		}
 	}
-	return check.NewMemoryStore(), nil
+	return watch.NewMemoryStore(), nil
 }
 
 func parseRedisToGoURL(redisToGo string) (addr string, password string, err error) {

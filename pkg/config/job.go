@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/uphy/watch-web/pkg/config/template"
 )
 
@@ -18,8 +18,8 @@ type (
 	}
 )
 
-func (c *JobConfig) addTo(ctx *template.TemplateContext, e *check.Executor) ([]*check.Job, error) {
-	jobs := make([]*check.Job, 0)
+func (c *JobConfig) addTo(ctx *template.TemplateContext, e *watch.Executor) ([]*watch.Job, error) {
+	jobs := make([]*watch.Job, 0)
 	if len(c.WithItems) == 0 {
 		job, err := c.addOne(ctx, e)
 		if err != nil {
@@ -70,7 +70,7 @@ func evaluateItemAsTemplate(ctx *template.TemplateContext, v interface{}) (inter
 	return e, nil
 }
 
-func (c *JobConfig) addOne(ctx *template.TemplateContext, e *check.Executor) (*check.Job, error) {
+func (c *JobConfig) addOne(ctx *template.TemplateContext, e *watch.Executor) (*watch.Job, error) {
 	source, err := c.Source.Source(ctx)
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (c *JobConfig) addOne(ctx *template.TemplateContext, e *check.Executor) (*c
 	if err != nil {
 		return nil, err
 	}
-	job := check.NewJob(&check.JobInfo{
+	job := watch.NewJob(&watch.JobInfo{
 		ID:    id,
 		Label: label,
 		Link:  link,

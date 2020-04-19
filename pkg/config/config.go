@@ -10,7 +10,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
-	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/uphy/watch-web/pkg/config/template"
 )
 
@@ -51,7 +51,7 @@ func (c *Config) Save(w io.Writer) error {
 	return err
 }
 
-func (c *Config) NewExecutor(log *logrus.Logger) (*check.Executor, error) {
+func (c *Config) NewExecutor(log *logrus.Logger) (*watch.Executor, error) {
 	ctx := template.NewRootContext()
 	// store
 	store, err := newStore(ctx, c.Store)
@@ -63,7 +63,7 @@ func (c *Config) NewExecutor(log *logrus.Logger) (*check.Executor, error) {
 	}).Info("Created store.")
 
 	// action
-	actions := []check.Action{}
+	actions := []watch.Action{}
 	for _, actionConfig := range c.Actions {
 		action, err := actionConfig.Action(ctx)
 		if err != nil {
@@ -73,7 +73,7 @@ func (c *Config) NewExecutor(log *logrus.Logger) (*check.Executor, error) {
 	}
 
 	// executor
-	e := check.NewExecutor(store, actions, log)
+	e := watch.NewExecutor(store, actions, log)
 	if c.InitialRun != nil {
 		initialRun, err := c.InitialRun.Evaluate(ctx)
 		if err != nil {

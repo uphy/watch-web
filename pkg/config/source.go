@@ -6,7 +6,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/uphy/watch-web/pkg/config/template"
 	"github.com/uphy/watch-web/pkg/value"
 	"golang.org/x/text/encoding"
@@ -38,22 +38,22 @@ type (
 		Command *template.TemplateString `json:"command"`
 	}
 	SourceWithRetry struct {
-		source      check.Source
+		source      watch.Source
 		emptyAction *EmptyAction
 		retry       *int
 	}
 )
 
-func (s *SourceConfig) Source(ctx *template.TemplateContext) (check.Source, error) {
+func (s *SourceConfig) Source(ctx *template.TemplateContext) (watch.Source, error) {
 	// load raw source
-	var source check.Source
+	var source watch.Source
 	var err error
 	if s.DOM != nil {
 		source, err = s.DOM.Source(ctx)
 	} else if s.Shell != nil {
 		source, err = s.Shell.Source(ctx)
 	} else if s.Constant != nil {
-		source = check.NewConstantSource(s.Constant)
+		source = watch.NewConstantSource(s.Constant)
 	}
 	if err != nil {
 		return nil, err
@@ -72,7 +72,7 @@ func (s *SourceConfig) Source(ctx *template.TemplateContext) (check.Source, erro
 	return &SourceWithRetry{source, s.EmptyAction, s.Retry}, nil
 }
 
-func (d *DOMSourceConfig) Source(ctx *template.TemplateContext) (check.Source, error) {
+func (d *DOMSourceConfig) Source(ctx *template.TemplateContext) (watch.Source, error) {
 	var encoding encoding.Encoding
 	if d.Encoding != nil {
 		enc, err := d.Encoding.Evaluate(ctx)
@@ -94,19 +94,19 @@ func (d *DOMSourceConfig) Source(ctx *template.TemplateContext) (check.Source, e
 	if err != nil {
 		return nil, err
 	}
-	source := check.NewDOMSource(u, s, encoding)
+	source := watch.NewDOMSource(u, s, encoding)
 	return source, nil
 }
 
-func (d *ShellSourceConfig) Source(ctx *template.TemplateContext) (check.Source, error) {
+func (d *ShellSourceConfig) Source(ctx *template.TemplateContext) (watch.Source, error) {
 	command, err := d.Command.Evaluate(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return check.NewShellSource(command), nil
+	return watch.NewShellSource(command), nil
 }
 
-func (s *SourceWithRetry) Fetch(ctx *check.JobContext) (value.Value, error) {
+func (s *SourceWithRetry) Fetch(ctx *watch.JobContext) (value.Value, error) {
 	if s.retry == nil {
 		return s.fetch(ctx)
 	}
@@ -127,7 +127,7 @@ func (s *SourceWithRetry) Fetch(ctx *check.JobContext) (value.Value, error) {
 	return nil, fmt.Errorf("too many retries: lastError=%w", err)
 }
 
-func (s *SourceWithRetry) fetch(ctx *check.JobContext) (value.Value, error) {
+func (s *SourceWithRetry) fetch(ctx *watch.JobContext) (value.Value, error) {
 	v, err := s.source.Fetch(ctx)
 	if err != nil {
 		return nil, err

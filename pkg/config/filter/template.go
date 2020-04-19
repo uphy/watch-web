@@ -3,7 +3,7 @@ package filter
 import (
 	"fmt"
 
-	"github.com/uphy/watch-web/pkg/check"
+	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/uphy/watch-web/pkg/config/template"
 	"github.com/uphy/watch-web/pkg/value"
 )
@@ -19,7 +19,7 @@ func NewTemplateFilter(template template.TemplateString, ctx *template.TemplateC
 	return &TemplateFilter{template, ctx}
 }
 
-func (t *TemplateFilter) Filter(ctx *check.JobContext, v value.Value) (value.Value, error) {
+func (t *TemplateFilter) Filter(ctx *watch.JobContext, v value.Value) (value.Value, error) {
 	t.ctx.PushScope()
 	defer t.ctx.PopScope()
 	t.ctx.Set("source", v.Interface())
