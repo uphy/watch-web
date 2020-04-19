@@ -19,6 +19,7 @@ type (
 		Jobs       map[string]*Job
 		InitialRun bool
 		store      Store
+		actions    []Action
 		log        *logrus.Logger
 	}
 	Source interface {
@@ -34,7 +35,7 @@ func init() {
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 }
 
-func NewExecutor(store Store, log *logrus.Logger) *Executor {
+func NewExecutor(store Store, actions []Action, log *logrus.Logger) *Executor {
 	return &Executor{
 		c:     cron.New(),
 		store: store,
@@ -47,30 +48,18 @@ func (e *Executor) Job(id string) *Job {
 	return e.Jobs[id]
 }
 
-func (e *Executor) AddJob(id, schedule, label, link string, source Source, action ...Action) (*Job, error) {
-	if schedule == "" {
-		schedule = "@every 1h"
-	}
+func (e *Executor) AddJob(job *Job, schedule *string) error {
 	jobLogger := e.log.WithFields(logrus.Fields{
-		"id": id,
+		"id": job.ID(),
 	})
-	job := &Job{
-		ID:       id,
-		source:   source,
-		actions:  action,
-		Label:    label,
-		Link:     link,
-		Previous: nil,
-		Status:   StatusOK,
-		Error:    nil,
-		store:    e.store,
-		ctx:      &JobContext{jobLogger},
+	job.ctx = &JobContext{jobLogger}
+	e.Jobs[job.ID()] = job
+	if schedule != nil {
+		return e.c.AddFunc(*schedule, func() {
+			e.Check(job)
+		})
 	}
-	job.RestoreState()
-	e.Jobs[id] = job
-	return job, e.c.AddFunc(schedule, func() {
-		job.Check()
-	})
+	return nil
 }
 
 func (e *Executor) Run() {
@@ -89,88 +78,86 @@ func (e *Executor) CheckAll() {
 		ch <- struct{}{}
 		go func(job *Job) {
 			defer wg.Done()
-			job.Check()
+			e.Check(job)
 			<-ch
 		}(job)
 	}
 	wg.Wait()
 }
 
-func (j *Job) RestoreState() error {
-	if err := j.store.GetJob(j.ID, j); err != nil {
-		j.failed("failed to get previous job status", err)
-		return err
+func (e *Executor) Check(job *Job) (res *result.Result, err error) {
+	job.ctx.Log.Info("Running job.")
+
+	// Get previous job properties
+	status, err := e.store.GetStatus(job.ID())
+	if status == nil {
+		status = new(JobStatus)
 	}
-	j.ctx.Log.WithField("job", j).Debug("Restored job.")
-	j.ctx.Log.Info("Restored job.")
-	return nil
-}
-
-func (j *Job) StoreState() error {
-	if err := j.store.SetJob(j.ID, j); err != nil {
-		j.failed("failed to store current value", err)
-		return err
+	defer func() {
+		// store status even if got errors for fixing broken data
+		if err := e.store.SetStatus(job.ID(), status); err != nil {
+			job.failed(status, "failed to set job status", err)
+		}
+	}()
+	if err != nil && err != ErrNotFound {
+		job.failed(status, "failed to get previous job status", err)
+		return nil, err
 	}
-	j.ctx.Log.WithField("job", j).Debug("Stored job.")
-	j.ctx.Log.Info("Stored job.")
-	return nil
-}
-
-func (j *Job) Check() (res *result.Result, err error) {
-	j.ctx.Log.Info("Running job.")
-	j.RestoreState()
-
-	if err = j.store.GetJob(j.ID, j); err != nil {
-		j.failed("failed to get previous job status", err)
-		return
+	previous, err := e.store.GetValue(job.ID())
+	firstCheck := false
+	if err != nil {
+		if err == ErrNotFound {
+			firstCheck = true
+		} else {
+			job.failed(status, "failed to load previous job value", err)
+			return nil, err
+		}
 	}
 
 	now := time.Now()
-	j.Last = &now
-	j.Count++
-	j.Status = StatusRunning
-	j.Error = nil
+	status.Last = &now
+	status.Count++
+	status.Status = StatusRunning
+	status.Error = nil
 
 	// Get current value
-	current, err := j.source.Fetch(j.ctx)
+	current, err := job.source.Fetch(job.ctx)
 	if err != nil {
-		j.failed("failed to fetch", err)
+		job.failed(status, "failed to fetch", err)
 		return
 	}
-	j.ctx.Log.WithFields(logrus.Fields{
+	job.ctx.Log.WithFields(logrus.Fields{
 		"current": fmt.Sprintf("%#v", current),
 	}).Debug("Fetched job result.")
-	j.ctx.Log.Info("Fetched job result.")
+	job.ctx.Log.Info("Fetched job result.")
+	currentString := current.String()
+	defer func() {
+		if err := e.store.SetValue(job.ID(), currentString); err != nil {
+			job.failed(status, "failed to store job value", err)
+		}
+	}()
 
 	// make result
-	var previous string
-	if j.Previous != nil {
-		previous = *j.Previous
-	} else {
-		previous = ""
-	}
-	currentString := current.String()
-	res = result.New(j.ID, j.Label, j.Link, previous, currentString, current.Type())
+	res = result.New(job.ID(), job.Info.Label, job.Info.Link, previous, currentString, current.Type())
 
 	// Do action
-	if j.Previous != nil {
-		if err = j.DoActions(res); err != nil {
-			j.failed("failed to perform action", err)
+	if !firstCheck {
+		if err = e.DoActions(job, res); err != nil {
+			job.failed(status, "failed to perform action", err)
+			return
 		}
 	}
 
 	// Store job status
-	j.Previous = &currentString
-	j.Status = StatusOK
-	j.StoreState()
-	j.ctx.Log.WithField("result", fmt.Sprintf("%#v", res)).Debug("Finished job.")
-	j.ctx.Log.Info("Finished job.")
+	status.Status = StatusOK
+	job.ctx.Log.WithField("result", fmt.Sprintf("%#v", res)).Debug("Finished job.")
+	job.ctx.Log.Info("Finished job.")
 	return
 }
 
-func (j *Job) TestActions() error {
-	return j.DoActions(&result.Result{
-		JobID:    j.ID,
+func (e *Executor) TestActions(job *Job) error {
+	return e.DoActions(job, &result.Result{
+		JobID:    job.ID(),
 		Label:    "test action",
 		Link:     "https://google.com",
 		Previous: "This is test action.",
@@ -178,12 +165,34 @@ func (j *Job) TestActions() error {
 	})
 }
 
-func (j *Job) DoActions(result *result.Result) error {
+func (e *Executor) DoActions(job *Job, result *result.Result) error {
 	var errs error
-	for _, action := range j.actions {
-		if err := action.Run(j.ctx, result); err != nil {
+	for _, action := range e.actions {
+		if err := action.Run(job.ctx, result); err != nil {
 			errs = multierror.Append(errs, err)
 		}
 	}
 	return errs
+}
+
+func (e *Executor) GetJobStatus(jobID string) (*JobStatus, error) {
+	status, err := e.store.GetStatus(jobID)
+	if err != nil {
+		if err == ErrNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return status, nil
+}
+
+func (e *Executor) GetJobValue(jobID string) (*string, error) {
+	status, err := e.store.GetValue(jobID)
+	if err != nil {
+		if err == ErrNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &status, nil
 }

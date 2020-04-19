@@ -54,7 +54,7 @@ func newStore(ctx *template.TemplateContext, config *StoreConfig) (check.Store, 
 			return check.NewRedisStore(client), nil
 		}
 	}
-	return &check.NullStore{}, nil
+	return check.NewMemoryStore(), nil
 }
 
 func parseRedisToGoURL(redisToGo string) (addr string, password string, err error) {

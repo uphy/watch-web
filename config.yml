@@ -47,9 +47,6 @@ jobs:
     # 監視項目のURL
     link: https://www.ur-net.go.jp/chintai/kanto/tokyo/{{ .item.shisya }}_{{ .item.danchi }}0.html
     # 変更があったときに実施するアクション
-    actions:
-      - slack:
-          url: '{{ env "SLACK_WEBHOOK_URL" }}'
     # ここで指定した要素数だけ、jobが複製される。
     # job内で、各配列要素は `.item として参照できる。
     with_items:
@@ -83,11 +80,11 @@ jobs:
       empty: fail
       # sourceの収集中に失敗した場合、指定した回数リトライする。デフォルトではリトライしない。
       retry: 3
-    actions:
-      - slack:
-          url: '{{ env "SLACK_WEBHOOK_URL" }}'
     with_items:
       - { id: 'B07H56HB8T', name: 'TOPVISION プロジェクター' }
+actions:
+  - slack:
+      url: '{{ env "SLACK_WEBHOOK_URL" }}'
 # 各ジョブの現在の値を保存するストレージ
 store:
   redis:

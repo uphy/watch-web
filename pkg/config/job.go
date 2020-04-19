@@ -7,6 +7,17 @@ import (
 	"github.com/uphy/watch-web/pkg/config/template"
 )
 
+type (
+	JobConfig struct {
+		ID        template.TemplateString `json:"id"`
+		Label     template.TemplateString `json:"label"`
+		Link      template.TemplateString `json:"link"`
+		Source    *SourceConfig           `json:"source,omitempty"`
+		Schedule  template.TemplateString `json:"schedule,omitempty"`
+		WithItems []interface{}           `json:"with_items,omitempty"`
+	}
+)
+
 func (c *JobConfig) addTo(ctx *template.TemplateContext, e *check.Executor) ([]*check.Job, error) {
 	jobs := make([]*check.Job, 0)
 	if len(c.WithItems) == 0 {
@@ -64,14 +75,6 @@ func (c *JobConfig) addOne(ctx *template.TemplateContext, e *check.Executor) (*c
 	if err != nil {
 		return nil, err
 	}
-	actions := []check.Action{}
-	for _, actionConfig := range c.Actions {
-		action, err := actionConfig.Action(ctx)
-		if err != nil {
-			return nil, err
-		}
-		actions = append(actions, action)
-	}
 	id, err := c.ID.Evaluate(ctx)
 	if err != nil {
 		return nil, err
@@ -88,8 +91,13 @@ func (c *JobConfig) addOne(ctx *template.TemplateContext, e *check.Executor) (*c
 	if err != nil {
 		return nil, err
 	}
-	job, err := e.AddJob(id, schedule, label, link, source, actions...)
-	if err != nil {
+	job := check.NewJob(&check.JobInfo{
+		ID:    id,
+		Label: label,
+		Link:  link,
+	}, source)
+
+	if err := e.AddJob(job, &schedule); err != nil {
 		return nil, err
 	}
 	return job, nil

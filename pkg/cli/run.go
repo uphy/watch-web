@@ -30,7 +30,7 @@ func (c *CLI) run() cli.Command {
 			} else {
 				for _, id := range ctx.Args() {
 					job := exe.Job(id)
-					result, err := job.Check()
+					result, err := exe.Check(job)
 					if err != nil {
 						continue
 					}
@@ -58,7 +58,7 @@ func (c *CLI) run() cli.Command {
 					}
 
 					if testAction {
-						if err := job.DoActions(result); err != nil {
+						if err := exe.DoActions(job, result); err != nil {
 							fmt.Println("failed on action: ", err)
 						}
 					}

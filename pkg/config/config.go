@@ -18,16 +18,8 @@ type (
 	Config struct {
 		Jobs       []JobConfig              `json:"jobs"`
 		InitialRun *template.TemplateString `json:"initial_run,omitempty"`
+		Actions    []ActionConfig           `json:"actions"`
 		Store      *StoreConfig             `json:"store"`
-	}
-	JobConfig struct {
-		ID        template.TemplateString `json:"id"`
-		Label     template.TemplateString `json:"label"`
-		Link      template.TemplateString `json:"link"`
-		Source    *SourceConfig           `json:"source,omitempty"`
-		Schedule  template.TemplateString `json:"schedule,omitempty"`
-		Actions   []ActionConfig          `json:"actions"`
-		WithItems []interface{}           `json:"with_items,omitempty"`
 	}
 )
 
@@ -61,6 +53,7 @@ func (c *Config) Save(w io.Writer) error {
 
 func (c *Config) NewExecutor(log *logrus.Logger) (*check.Executor, error) {
 	ctx := template.NewRootContext()
+	// store
 	store, err := newStore(ctx, c.Store)
 	if err != nil {
 		return nil, err
@@ -68,7 +61,19 @@ func (c *Config) NewExecutor(log *logrus.Logger) (*check.Executor, error) {
 	log.WithFields(logrus.Fields{
 		"store": fmt.Sprintf("%#v", store),
 	}).Info("Created store.")
-	e := check.NewExecutor(store, log)
+
+	// action
+	actions := []check.Action{}
+	for _, actionConfig := range c.Actions {
+		action, err := actionConfig.Action(ctx)
+		if err != nil {
+			return nil, err
+		}
+		actions = append(actions, action)
+	}
+
+	// executor
+	e := check.NewExecutor(store, actions, log)
 	if c.InitialRun != nil {
 		initialRun, err := c.InitialRun.Evaluate(ctx)
 		if err != nil {
@@ -80,6 +85,8 @@ func (c *Config) NewExecutor(log *logrus.Logger) (*check.Executor, error) {
 		}
 		e.InitialRun = ini
 	}
+
+	// jobs
 	for _, jobConfig := range c.Jobs {
 		jobs, err := jobConfig.addTo(ctx, e)
 		if err != nil {

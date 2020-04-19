@@ -18,7 +18,7 @@ func (c *CLI) list() cli.Command {
 			}
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 			for _, job := range exe.Jobs {
-				fmt.Fprintf(w, "%s\t%s\t%s\n", job.ID, job.Label, job.Link)
+				fmt.Fprintf(w, "%s\t%s\t%s\n", job.ID(), job.Info.Label, job.Info.Link)
 			}
 			w.Flush()
 			return nil
