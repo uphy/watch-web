@@ -35,32 +35,6 @@ func (s *SlackAction) Run(ctx *JobContext, res *result.Result) error {
 	var template string
 	switch changes.(type) {
 	case result.JSONArrayDiffResult:
-		/*
-			// To sort the fields of element object,
-			// Re-build the diff result.
-			var fieldOrder = map[string]int{
-				"summary":0,
-				"description":1,
-
-			}
-			var elements = make([]map[string]interface{}, len(c))
-			for i, element := range c {
-				fields := make([]map[string]interface{}, len(element.Object))
-				for k, v := range element.Object {
-					fields[len(fields)] = map[string]interface{}{
-						"name":  k,
-						"value": v,
-					}
-				}
-				sort.Slice(fields, func(i, j int) bool {
-					return false
-				})
-				elements[i] = map[string]interface{}{
-					"object": fields,
-					"type":   element.Type,
-				}
-			}
-		*/
 		template = resources.SlackArrayTemplate
 	case result.JSONObjectDiffResult:
 		template = resources.SlackTemplate

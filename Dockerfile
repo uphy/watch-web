@@ -11,7 +11,7 @@ WORKDIR /go/src/github.com/uphy/watch-web
 # Build app
 COPY . .
 COPY --from=frontend-builder /app/dist/ ./frontend/dist/
-RUN go get -u github.com/markbates/pkger/cmd/pkger && pkger -o resources
+RUN go get -u github.com/markbates/pkger/cmd/pkger && pkger -o pkg/resources
 RUN CGO_ENABLED=0 GOOS=linux go build -o /watch-web
 # Build gojq
 RUN CGO_ENABLED=0 GOOS=linux go get -u github.com/itchyny/gojq/cmd/gojq

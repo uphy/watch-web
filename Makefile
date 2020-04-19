@@ -1,6 +1,6 @@
 .PHONY: clean
 clean:
-	rm -rf resources/pkged.go build
+	rm -rf pkg/resources/pkged.go build
 
 .PHONY: frontend
 frontend: clean
