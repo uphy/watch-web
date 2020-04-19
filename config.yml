@@ -74,7 +74,8 @@ jobs:
             {{- else -}}
             {{- (.source | dom "#priceblock_ourprice").text -}}
             {{- end -}}
-            ({{- (.source | dom "#availability>.a-size-medium").text | trim | replace "。" "" -}})
+            {{- $availability := (.source | dom "#availability>.a-size-medium").text | trim | replace "。" "" -}}
+            {{- if $availability }}({{ $availability }}){{ end -}}
       # デフォルトではfilteringしたあとのsourceの値が空でも空の値として継続する。
       # failを設定した場合には、空の場合実行失敗とみなす。
       empty: fail
