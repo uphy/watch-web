@@ -76,6 +76,9 @@ func ParseJSON(s string) (Value, error) {
 
 func ParseJSONObject(s string) (Value, error) {
 	trimmed := strings.Trim(s, " \t\n")
+	if len(trimmed) == 0 {
+		return NewJSONObjectValue(make(JSONObject)), nil
+	}
 	if strings.HasPrefix(trimmed, "{") && strings.HasSuffix(trimmed, "}") {
 		var m map[string]interface{}
 		if err := json.Unmarshal([]byte(s), &m); err == nil {
@@ -87,6 +90,9 @@ func ParseJSONObject(s string) (Value, error) {
 
 func ParseJSONArray(s string) (Value, error) {
 	trimmed := strings.Trim(s, " \t\n")
+	if len(trimmed) == 0 {
+		return NewJSONArrayValue(make(JSONArray, 0)), nil
+	}
 	if strings.HasPrefix(trimmed, "[") && strings.HasSuffix(trimmed, "]") {
 		var a []interface{}
 		if err := json.Unmarshal([]byte(s), &a); err == nil {
