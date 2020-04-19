@@ -1,4 +1,4 @@
-package watch
+package store
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/go-redis/redis/v7"
+	"github.com/uphy/watch-web/pkg/domain"
 )
 
 const (
@@ -18,14 +19,8 @@ var (
 )
 
 type (
-	Store interface {
-		GetValue(jobID string) (string, error)
-		SetValue(jobID string, value string) error
-		GetStatus(jobID string) (*JobStatus, error)
-		SetStatus(jobID string, status *JobStatus) error
-	}
 	MemoryStore struct {
-		statuses map[string]JobStatus
+		statuses map[string]domain.JobStatus
 		values   map[string]string
 	}
 	RedisStore struct {
@@ -41,7 +36,7 @@ type (
 )
 
 func NewMemoryStore() *MemoryStore {
-	return &MemoryStore{make(map[string]JobStatus), make(map[string]string)}
+	return &MemoryStore{make(map[string]domain.JobStatus), make(map[string]string)}
 }
 
 func NewRedisStore(client *redis.Client) *RedisStore {
@@ -61,7 +56,7 @@ func (s *MemoryStore) SetValue(jobID string, value string) error {
 	return nil
 }
 
-func (s *MemoryStore) GetStatus(jobID string) (*JobStatus, error) {
+func (s *MemoryStore) GetStatus(jobID string) (*domain.JobStatus, error) {
 	v, exist := s.statuses[jobID]
 	if !exist {
 		return nil, ErrNotFound
@@ -69,7 +64,7 @@ func (s *MemoryStore) GetStatus(jobID string) (*JobStatus, error) {
 	return &v, nil
 }
 
-func (s *MemoryStore) SetStatus(jobID string, status *JobStatus) error {
+func (s *MemoryStore) SetStatus(jobID string, status *domain.JobStatus) error {
 	fmt.Println(*status)
 	s.statuses[jobID] = *status
 	return nil
@@ -90,7 +85,7 @@ func (s *RedisStore) SetValue(jobID string, value string) error {
 	return s.client.Set(redisPrefixValue+jobID, value, 0).Err()
 }
 
-func (s *RedisStore) GetStatus(jobID string) (*JobStatus, error) {
+func (s *RedisStore) GetStatus(jobID string) (*domain.JobStatus, error) {
 	b, err := s.client.Get(redisPrefixStatus + jobID).Result()
 	if err != nil {
 		if err == redis.Nil {
@@ -98,14 +93,14 @@ func (s *RedisStore) GetStatus(jobID string) (*JobStatus, error) {
 		}
 		return nil, err
 	}
-	var status JobStatus
+	var status domain.JobStatus
 	if err := json.Unmarshal([]byte(b), &status); err != nil {
 		return nil, err
 	}
 	return &status, nil
 }
 
-func (s *RedisStore) SetStatus(jobID string, status *JobStatus) error {
+func (s *RedisStore) SetStatus(jobID string, status *domain.JobStatus) error {
 	b, err := json.Marshal(status)
 	if err != nil {
 		return err

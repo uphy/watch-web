@@ -6,8 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/uphy/watch-web/pkg/watch"
-	"github.com/uphy/watch-web/pkg/value"
+	"github.com/uphy/watch-web/pkg/domain"
 )
 
 type (
@@ -20,7 +19,7 @@ func NewJSONArraySortFilter(by string) *JSONArraySortFilter {
 	return &JSONArraySortFilter{by}
 }
 
-func (j *JSONArraySortFilter) Filter(ctx *watch.JobContext, v value.Value) (value.Value, error) {
+func (j *JSONArraySortFilter) Filter(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
 	array := v.JSONArray()
 	extract := func(v interface{}) string {
 		b, err := json.Marshal(v)
@@ -42,7 +41,7 @@ func (j *JSONArraySortFilter) Filter(ctx *watch.JobContext, v value.Value) (valu
 		v2 := extract(array[j])
 		return strings.Compare(v1, v2) < 0
 	})
-	return value.NewJSONArrayValue(array), nil
+	return domain.NewJSONArrayValue(array), nil
 }
 
 func (j *JSONArraySortFilter) String() string {

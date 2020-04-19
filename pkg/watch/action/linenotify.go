@@ -1,4 +1,4 @@
-package watch
+package actions
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/uphy/watch-web/pkg/result"
+	"github.com/uphy/watch-web/pkg/domain"
 )
 
 type (
@@ -23,7 +23,7 @@ func NewLINENotifyAction(accessToken string) *LINENotifyAction {
 	return &LINENotifyAction{accessToken}
 }
 
-func (a *LINENotifyAction) Run(ctx *JobContext, res *result.Result) error {
+func (a *LINENotifyAction) Run(ctx *domain.JobContext, res *domain.Result) error {
 	changes, err := res.Diff()
 	if err != nil {
 		return err

@@ -1,9 +1,9 @@
-package watch
+package actions
 
 import (
 	"fmt"
 
-	"github.com/uphy/watch-web/pkg/result"
+	"github.com/uphy/watch-web/pkg/domain"
 )
 
 type (
@@ -15,7 +15,7 @@ func NewConsoleAction() *ConsoleAction {
 	return &ConsoleAction{}
 }
 
-func (s *ConsoleAction) Run(ctx *JobContext, res *result.Result) error {
+func (s *ConsoleAction) Run(ctx *domain.JobContext, res *domain.Result) error {
 	changes, err := res.Diff()
 	if err != nil {
 		return err

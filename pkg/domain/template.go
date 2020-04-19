@@ -1,4 +1,4 @@
-package template
+package domain
 
 import (
 	"bytes"
@@ -10,7 +10,6 @@ import (
 	"text/template"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/uphy/watch-web/pkg/value"
 	"golang.org/x/net/html"
 )
 
@@ -99,7 +98,7 @@ func (t TemplateString) Evaluate(ctx *TemplateContext) (string, error) {
 	return buf.String(), nil
 }
 
-func ParseDOM(html string, selector string) (value.Value, error) {
+func ParseDOM(html string, selector string) (Value, error) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
 	if err != nil {
 		return nil, err
@@ -116,7 +115,7 @@ func ParseDOM(html string, selector string) (value.Value, error) {
 	selectedHTML, _ := selection.Html()
 	result["html"] = selectedHTML
 	result["nodes"] = nodes
-	return value.NewJSONObjectValue(result), nil
+	return NewJSONObjectValue(result), nil
 }
 
 func nodeToMap(n *html.Node) map[string]interface{} {

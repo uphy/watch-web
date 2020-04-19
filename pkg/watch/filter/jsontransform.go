@@ -3,24 +3,22 @@ package filter
 import (
 	"fmt"
 
-	"github.com/uphy/watch-web/pkg/watch"
-	"github.com/uphy/watch-web/pkg/config/template"
-	"github.com/uphy/watch-web/pkg/value"
+	"github.com/uphy/watch-web/pkg/domain"
 )
 
 type (
-	transform           map[string]template.TemplateString
+	transform           map[string]domain.TemplateString
 	JSONTransformFilter struct {
 		transform transform
-		ctx       *template.TemplateContext
+		ctx       *domain.TemplateContext
 	}
 )
 
-func NewJSONTransformFilter(transform map[string]template.TemplateString, ctx *template.TemplateContext) *JSONTransformFilter {
+func NewJSONTransformFilter(transform map[string]domain.TemplateString, ctx *domain.TemplateContext) *JSONTransformFilter {
 	return &JSONTransformFilter{transform, ctx}
 }
 
-func (t transform) transform(ctx *template.TemplateContext, v value.Value) (value.Value, error) {
+func (t transform) transform(ctx *domain.TemplateContext, v domain.Value) (domain.Value, error) {
 	ctx.PushScope()
 	ctx.Set("source", v.Interface())
 	defer ctx.PopScope()
@@ -33,17 +31,17 @@ func (t transform) transform(ctx *template.TemplateContext, v value.Value) (valu
 		}
 		transformed[k] = evaluated
 	}
-	return value.NewJSONObjectValue(transformed), nil
+	return domain.NewJSONObjectValue(transformed), nil
 }
 
-func (t *JSONTransformFilter) Filter(ctx *watch.JobContext, v value.Value) (value.Value, error) {
+func (t *JSONTransformFilter) Filter(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
 	switch v.Type() {
-	case value.ValueTypeString, value.ValueTypeJSONObject:
+	case domain.ValueTypeString, domain.ValueTypeJSONObject:
 		return t.transform.transform(t.ctx, v)
-	case value.ValueTypeJSONArray:
+	case domain.ValueTypeJSONArray:
 		var result = make([]interface{}, 0)
 		for _, elm := range v.JSONArray() {
-			value, err := value.ConvertInterfaceAs(elm, value.ValueTypeJSONObject)
+			value, err := domain.ConvertInterfaceAs(elm, domain.ValueTypeJSONObject)
 			if err != nil {
 				return nil, err
 			}
@@ -53,7 +51,7 @@ func (t *JSONTransformFilter) Filter(ctx *watch.JobContext, v value.Value) (valu
 			}
 			result = append(result, transformed.Interface())
 		}
-		return value.NewJSONArrayValue(result), nil
+		return domain.NewJSONArrayValue(result), nil
 	default:
 		return nil, fmt.Errorf("unsupported value type: %s", v.Type())
 	}

@@ -1,4 +1,4 @@
-package template
+package domain
 
 type (
 	TemplateContext struct {
@@ -10,7 +10,7 @@ type (
 	}
 )
 
-func NewRootContext() *TemplateContext {
+func NewRootTemplateContext() *TemplateContext {
 	return &TemplateContext{&templateScope{nil, make(map[string]interface{})}}
 }
 

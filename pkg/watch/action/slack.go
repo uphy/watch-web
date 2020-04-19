@@ -1,4 +1,4 @@
-package watch
+package actions
 
 import (
 	"bytes"
@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"text/template"
 
+	"github.com/uphy/watch-web/pkg/domain"
 	"github.com/uphy/watch-web/pkg/resources"
-	"github.com/uphy/watch-web/pkg/result"
 )
 
 type (
@@ -24,7 +24,7 @@ func NewSlackAction(webhookURL string, debug bool) *SlackAction {
 	return &SlackAction{webhookURL, debug}
 }
 
-func (s *SlackAction) Run(ctx *JobContext, res *result.Result) error {
+func (s *SlackAction) Run(ctx *domain.JobContext, res *domain.Result) error {
 	changes, err := res.Diff()
 	if err != nil {
 		return err
@@ -34,9 +34,9 @@ func (s *SlackAction) Run(ctx *JobContext, res *result.Result) error {
 	}
 	var template string
 	switch changes.(type) {
-	case result.JSONArrayDiffResult:
+	case domain.JSONArrayDiffResult:
 		template = resources.SlackArrayTemplate
-	case result.JSONObjectDiffResult:
+	case domain.JSONObjectDiffResult:
 		template = resources.SlackTemplate
 	default:
 		template = resources.SlackTemplate
@@ -47,7 +47,7 @@ func (s *SlackAction) Run(ctx *JobContext, res *result.Result) error {
 	}, template)
 }
 
-func (s *SlackAction) run(ctx *JobContext, v interface{}, templateString string) error {
+func (s *SlackAction) run(ctx *domain.JobContext, v interface{}, templateString string) error {
 	tmpl := template.Must(template.New("slack-template").Funcs(template.FuncMap{
 		"toArrayExcludes": func(v map[string]interface{}, excludes ...string) []map[string]interface{} {
 			excludesSet := make(map[string]struct{})

@@ -4,8 +4,8 @@ import (
 	"net/url"
 
 	"github.com/go-redis/redis/v7"
-	"github.com/uphy/watch-web/pkg/watch"
-	"github.com/uphy/watch-web/pkg/config/template"
+	"github.com/uphy/watch-web/pkg/domain"
+	"github.com/uphy/watch-web/pkg/watch/store"
 )
 
 type (
@@ -13,13 +13,13 @@ type (
 		Redis *RedisConfig `json:"redis,omitempty"`
 	}
 	RedisConfig struct {
-		Address   *template.TemplateString `json:"address"`
-		Password  *template.TemplateString `json:"password"`
-		RedisToGo *template.TemplateString `json:"redistogo"`
+		Address   *domain.TemplateString `json:"address"`
+		Password  *domain.TemplateString `json:"password"`
+		RedisToGo *domain.TemplateString `json:"redistogo"`
 	}
 )
 
-func newStore(ctx *template.TemplateContext, config *StoreConfig) (watch.Store, error) {
+func newStore(ctx *domain.TemplateContext, config *StoreConfig) (domain.Store, error) {
 	if config != nil && config.Redis != nil {
 		password := ""
 		addr := ""
@@ -51,10 +51,10 @@ func newStore(ctx *template.TemplateContext, config *StoreConfig) (watch.Store, 
 				Addr:     addr,
 				Password: password,
 			})
-			return watch.NewRedisStore(client), nil
+			return store.NewRedisStore(client), nil
 		}
 	}
-	return watch.NewMemoryStore(), nil
+	return store.NewMemoryStore(), nil
 }
 
 func parseRedisToGoURL(redisToGo string) (addr string, password string, err error) {

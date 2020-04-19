@@ -1,4 +1,4 @@
-package result
+package domain
 
 import (
 	"bytes"
@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/sergi/go-diff/diffmatchpatch"
-	"github.com/uphy/watch-web/pkg/value"
 )
 
 const (
@@ -38,7 +37,7 @@ type (
 	}
 	JSONArrayDiffResult []JSONArrayElement
 	JSONArrayElement    struct {
-		Object value.JSONObject
+		Object JSONObject
 		Type   ChangeType
 	}
 )
@@ -94,7 +93,7 @@ func DiffJSONArray(jsonArray1, jsonArray2 string) (JSONArrayDiffResult, error) {
 	d := DiffString(v1, v2)
 	elements := make([]JSONArrayElement, len(d))
 	for i, line := range d {
-		var v value.JSONObject
+		var v JSONObject
 		if err := json.Unmarshal([]byte(line.Text), &v); err != nil {
 			return nil, err
 		}
@@ -115,7 +114,7 @@ func DiffJSONObject(jsonObject1, jsonObject2 string) (JSONObjectDiffResult, erro
 	d := DiffString(v1, v2)
 	fields := make([]JSONField, len(d))
 	for i, line := range d {
-		var f value.JSONObject
+		var f JSONObject
 		if err := json.Unmarshal([]byte(line.Text), &f); err != nil {
 			return nil, err
 		}

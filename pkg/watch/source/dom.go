@@ -1,4 +1,4 @@
-package watch
+package source
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 	"golang.org/x/text/encoding"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/uphy/watch-web/pkg/value"
+	"github.com/uphy/watch-web/pkg/domain"
 )
 
 type (
@@ -30,7 +30,7 @@ func NewDOMSource(url, selector string, encoding encoding.Encoding) *DOMSource {
 	}
 }
 
-func (d *DOMSource) Fetch(ctx *JobContext) (value.Value, error) {
+func (d *DOMSource) Fetch(ctx *domain.JobContext) (domain.Value, error) {
 	resp, err := http.Get(d.URL)
 	if err != nil {
 		return nil, err
@@ -59,5 +59,5 @@ func (d *DOMSource) Fetch(ctx *JobContext) (value.Value, error) {
 
 		buf.WriteString(text)
 	})
-	return value.String(buf.String()), nil
+	return domain.NewStringValue(buf.String()), nil
 }

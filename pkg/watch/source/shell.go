@@ -1,4 +1,4 @@
-package watch
+package source
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/uphy/watch-web/pkg/value"
+	"github.com/uphy/watch-web/pkg/domain"
 )
 
 type (
@@ -22,7 +22,7 @@ func NewShellSource(command string) *ShellSource {
 	}
 }
 
-func (c *ShellSource) Fetch(ctx *JobContext) (value.Value, error) {
+func (c *ShellSource) Fetch(ctx *domain.JobContext) (domain.Value, error) {
 	ctx.Log.WithField("command", c.Command).Debug("Run shell command.")
 	cmd := exec.Command("sh", "-c", c.Command)
 	for _, env := range os.Environ() {
@@ -41,7 +41,7 @@ func (c *ShellSource) Fetch(ctx *JobContext) (value.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	return value.String(string(b)), nil
+	return domain.NewStringValue(string(b)), nil
 }
 
 func (c *ShellSource) String() string {

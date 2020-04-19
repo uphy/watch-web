@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/uphy/watch-web/pkg/value"
+	"github.com/uphy/watch-web/pkg/domain"
 	"github.com/urfave/cli"
 )
 
@@ -41,11 +41,11 @@ func (c *CLI) run() cli.Command {
 					if result.Previous == "" {
 						var prev string
 						switch result.ValueType {
-						case value.ValueTypeString:
+						case domain.ValueTypeString:
 							prev = ""
-						case value.ValueTypeJSONArray:
+						case domain.ValueTypeJSONArray:
 							prev = "[]"
-						case value.ValueTypeJSONObject:
+						case domain.ValueTypeJSONObject:
 							prev = "{}"
 						}
 						result.Previous = prev

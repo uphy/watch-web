@@ -8,6 +8,7 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/uphy/watch-web/pkg/domain"
 	"github.com/uphy/watch-web/pkg/resources"
 	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/urfave/cli"
@@ -15,13 +16,13 @@ import (
 
 type (
 	JobDTO struct {
-		ID     string       `json:"id"`
-		Link   string       `json:"link,omitempty"`
-		Label  string       `json:"label,omitempty"`
-		Status watch.Status `json:"status"`
-		Error  *string      `json:"error,omitempty"`
-		Last   *time.Time   `json:"last,omitempty"`
-		Count  int          `json:"count"`
+		ID     string        `json:"id"`
+		Link   string        `json:"link,omitempty"`
+		Label  string        `json:"label,omitempty"`
+		Status domain.Status `json:"status"`
+		Error  *string       `json:"error,omitempty"`
+		Last   *time.Time    `json:"last,omitempty"`
+		Count  int           `json:"count"`
 	}
 	JobDetailDTO struct {
 		*JobDTO
@@ -36,8 +37,8 @@ func getJob(exe *watch.Executor, jobID string) (*JobDTO, error) {
 		return nil, err
 	}
 	if status == nil {
-		status = &watch.JobStatus{
-			Status: watch.StatusOK,
+		status = &domain.JobStatus{
+			Status: domain.StatusOK,
 		}
 	}
 	return &JobDTO{

@@ -10,16 +10,16 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
+	"github.com/uphy/watch-web/pkg/domain"
 	"github.com/uphy/watch-web/pkg/watch"
-	"github.com/uphy/watch-web/pkg/config/template"
 )
 
 type (
 	Config struct {
-		Jobs       []JobConfig              `json:"jobs"`
-		InitialRun *template.TemplateString `json:"initial_run,omitempty"`
-		Actions    []ActionConfig           `json:"actions"`
-		Store      *StoreConfig             `json:"store"`
+		Jobs       []JobConfig            `json:"jobs"`
+		InitialRun *domain.TemplateString `json:"initial_run,omitempty"`
+		Actions    []ActionConfig         `json:"actions"`
+		Store      *StoreConfig           `json:"store"`
 	}
 )
 
@@ -52,7 +52,7 @@ func (c *Config) Save(w io.Writer) error {
 }
 
 func (c *Config) NewExecutor(log *logrus.Logger) (*watch.Executor, error) {
-	ctx := template.NewRootContext()
+	ctx := domain.NewRootTemplateContext()
 	// store
 	store, err := newStore(ctx, c.Store)
 	if err != nil {
@@ -63,7 +63,7 @@ func (c *Config) NewExecutor(log *logrus.Logger) (*watch.Executor, error) {
 	}).Info("Created store.")
 
 	// action
-	actions := []watch.Action{}
+	actions := []domain.Action{}
 	for _, actionConfig := range c.Actions {
 		action, err := actionConfig.Action(ctx)
 		if err != nil {

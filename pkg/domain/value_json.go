@@ -1,4 +1,4 @@
-package value
+package domain
 
 type (
 	JSONObjectValue struct {

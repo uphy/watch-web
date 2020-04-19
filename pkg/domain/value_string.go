@@ -1,4 +1,4 @@
-package value
+package domain
 
 import "strings"
 
@@ -8,7 +8,7 @@ type (
 	}
 )
 
-func String(s string) Value {
+func NewStringValue(s string) Value {
 	return &StringValue{strings.Trim(s, " \t\n")}
 }
 

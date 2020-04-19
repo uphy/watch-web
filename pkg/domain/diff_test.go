@@ -1,10 +1,8 @@
-package result
+package domain
 
 import (
 	"reflect"
 	"testing"
-
-	"github.com/uphy/watch-web/pkg/value"
 )
 
 func TestDiffString(t *testing.T) {
@@ -89,19 +87,19 @@ func TestDiffJSONArray(t *testing.T) {
 			},
 			want: JSONArrayDiffResult{
 				JSONArrayElement{
-					Object: value.JSONObject{
+					Object: JSONObject{
 						"name": "a",
 					},
 					Type: ChangeTypeEqual,
 				},
 				JSONArrayElement{
-					Object: value.JSONObject{
+					Object: JSONObject{
 						"name": "b",
 					},
 					Type: ChangeTypeEqual,
 				},
 				JSONArrayElement{
-					Object: value.JSONObject{
+					Object: JSONObject{
 						"name": "c",
 					},
 					Type: ChangeTypeInsert,

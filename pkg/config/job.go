@@ -3,22 +3,22 @@ package config
 import (
 	"fmt"
 
+	"github.com/uphy/watch-web/pkg/domain"
 	"github.com/uphy/watch-web/pkg/watch"
-	"github.com/uphy/watch-web/pkg/config/template"
 )
 
 type (
 	JobConfig struct {
-		ID        template.TemplateString `json:"id"`
-		Label     template.TemplateString `json:"label"`
-		Link      template.TemplateString `json:"link"`
-		Source    *SourceConfig           `json:"source,omitempty"`
-		Schedule  template.TemplateString `json:"schedule,omitempty"`
-		WithItems []interface{}           `json:"with_items,omitempty"`
+		ID        domain.TemplateString `json:"id"`
+		Label     domain.TemplateString `json:"label"`
+		Link      domain.TemplateString `json:"link"`
+		Source    *SourceConfig         `json:"source,omitempty"`
+		Schedule  domain.TemplateString `json:"schedule,omitempty"`
+		WithItems []interface{}         `json:"with_items,omitempty"`
 	}
 )
 
-func (c *JobConfig) addTo(ctx *template.TemplateContext, e *watch.Executor) ([]*watch.Job, error) {
+func (c *JobConfig) addTo(ctx *domain.TemplateContext, e *watch.Executor) ([]*watch.Job, error) {
 	jobs := make([]*watch.Job, 0)
 	if len(c.WithItems) == 0 {
 		job, err := c.addOne(ctx, e)
@@ -46,12 +46,12 @@ func (c *JobConfig) addTo(ctx *template.TemplateContext, e *watch.Executor) ([]*
 	return jobs, nil
 }
 
-func evaluateItemAsTemplate(ctx *template.TemplateContext, v interface{}) (interface{}, error) {
+func evaluateItemAsTemplate(ctx *domain.TemplateContext, v interface{}) (interface{}, error) {
 	m, ok := v.(map[string]interface{})
 	if ok {
 		evaluated := make(map[string]interface{})
 		for key, value := range m {
-			ekey, err := template.TemplateString(key).Evaluate(ctx)
+			ekey, err := domain.TemplateString(key).Evaluate(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -63,14 +63,14 @@ func evaluateItemAsTemplate(ctx *template.TemplateContext, v interface{}) (inter
 		}
 		return evaluated, nil
 	}
-	e, err := template.TemplateString(fmt.Sprint(v)).Evaluate(ctx)
+	e, err := domain.TemplateString(fmt.Sprint(v)).Evaluate(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return e, nil
 }
 
-func (c *JobConfig) addOne(ctx *template.TemplateContext, e *watch.Executor) (*watch.Job, error) {
+func (c *JobConfig) addOne(ctx *domain.TemplateContext, e *watch.Executor) (*watch.Job, error) {
 	source, err := c.Source.Source(ctx)
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (c *JobConfig) addOne(ctx *template.TemplateContext, e *watch.Executor) (*w
 	if err != nil {
 		return nil, err
 	}
-	job := watch.NewJob(&watch.JobInfo{
+	job := watch.NewJob(&domain.JobInfo{
 		ID:    id,
 		Label: label,
 		Link:  link,

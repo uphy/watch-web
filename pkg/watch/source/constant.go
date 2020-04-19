@@ -1,9 +1,9 @@
-package watch
+package source
 
 import (
 	"fmt"
 
-	"github.com/uphy/watch-web/pkg/value"
+	"github.com/uphy/watch-web/pkg/domain"
 )
 
 type (
@@ -18,8 +18,8 @@ func NewConstantSource(constant interface{}) *ConstantSource {
 	}
 }
 
-func (c *ConstantSource) Fetch(ctx *JobContext) (value.Value, error) {
-	return value.ConvertInterfaceAs(c.value, value.ValueTypeAutoDetect)
+func (c *ConstantSource) Fetch(ctx *domain.JobContext) (domain.Value, error) {
+	return domain.ConvertInterfaceAs(c.value, domain.ValueTypeAutoDetect)
 }
 
 func (c *ConstantSource) String() string {

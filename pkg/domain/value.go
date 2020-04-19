@@ -1,4 +1,4 @@
-package value
+package domain
 
 import (
 	"encoding/json"
@@ -48,7 +48,7 @@ func ConvertAs(s string, valueType ValueType) (Value, error) {
 	case ValueTypeJSONArray:
 		return ParseJSONArray(s)
 	case ValueTypeString:
-		return String(s), nil
+		return NewStringValue(s), nil
 	case ValueTypeJSONAutoDetect:
 		return ParseJSON(s)
 	case ValueTypeAutoDetect:
@@ -62,7 +62,7 @@ func Auto(s string) Value {
 	if v, err := ParseJSON(s); err == nil {
 		return v
 	}
-	return String(s)
+	return NewStringValue(s)
 }
 
 func ParseJSON(s string) (Value, error) {

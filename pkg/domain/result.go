@@ -1,9 +1,7 @@
-package result
+package domain
 
 import (
 	"fmt"
-
-	"github.com/uphy/watch-web/pkg/value"
 )
 
 type (
@@ -13,11 +11,11 @@ type (
 		Link      string
 		Previous  string
 		Current   string
-		ValueType value.ValueType
+		ValueType ValueType
 	}
 )
 
-func New(jobId string, label string, link string, previous string, current string, valueType value.ValueType) *Result {
+func NewResult(jobId string, label string, link string, previous string, current string, valueType ValueType) *Result {
 	return &Result{
 		JobID:     jobId,
 		Label:     label,
@@ -30,11 +28,11 @@ func New(jobId string, label string, link string, previous string, current strin
 
 func (r *Result) Diff() (DiffResult, error) {
 	switch r.ValueType {
-	case value.ValueTypeString:
+	case ValueTypeString:
 		return DiffString(r.Previous, r.Current), nil
-	case value.ValueTypeJSONObject:
+	case ValueTypeJSONObject:
 		return DiffJSONObject(r.Previous, r.Current)
-	case value.ValueTypeJSONArray:
+	case ValueTypeJSONArray:
 		return DiffJSONArray(r.Previous, r.Current)
 	default:
 		return nil, fmt.Errorf("unsupported value type: %v", r.ValueType)
