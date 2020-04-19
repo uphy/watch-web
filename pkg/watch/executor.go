@@ -30,10 +30,11 @@ func init() {
 
 func NewExecutor(store domain.Store, actions []domain.Action, log *logrus.Logger) *Executor {
 	return &Executor{
-		c:     cron.New(),
-		store: store,
-		Jobs:  make(map[string]*Job),
-		log:   log,
+		c:       cron.New(),
+		store:   store,
+		Jobs:    make(map[string]*Job),
+		log:     log,
+		actions: actions,
 	}
 }
 

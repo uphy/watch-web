@@ -2,6 +2,8 @@ package config
 
 import (
 	"errors"
+	"io/ioutil"
+	"os"
 
 	"github.com/uphy/watch-web/pkg/domain"
 	"github.com/uphy/watch-web/pkg/watch/source"
@@ -11,10 +13,10 @@ import (
 
 type (
 	SourceConfig struct {
-		DOM      *DOMSourceConfig   `json:"dom,omitempty"`
-		Shell    *ShellSourceConfig `json:"shell,omitempty"`
-		Constant interface{}        `json:"constant",omitempty`
-		Filters  FiltersConfig      `json:"filters,omitempty"`
+		DOM      *DOMSourceConfig      `json:"dom,omitempty"`
+		Shell    *ShellSourceConfig    `json:"shell,omitempty"`
+		Constant *ConstantSourceConfig `json:"constant",omitempty`
+		Filters  FiltersConfig         `json:"filters,omitempty"`
 
 		EmptyAction *source.EmptyAction `json:"empty,omitempty"`
 		Retry       *int                `json:"retry,omitempty"`
@@ -27,6 +29,10 @@ type (
 	ShellSourceConfig struct {
 		Command *domain.TemplateString `json:"command"`
 	}
+	ConstantSourceConfig struct {
+		Value interface{} `json:"value,omitempty"`
+		File  *string     `json:"file,omitempty"`
+	}
 )
 
 func (s *SourceConfig) Source(ctx *domain.TemplateContext) (domain.Source, error) {
@@ -38,7 +44,7 @@ func (s *SourceConfig) Source(ctx *domain.TemplateContext) (domain.Source, error
 	} else if s.Shell != nil {
 		src, err = s.Shell.Source(ctx)
 	} else if s.Constant != nil {
-		src = source.NewConstantSource(s.Constant)
+		src, err = s.Constant.Source()
 	}
 	if err != nil {
 		return nil, err
@@ -89,4 +95,20 @@ func (d *ShellSourceConfig) Source(ctx *domain.TemplateContext) (domain.Source, 
 		return nil, err
 	}
 	return source.NewShellSource(command), nil
+}
+
+func (s *ConstantSourceConfig) Source() (domain.Source, error) {
+	if s.Value != nil {
+		return source.NewConstantSource(s.Value), nil
+	}
+	f, err := os.Open(*s.File)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+	return source.NewConstantSource(string(b)), nil
 }

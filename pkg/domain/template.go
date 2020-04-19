@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/net/html"
@@ -83,6 +84,13 @@ var funcs = map[string]interface{}{
 	},
 	"replace": func(old, new, original string) string {
 		return strings.ReplaceAll(original, old, new)
+	},
+	"contains": func(substring, s string) bool {
+		return strings.Contains(s, substring)
+	},
+	"formatEpochMillis": func(epochMillis float64) string {
+		n := int64(epochMillis) * 1000000
+		return time.Unix(0, n).Format("2006/01/02 15:04")
 	},
 }
 

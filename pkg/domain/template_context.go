@@ -30,6 +30,10 @@ func (c *TemplateContext) Set(key string, value interface{}) {
 	c.scope.set(key, value)
 }
 
+func (c *TemplateContext) Snapshot() *TemplateContext {
+	return &TemplateContext{c.scope}
+}
+
 func (c *templateScope) child() *templateScope {
 	return &templateScope{c, make(map[string]interface{})}
 }
