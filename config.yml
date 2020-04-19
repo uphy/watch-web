@@ -39,6 +39,9 @@ jobs:
               "間取り": '{{ .source.type }}'
               "平米数": '{{ .source.floorspace | match "(\\d+).*" }}㎡'
               "階数": '{{ .source.floor }} / {{ .source.floorAll }}'
+        # サーバー側で順序が変わっても対応できるように、配列要素をsummaryでソート
+        - json_array_sort:
+            by: summary
     # 監視項目の固定の表示文字列
     label: "{{ .item.name }}"
     # 監視項目のURL

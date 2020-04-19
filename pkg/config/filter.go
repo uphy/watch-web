@@ -21,6 +21,9 @@ type (
 		JSONTransform *struct {
 			Transform map[string]template.TemplateString `json:"transform,omitempty"`
 		} `json:"json_transform,omitempty"`
+		JSONArraySort *struct {
+			By string `json:"by"`
+		} `json:"json_array_sort"`
 	}
 
 	FilterSource struct {
@@ -66,6 +69,9 @@ func (f *FilterConfig) Filter(ctx *template.TemplateContext) (Filter, error) {
 	}
 	if f.JSONArray != nil {
 		return filter.NewJSONArrayFilter(), nil
+	}
+	if f.JSONArraySort != nil {
+		return filter.NewJSONArraySortFilter(f.JSONArraySort.By), nil
 	}
 	return nil, errors.New("no filters defined")
 }
