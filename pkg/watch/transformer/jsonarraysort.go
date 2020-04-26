@@ -1,4 +1,4 @@
-package filter
+package transformer
 
 import (
 	"encoding/json"
@@ -10,16 +10,16 @@ import (
 )
 
 type (
-	JSONArraySortFilter struct {
+	JSONArraySortTransformer struct {
 		by string
 	}
 )
 
-func NewJSONArraySortFilter(by string) *JSONArraySortFilter {
-	return &JSONArraySortFilter{by}
+func NewJSONArraySortTransformer(by string) *JSONArraySortTransformer {
+	return &JSONArraySortTransformer{by}
 }
 
-func (j *JSONArraySortFilter) Filter(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
+func (j *JSONArraySortTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
 	array := v.JSONArray()
 	extract := func(v interface{}) string {
 		b, err := json.Marshal(v)
@@ -44,6 +44,6 @@ func (j *JSONArraySortFilter) Filter(ctx *domain.JobContext, v domain.Value) (do
 	return domain.NewJSONArrayValue(array), nil
 }
 
-func (j *JSONArraySortFilter) String() string {
+func (j *JSONArraySortTransformer) String() string {
 	return fmt.Sprintf("JSONArraySort[by=%s]", j.by)
 }

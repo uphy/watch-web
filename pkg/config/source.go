@@ -13,10 +13,10 @@ import (
 
 type (
 	SourceConfig struct {
-		DOM      *DOMSourceConfig      `json:"dom,omitempty"`
-		Shell    *ShellSourceConfig    `json:"shell,omitempty"`
-		Constant *ConstantSourceConfig `json:"constant",omitempty`
-		Filters  FiltersConfig         `json:"filters,omitempty"`
+		DOM        *DOMSourceConfig      `json:"dom,omitempty"`
+		Shell      *ShellSourceConfig    `json:"shell,omitempty"`
+		Constant   *ConstantSourceConfig `json:"constant",omitempty`
+		Transforms TransformsConfig      `json:"transforms,omitempty"`
 
 		EmptyAction *source.EmptyAction `json:"empty,omitempty"`
 		Retry       *int                `json:"retry,omitempty"`
@@ -52,9 +52,9 @@ func (s *SourceConfig) Source(ctx *domain.TemplateContext) (domain.Source, error
 	if src == nil {
 		return nil, errors.New("no source defined")
 	}
-	// wrap source for filters
-	if len(s.Filters) > 0 {
-		src, err = s.Filters.Filters(ctx, src)
+	// wrap source for transformers
+	if len(s.Transforms) > 0 {
+		src, err = s.Transforms.Transforms(ctx, src)
 		if err != nil {
 			return nil, err
 		}

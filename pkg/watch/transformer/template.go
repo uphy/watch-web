@@ -1,4 +1,4 @@
-package filter
+package transformer
 
 import (
 	"fmt"
@@ -7,17 +7,17 @@ import (
 )
 
 type (
-	TemplateFilter struct {
+	TemplateTransformer struct {
 		template domain.TemplateString
 		ctx      *domain.TemplateContext
 	}
 )
 
-func NewTemplateFilter(template domain.TemplateString, ctx *domain.TemplateContext) *TemplateFilter {
-	return &TemplateFilter{template, ctx}
+func NewTemplateTransformer(template domain.TemplateString, ctx *domain.TemplateContext) *TemplateTransformer {
+	return &TemplateTransformer{template, ctx}
 }
 
-func (t *TemplateFilter) Filter(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
+func (t *TemplateTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
 	t.ctx.PushScope()
 	defer t.ctx.PopScope()
 	t.ctx.Set("source", v.Interface())
@@ -28,6 +28,6 @@ func (t *TemplateFilter) Filter(ctx *domain.JobContext, v domain.Value) (domain.
 	return domain.Auto(evaluated), nil
 }
 
-func (t *TemplateFilter) String() string {
+func (t *TemplateTransformer) String() string {
 	return fmt.Sprintf("Template[template=%v]", t.template)
 }

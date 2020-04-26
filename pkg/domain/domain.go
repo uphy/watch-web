@@ -33,8 +33,8 @@ type (
 	Source interface {
 		Fetch(ctx *JobContext) (Value, error)
 	}
-	Filter interface {
-		Filter(ctx *JobContext, v Value) (Value, error)
+	Transformer interface {
+		Transform(ctx *JobContext, v Value) (Value, error)
 	}
 	Action interface {
 		Run(ctx *JobContext, result *Result) error

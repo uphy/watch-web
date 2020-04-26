@@ -8,7 +8,7 @@ jobs:
         # 実行するコマンド。APIがjson arrayを返してくれるが、shellなので実行結果は文字列
         command: ur {{ .item.shisya }} {{ .item.danchi }}
       # sourceを変換するフィルタ定義。0個以上指定可能。
-      filters:
+      transforms:
         # sourceは文字列なので、json arrayに変換する。
         - json_array: {}
         # json arrayの各要素をtransformによって変換する。
@@ -67,7 +67,7 @@ jobs:
       shell:
         command: |
           curl --compressed -sSL https://www.amazon.co.jp/dp/{{ .item.id }}/
-      filters:
+      transforms:
         - template: |
             {{- $saleprice := (.source | dom "#priceblock_saleprice").text -}}
             {{- if $saleprice }}{{ $saleprice -}}
@@ -76,7 +76,7 @@ jobs:
             {{- end -}}
             {{- $availability := (.source | dom "#availability>.a-size-medium").text | trim | replace "。" "" -}}
             {{- if $availability }}({{ $availability }}){{ end -}}
-      # デフォルトではfilteringしたあとのsourceの値が空でも空の値として継続する。
+      # デフォルトではtransformしたあとのsourceの値が空でも空の値として継続する。
       # failを設定した場合には、空の場合実行失敗とみなす。
       empty: fail
       # sourceの収集中に失敗した場合、指定した回数リトライする。デフォルトではリトライしない。
@@ -90,7 +90,7 @@ jobs:
     source:
       shell:
         command: curl -sSL https://a-timesale.com/deals/api/items
-      filters:
+      transforms:
         - json_array:
             condition: '{{ .source.title | contains .item.keyword }}'
         - json_transform:

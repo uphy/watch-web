@@ -1,4 +1,4 @@
-package filter
+package transformer
 
 import (
 	"fmt"
@@ -7,15 +7,15 @@ import (
 )
 
 type (
-	transform           map[string]domain.TemplateString
-	JSONTransformFilter struct {
+	transform                map[string]domain.TemplateString
+	JSONTransformTransformer struct {
 		transform transform
 		ctx       *domain.TemplateContext
 	}
 )
 
-func NewJSONTransformFilter(transform map[string]domain.TemplateString, ctx *domain.TemplateContext) *JSONTransformFilter {
-	return &JSONTransformFilter{transform, ctx}
+func NewJSONTransformTransformer(transform map[string]domain.TemplateString, ctx *domain.TemplateContext) *JSONTransformTransformer {
+	return &JSONTransformTransformer{transform, ctx}
 }
 
 func (t transform) transform(ctx *domain.TemplateContext, v domain.Value) (domain.Value, error) {
@@ -34,7 +34,7 @@ func (t transform) transform(ctx *domain.TemplateContext, v domain.Value) (domai
 	return domain.NewJSONObjectValue(transformed), nil
 }
 
-func (t *JSONTransformFilter) Filter(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
+func (t *JSONTransformTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
 	switch v.Type() {
 	case domain.ValueTypeString, domain.ValueTypeJSONObject:
 		return t.transform.transform(t.ctx, v)

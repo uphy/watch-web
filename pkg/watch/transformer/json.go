@@ -1,4 +1,4 @@
-package filter
+package transformer
 
 import (
 	"fmt"
@@ -8,19 +8,19 @@ import (
 )
 
 type (
-	JSONArrayFilter struct {
+	JSONArrayTransformer struct {
 		condition *domain.TemplateString
 		ctx       *domain.TemplateContext
 	}
-	JSONObjectFilter struct {
+	JSONObjectTransformer struct {
 	}
 )
 
-func NewJSONArrayFilter(ctx *domain.TemplateContext, condition *domain.TemplateString) *JSONArrayFilter {
-	return &JSONArrayFilter{condition, ctx}
+func NewJSONArrayTransformer(ctx *domain.TemplateContext, condition *domain.TemplateString) *JSONArrayTransformer {
+	return &JSONArrayTransformer{condition, ctx}
 }
 
-func (j *JSONArrayFilter) Filter(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
+func (j *JSONArrayTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
 	if j.condition != nil {
 		array, err := domain.ConvertAs(v.String(), domain.ValueTypeJSONArray)
 		if err != nil {
@@ -45,18 +45,18 @@ func (j *JSONArrayFilter) Filter(ctx *domain.JobContext, v domain.Value) (domain
 	return domain.ConvertAs(v.String(), domain.ValueTypeJSONArray)
 }
 
-func (j *JSONArrayFilter) String() string {
+func (j *JSONArrayTransformer) String() string {
 	return fmt.Sprintf("JSONArray[]")
 }
 
-func NewJSONObjectFilter() *JSONObjectFilter {
-	return &JSONObjectFilter{}
+func NewJSONObjectTransformer() *JSONObjectTransformer {
+	return &JSONObjectTransformer{}
 }
 
-func (j *JSONObjectFilter) Filter(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
+func (j *JSONObjectTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
 	return domain.ConvertAs(v.String(), domain.ValueTypeJSONObject)
 }
 
-func (j *JSONObjectFilter) String() string {
+func (j *JSONObjectTransformer) String() string {
 	return fmt.Sprintf("JSONObject[]")
 }
