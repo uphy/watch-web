@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/uphy/watch-web/pkg/domain"
 	actions "github.com/uphy/watch-web/pkg/watch/action"
@@ -32,7 +31,6 @@ func (a *ActionConfig) Action(ctx *domain.TemplateContext) (domain.Action, error
 	if a.LINENotify != nil {
 		return a.LINENotify.Action(ctx)
 	}
-	fmt.Println(a.Console)
 	if a.Console != nil {
 		return actions.NewConsoleAction(), nil
 	}

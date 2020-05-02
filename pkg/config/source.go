@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -30,8 +31,9 @@ type (
 		Command *domain.TemplateString `json:"command"`
 	}
 	ConstantSourceConfig struct {
-		Value interface{} `json:"value,omitempty"`
-		File  *string     `json:"file,omitempty"`
+		Value    interface{}            `json:"value,omitempty"`
+		Template *domain.TemplateString `json:"template,omitempty"`
+		File     *string                `json:"file,omitempty"`
 	}
 )
 
@@ -44,7 +46,7 @@ func (s *SourceConfig) Source(ctx *domain.TemplateContext) (domain.Source, error
 	} else if s.Shell != nil {
 		src, err = s.Shell.Source(ctx)
 	} else if s.Constant != nil {
-		src, err = s.Constant.Source()
+		src, err = s.Constant.Source(ctx)
 	}
 	if err != nil {
 		return nil, err
@@ -97,18 +99,28 @@ func (d *ShellSourceConfig) Source(ctx *domain.TemplateContext) (domain.Source, 
 	return source.NewShellSource(command), nil
 }
 
-func (s *ConstantSourceConfig) Source() (domain.Source, error) {
+func (s *ConstantSourceConfig) Source(ctx *domain.TemplateContext) (domain.Source, error) {
 	if s.Value != nil {
 		return source.NewConstantSource(s.Value), nil
 	}
-	f, err := os.Open(*s.File)
-	if err != nil {
-		return nil, err
+	if s.File != nil {
+		f, err := os.Open(*s.File)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+		b, err := ioutil.ReadAll(f)
+		if err != nil {
+			return nil, err
+		}
+		return source.NewConstantSource(string(b)), nil
 	}
-	defer f.Close()
-	b, err := ioutil.ReadAll(f)
-	if err != nil {
-		return nil, err
+	if s.Template != nil {
+		value, err := s.Template.Evaluate(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to evaluate constant source template: %w", err)
+		}
+		return source.NewConstantSource(string(value)), nil
 	}
-	return source.NewConstantSource(string(b)), nil
+	return nil, errors.New("unsupported constant source")
 }

@@ -3,7 +3,6 @@ package store
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	"github.com/go-redis/redis/v7"
 	"github.com/uphy/watch-web/pkg/domain"
@@ -65,7 +64,6 @@ func (s *MemoryStore) GetStatus(jobID string) (*domain.JobStatus, error) {
 }
 
 func (s *MemoryStore) SetStatus(jobID string, status *domain.JobStatus) error {
-	fmt.Println(*status)
 	s.statuses[jobID] = *status
 	return nil
 }

@@ -20,4 +20,5 @@ require (
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	golang.org/x/text v0.3.2
+	gopkg.in/yaml.v2 v2.2.7
 )
