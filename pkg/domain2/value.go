@@ -85,6 +85,11 @@ type (
 	}
 )
 
+func NewItemListFromJSON(j string) (i ItemList, err error) {
+	err = json.Unmarshal([]byte(j), &i)
+	return
+}
+
 // Clone returns the deep-copied struct.
 func (i ItemList) Clone() ItemList {
 	clone := make([]Item, len(i))
@@ -111,6 +116,16 @@ func (i ItemList) ids() []string {
 	return ids
 }
 
+func (i ItemList) Empty() bool {
+	return len(i) == 0
+}
+
+// JSON converts item list as JSON.
+func (i ItemList) JSON() string {
+	b, _ := json.Marshal(i)
+	return string(b)
+}
+
 // Clone returns the deep-copied struct.
 func (i Item) Clone() Item {
 	clone := make(map[string]string, len(i))
@@ -135,6 +150,12 @@ func NewItemFromJSON(jsonString string) (Item, error) {
 	return NewItem(m), nil
 }
 
+func NewItemForSource(s string) Item {
+	return Item{
+		"source": s,
+	}
+}
+
 // ID returns the item ID.
 // If item ID is set, return it.
 // Otherwise, Item ID is determined from item content.
@@ -157,4 +178,16 @@ func (i Item) SetID(id string) {
 func (i Item) JSON() string {
 	b, _ := json.Marshal(i)
 	return string(b)
+}
+
+func (i Item) Empty() bool {
+	keys := len(i)
+	if _, idExist := i[ItemKeyID]; idExist {
+		keys--
+	}
+	return keys == 0
+}
+
+func (u Updates) Changes() bool {
+	return len(u.Added) > 0 || len(u.Removed) > 0 || len(u.Changed) > 0
 }
