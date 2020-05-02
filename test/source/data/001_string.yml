@@ -1,0 +1,75 @@
+source:
+  constant:
+    template: "{{ .current }}"
+tests:
+  - name: New row added
+    vars:
+      current: |
+        line1
+        line2
+    previous: ""
+    expects:
+      result: |
+        line1
+        line2
+      changed: true
+      diff: |
+        + line1
+        + line2
+  - name: No changes
+    vars:
+      current: |
+        line1
+        line2
+    previous: |
+      line1
+      line2
+    expects:
+      result: |
+        line1
+        line2
+      changed: false
+  - name: Removed
+    vars:
+      current: |
+        line1
+    previous: |
+      line1
+      line2
+    expects:
+      result: |
+        line1
+      changed: true
+      diff: |2
+          line1
+        - line2
+  - name: Mixed
+    vars:
+      current: |
+        line1
+        line2
+    previous: |
+      line2
+      line3
+    expects:
+      result: |
+        line1
+        line2
+      changed: true
+      diff: |2
+        + line1
+          line2
+        - line3
+  - name: JSON-like string but a string
+    vars:
+      current: |
+        [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
+    previous: |
+      [{"id":"000","price":200,"title":"TITLE1"}]
+    expects:
+      result: |
+        [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
+      changed: true
+      diff: |
+        - [{"id":"000","price":200,"title":"TITLE1"}]
+        + [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]

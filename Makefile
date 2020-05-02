@@ -13,4 +13,8 @@ backend: frontend
 	cp config.yml build; \
 	cp -rp scripts build
 
+.PHONY: test
+test:
+	go test ./...
+
 all: backend

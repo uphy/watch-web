@@ -1,0 +1,23 @@
+source:
+  constant:
+    template: "{{ .current }}"
+  transforms:
+    - json_array: {}
+    - json_transform:
+        transform:
+          id: "{{ .source.id }}"
+          a: "{{ .source.price }}"
+          b: "bbb"
+tests:
+  - name: Added
+    vars:
+      current: |
+        [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
+    previous: "[]"
+    expects:
+      result: |
+        [{"a":"200","b":"bbb","id":"000"},{"a":"300","b":"bbb","id":"001"}]
+      changed: true
+      diff: |
+        + {"a":"200","b":"bbb","id":"000"}
+        + {"a":"300","b":"bbb","id":"001"}

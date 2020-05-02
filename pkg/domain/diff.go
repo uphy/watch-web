@@ -134,6 +134,11 @@ func DiffJSONObject(jsonObject1, jsonObject2 string) (JSONObjectDiffResult, erro
 
 // splitJSONArray splits the input json array string into elements separated with line break.
 func splitJSONArray(jsonArray string) (string, error) {
+	if jsonArray == "" {
+		// Replace empty string with empty array
+		// because initial state is empty string "".
+		jsonArray = "[]"
+	}
 	var v []interface{}
 	if err := json.Unmarshal([]byte(jsonArray), &v); err != nil {
 		return "", err

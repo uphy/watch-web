@@ -101,7 +101,11 @@ func (d *ShellSourceConfig) Source(ctx *domain.TemplateContext) (domain.Source, 
 
 func (s *ConstantSourceConfig) Source(ctx *domain.TemplateContext) (domain.Source, error) {
 	if s.Value != nil {
-		return source.NewConstantSource(s.Value), nil
+		v, err := domain.ConvertInterfaceAs(s.Value, domain.ValueTypeAutoDetect)
+		if err != nil {
+			return nil, err
+		}
+		return source.NewConstantSource(v), nil
 	}
 	if s.File != nil {
 		f, err := os.Open(*s.File)
@@ -113,14 +117,14 @@ func (s *ConstantSourceConfig) Source(ctx *domain.TemplateContext) (domain.Sourc
 		if err != nil {
 			return nil, err
 		}
-		return source.NewConstantSource(string(b)), nil
+		return source.NewConstantSource(domain.NewStringValue(string(b))), nil
 	}
 	if s.Template != nil {
 		value, err := s.Template.Evaluate(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to evaluate constant source template: %w", err)
 		}
-		return source.NewConstantSource(string(value)), nil
+		return source.NewConstantSource(domain.NewStringValue(string(value))), nil
 	}
 	return nil, errors.New("unsupported constant source")
 }

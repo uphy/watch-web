@@ -1,0 +1,57 @@
+source:
+  constant:
+    template: "{{ .current }}"
+  transforms:
+    - json_array: {}
+tests:
+  - name: Added
+    vars:
+      current: |
+        [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
+    previous: "[]"
+    expects:
+      result: |
+        [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
+      changed: true
+      diff: |
+        + {"id":"000","price":200,"title":"TITLE1"}
+        + {"id":"001","price":300,"title":"TITLE1"}
+  - name: Empty String(Initial value)
+    vars:
+      current: |
+        [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
+    previous: ""
+    expects:
+      result: |
+        [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
+      changed: true
+      diff: |
+        + {"id":"000","price":200,"title":"TITLE1"}
+        + {"id":"001","price":300,"title":"TITLE1"}
+  - name: Removed
+    vars:
+      current: |
+        [{"id":"000","price":200,"title":"TITLE1"}]
+    previous: |
+      [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
+    expects:
+      result: |
+        [{"id":"000","price":200,"title":"TITLE1"}]
+      changed: true
+      diff: |2
+          {"id":"000","price":200,"title":"TITLE1"}
+        - {"id":"001","price":300,"title":"TITLE1"}
+  - name: Mixed
+    vars:
+      current: |
+        [{"id":"000","price":200,"title":"TITLE1"},{"id":"002","price":400,"title":"TITLE3"}]
+    previous: |
+      [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
+    expects:
+      result: |
+        [{"id":"000","price":200,"title":"TITLE1"},{"id":"002","price":400,"title":"TITLE3"}]
+      changed: true
+      diff: |2
+          {"id":"000","price":200,"title":"TITLE1"}
+        - {"id":"001","price":300,"title":"TITLE1"}
+        + {"id":"002","price":400,"title":"TITLE3"}

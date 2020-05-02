@@ -32,8 +32,9 @@ type (
 		Expects  Expects           `json:"expects"`
 	}
 	Expects struct {
-		Result *string `json:"result"`
-		Diff   *string `json:"diff"`
+		Result  *string `json:"result"`
+		Changed *bool   `json:"changed"`
+		Diff    *string `json:"diff"`
 	}
 	reporter struct {
 		t        *testing.T
@@ -59,7 +60,7 @@ func TestAll(t *testing.T) {
 			source, err := testData.Source.Source(ctx)
 			if err != nil {
 				reporter.Error("failed to create source:", err)
-				return
+				continue
 			}
 			jobID := fmt.Sprintf("%s-%d", file.Name(), i)
 			store := store.NewMemoryStore()
@@ -70,34 +71,41 @@ func TestAll(t *testing.T) {
 			}, source)
 			if err := exe.AddJob(job, nil); err != nil {
 				reporter.Error("failed to add job:", err)
-				return
+				continue
 			}
 			res, err := exe.Check(job)
 			if err != nil {
 				reporter.Error("failed to check update:", err)
-				return
+				continue
 			}
 			if test.Expects.Result != nil {
 				expected := *test.Expects.Result
 				compareString(reporter, "Result", expected, res.Current)
 			}
-			if test.Expects.Diff != nil {
-				expected := *test.Expects.Diff
+			if test.Expects.Diff != nil || test.Expects.Changed != nil {
 				r, err := res.Diff()
 				if err != nil {
 					reporter.Error("failed to diff:", err)
-					return
+					continue
 				}
-				compareString(reporter, "Diff", expected, r.String())
+				changed := r.Changed()
+				if test.Expects.Changed != nil && changed != *test.Expects.Changed {
+					reporter.Errorf("Diff changed property is wrong: expected=%v, actual=%v", *test.Expects.Changed, changed)
+					continue
+				}
+				if test.Expects.Diff != nil {
+					expected := *test.Expects.Diff
+					compareString(reporter, "Diff", expected, r.String())
+				}
 			}
 		}
 	}
 }
 
 func compareString(reporter *reporter, label, expected, actual string) {
-	expected = strings.Trim(expected, " \t\n")
-	actual = strings.Trim(actual, " \t\n")
-	if actual != expected {
+	trimedExpected := strings.Trim(expected, " \t\n")
+	trimedActual := strings.Trim(actual, " \t\n")
+	if trimedActual != trimedExpected {
 		reporter.Errorf(`%s wrong:
 expected:
 %s

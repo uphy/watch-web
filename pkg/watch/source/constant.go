@@ -8,18 +8,18 @@ import (
 
 type (
 	ConstantSource struct {
-		value interface{}
+		value domain.Value
 	}
 )
 
-func NewConstantSource(constant interface{}) *ConstantSource {
+func NewConstantSource(constant domain.Value) *ConstantSource {
 	return &ConstantSource{
 		value: constant,
 	}
 }
 
 func (c *ConstantSource) Fetch(ctx *domain.JobContext) (domain.Value, error) {
-	return domain.ConvertInterfaceAs(c.value, domain.ValueTypeAutoDetect)
+	return c.value, nil
 }
 
 func (c *ConstantSource) String() string {
