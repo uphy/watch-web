@@ -39,7 +39,6 @@ tests:
         [{"id":"000","price":200,"title":"TITLE1"}]
       changed: true
       diff: |2
-          {"id":"000","price":200,"title":"TITLE1"}
         - {"id":"001","price":300,"title":"TITLE1"}
   - name: Mixed
     vars:
@@ -52,6 +51,5 @@ tests:
         [{"id":"000","price":200,"title":"TITLE1"},{"id":"002","price":400,"title":"TITLE3"}]
       changed: true
       diff: |2
-          {"id":"000","price":200,"title":"TITLE1"}
         - {"id":"001","price":300,"title":"TITLE1"}
         + {"id":"002","price":400,"title":"TITLE3"}

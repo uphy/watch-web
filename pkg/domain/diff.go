@@ -186,7 +186,9 @@ func (r StringDiffResult) Changed() bool {
 func (r StringDiffResult) String() string {
 	w := new(bytes.Buffer)
 	for _, l := range r {
-		fmt.Fprintln(w, diffLineToString(l.Text, l.Type))
+		if l.Type != ChangeTypeEqual {
+			fmt.Fprintln(w, diffLineToString(l.Text, l.Type))
+		}
 	}
 	return w.String()
 }
@@ -214,7 +216,9 @@ func (r JSONObjectDiffResult) Changed() bool {
 func (r JSONObjectDiffResult) String() string {
 	w := new(bytes.Buffer)
 	for _, l := range r {
-		fmt.Fprintln(w, diffLineToString(fmt.Sprintf("%s = %v", l.Name, l.Value), l.Type))
+		if l.Type != ChangeTypeEqual {
+			fmt.Fprintln(w, diffLineToString(fmt.Sprintf("%s = %v", l.Name, l.Value), l.Type))
+		}
 	}
 	return w.String()
 }
@@ -231,7 +235,9 @@ func (r JSONArrayDiffResult) Changed() bool {
 func (r JSONArrayDiffResult) String() string {
 	w := new(bytes.Buffer)
 	for _, l := range r {
-		fmt.Fprintln(w, diffLineToString(fmt.Sprintf("%v", l.Object), l.Type))
+		if l.Type != ChangeTypeEqual {
+			fmt.Fprintln(w, diffLineToString(fmt.Sprintf("%v", l.Object), l.Type))
+		}
 	}
 	return w.String()
 }

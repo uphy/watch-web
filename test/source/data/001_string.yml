@@ -41,7 +41,6 @@ tests:
         line1
       changed: true
       diff: |2
-          line1
         - line2
   - name: Mixed
     vars:
@@ -58,7 +57,6 @@ tests:
       changed: true
       diff: |2
         + line1
-          line2
         - line3
   - name: JSON-like string but a string
     vars:
