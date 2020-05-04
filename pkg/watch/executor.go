@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/uphy/watch-web/pkg/domain2"
+
 	"github.com/hashicorp/go-multierror"
 	"github.com/robfig/cron"
 	"github.com/sirupsen/logrus"
@@ -107,6 +109,11 @@ func (e *Executor) Check(job *Job) (res *domain.Result, err error) {
 			return nil, err
 		}
 	}
+	previousItemList, err := domain2.NewItemListFromJSON(previous)
+	if err != nil {
+		job.failed(status, "failed to restore item list", err)
+		previousItemList = make(domain2.ItemList, 0)
+	}
 
 	now := time.Now()
 	status.Last = &now
@@ -124,15 +131,20 @@ func (e *Executor) Check(job *Job) (res *domain.Result, err error) {
 		"current": fmt.Sprintf("%#v", current),
 	}).Debug("Fetched job result.")
 	job.ctx.Log.Info("Fetched job result.")
-	currentString := current.String()
+	currentItemList := current.ItemList()
+	currentItemListJSON := currentItemList.JSON()
 	defer func() {
-		if err := e.store.SetValue(job.ID(), currentString); err != nil {
+		if err := e.store.SetValue(job.ID(), currentItemListJSON); err != nil {
 			job.failed(status, "failed to store job value", err)
 		}
 	}()
 
 	// make result
-	res = domain.NewResult(job.Info, previous, currentString, current.Type())
+	/*
+	 * previousとcurrentは、ここで確実にItemListになるようにする。
+	 * previousの永続化もItemListで行う。
+	 */
+	res = domain.NewResult(job.Info, previousItemList, currentItemList)
 
 	// Do action
 	if !firstCheck {
@@ -154,8 +166,8 @@ func (e *Executor) TestActions(job *Job) error {
 		JobID:    job.ID(),
 		Label:    "test action",
 		Link:     "https://google.com",
-		Previous: "This is test action.",
-		Current:  "This is test action.\naaaa",
+		Previous: domain2.ItemList{domain2.Item{"This is test action.": ""}},
+		Current:  domain2.ItemList{domain2.Item{"This is test action.\naaaaaa": ""}},
 	})
 }
 

@@ -25,26 +25,14 @@ func NewSlackAction(webhookURL string, debug bool) *SlackAction {
 }
 
 func (s *SlackAction) Run(ctx *domain.JobContext, res *domain.Result) error {
-	changes, err := res.Diff()
-	if err != nil {
-		return err
-	}
-	if !changes.Changed() {
+	updates := res.Diff()
+	if !updates.Changes() {
 		return nil
-	}
-	var template string
-	switch changes.(type) {
-	case domain.JSONArrayDiffResult:
-		template = resources.SlackArrayTemplate
-	case domain.JSONObjectDiffResult:
-		template = resources.SlackTemplate
-	default:
-		template = resources.SlackTemplate
 	}
 	return s.run(ctx, map[string]interface{}{
 		"res":     res,
-		"changes": changes,
-	}, template)
+		"updates": updates,
+	}, resources.SlackArrayTemplate)
 }
 
 func (s *SlackAction) run(ctx *domain.JobContext, v interface{}, templateString string) error {

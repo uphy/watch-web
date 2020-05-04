@@ -10,12 +10,14 @@ tests:
     vars:
       current: |
         [{"id":"001","price":200,"title":"TITLE1"},{"id":"000","price":300,"title":"TITLE0"},{"id":"002","price":400,"title":"TITLE2"}]
-    previous: "[]"
+    previous: []
     expects:
-      result: |
-        [{"id":"000","price":300,"title":"TITLE0"},{"id":"001","price":200,"title":"TITLE1"},{"id":"002","price":400,"title":"TITLE2"}]
+      result:
+        - {"id":"000","price":"300","title":"TITLE0"}
+        - {"id":"001","price":"200","title":"TITLE1"}
+        - {"id":"002","price":"400","title":"TITLE2"}
       changed: true
-      diff: |
-        + {"id":"000","price":300,"title":"TITLE0"}
-        + {"id":"001","price":200,"title":"TITLE1"}
-        + {"id":"002","price":400,"title":"TITLE2"}
+      diff:
+        - add: {"id":"000","price":"300","title":"TITLE0"}
+        - add: {"id":"001","price":"200","title":"TITLE1"}
+        - add: {"id":"002","price":"400","title":"TITLE2"}

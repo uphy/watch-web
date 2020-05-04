@@ -16,17 +16,14 @@ func NewConsoleAction() *ConsoleAction {
 }
 
 func (s *ConsoleAction) Run(ctx *domain.JobContext, res *domain.Result) error {
-	changes, err := res.Diff()
-	if err != nil {
-		return err
-	}
+	updates := res.Diff()
 
 	fmt.Println("--------------------------------------------------------------------------------")
 	fmt.Printf("%s (%s)\n", res.Label, res.JobID)
 	fmt.Println("--------------------------------------------------------------------------------")
-	if changes.Changed() {
+	if updates.Changes() {
 		fmt.Println("Changes:")
-		fmt.Println(changes.String())
+		fmt.Println(updates)
 		fmt.Println()
 		fmt.Println("Previous:")
 		fmt.Println(res.Previous)

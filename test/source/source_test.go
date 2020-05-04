@@ -1,16 +1,19 @@
 package source
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
-	"strings"
+	"reflect"
 	"testing"
 
 	"github.com/ghodss/yaml"
 
 	"github.com/sirupsen/logrus"
+	"github.com/uphy/watch-web/pkg/domain2"
 	"github.com/uphy/watch-web/pkg/watch/store"
 
 	"github.com/uphy/watch-web/pkg/watch"
@@ -28,13 +31,13 @@ type (
 	Test struct {
 		Name     string            `json:"name"`
 		Vars     map[string]string `json:"vars"`
-		Previous string            `json:"previous"`
+		Previous interface{}       `json:"previous"`
 		Expects  Expects           `json:"expects"`
 	}
 	Expects struct {
-		Result  *string `json:"result"`
-		Changed *bool   `json:"changed"`
-		Diff    *string `json:"diff"`
+		Result  domain2.ItemList `json:"result"`
+		Changed *bool            `json:"changed"`
+		Diff    domain2.Updates  `json:"diff"`
 	}
 	reporter struct {
 		t        *testing.T
@@ -52,6 +55,9 @@ func TestAll(t *testing.T) {
 		reporter.SetFileName(file.Name())
 		testData := LoadTestData(filepath.Join(dir, file.Name()))
 		for i, test := range testData.Tests {
+			if test.Name != "Element Changed" {
+				continue
+			}
 			reporter.SetTestName(test.Name)
 			ctx := domain.NewRootTemplateContext()
 			for k, v := range test.Vars {
@@ -62,9 +68,18 @@ func TestAll(t *testing.T) {
 				reporter.Error("failed to create source:", err)
 				continue
 			}
-			jobID := fmt.Sprintf("%s-%d", file.Name(), i)
+			jobID := fmt.Sprintf("%s-%d-%s", file.Name(), i, test.Name)
 			store := store.NewMemoryStore()
-			store.SetValue(jobID, test.Previous)
+			if s, ok := test.Previous.(string); ok {
+				store.SetValue(jobID, s)
+			} else {
+				previousJSON, err := json.Marshal(test.Previous)
+				if err != nil {
+					reporter.Error("failed to marshal previous value")
+					continue
+				}
+				store.SetValue(jobID, string(previousJSON))
+			}
 			exe := watch.NewExecutor(store, make([]domain.Action, 0), logger)
 			job := watch.NewJob(&domain.JobInfo{
 				ID: jobID,
@@ -79,40 +94,48 @@ func TestAll(t *testing.T) {
 				continue
 			}
 			if test.Expects.Result != nil {
-				expected := *test.Expects.Result
-				compareString(reporter, "Result", expected, res.Current)
+				expected := test.Expects.Result
+				compareResult(reporter, "Result", expected, res.Current)
 			}
 			if test.Expects.Diff != nil || test.Expects.Changed != nil {
-				r, err := res.Diff()
-				if err != nil {
-					reporter.Error("failed to diff:", err)
-					continue
-				}
-				changed := r.Changed()
+				r := res.Diff()
+				changed := r.Changes()
 				if test.Expects.Changed != nil && changed != *test.Expects.Changed {
 					reporter.Errorf("Diff changed property is wrong: expected=%v, actual=%v", *test.Expects.Changed, changed)
 					continue
 				}
 				if test.Expects.Diff != nil {
-					expected := *test.Expects.Diff
-					compareString(reporter, "Diff", expected, r.String())
+					expected := test.Expects.Diff
+					compareUpdates(reporter, "Diff", expected, r)
 				}
 			}
 		}
 	}
 }
 
-func compareString(reporter *reporter, label, expected, actual string) {
-	trimedExpected := strings.Trim(expected, " \t\n")
-	trimedActual := strings.Trim(actual, " \t\n")
-	if trimedActual != trimedExpected {
+func compareResult(reporter *reporter, label string, expected, actual domain2.ItemList) {
+	if !reflect.DeepEqual(expected, actual) {
 		reporter.Errorf(`%s wrong:
 expected:
 %s
 
 actual:
 %s
-`, label, expected, actual)
+`, label, expected.YAML(), actual.YAML())
+	}
+}
+
+func compareUpdates(reporter *reporter, label string, expected, actual domain2.Updates) {
+	y1 := expected.YAML()
+	y2 := actual.YAML()
+	if !reflect.DeepEqual(y1, y2) {
+		reporter.Errorf(`%s wrong:
+expected:
+%s
+
+actual:
+%s
+`, label, y1, y2)
 	}
 }
 
@@ -121,7 +144,10 @@ func LoadTestData(file string) *TestData {
 	defer f.Close()
 	b, _ := ioutil.ReadAll(f)
 	var v TestData
-	yaml.Unmarshal(b, &v)
+	err := yaml.Unmarshal(b, &v)
+	if err != nil {
+		log.Fatal("failed to parse:", file, " ", err)
+	}
 	return &v
 }
 

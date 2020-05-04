@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 
-	"github.com/uphy/watch-web/pkg/domain"
 	"github.com/urfave/cli"
 )
 
@@ -38,24 +37,8 @@ func (c *CLI) run() cli.Command {
 					fmt.Println(result.Current)
 
 					fmt.Println("[Diff]")
-					if result.Previous == "" {
-						var prev string
-						switch result.ValueType {
-						case domain.ValueTypeString:
-							prev = ""
-						case domain.ValueTypeJSONArray:
-							prev = "[]"
-						case domain.ValueTypeJSONObject:
-							prev = "{}"
-						}
-						result.Previous = prev
-					}
-					diff, err := result.Diff()
-					if err != nil {
-						fmt.Println("failed on diff: ", err)
-					} else {
-						fmt.Println(diff)
-					}
+					diff := result.Diff()
+					fmt.Println(diff)
 
 					if testAction {
 						if err := exe.DoActions(job, result); err != nil {

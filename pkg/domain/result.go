@@ -1,40 +1,29 @@
 package domain
 
 import (
-	"fmt"
+	"github.com/uphy/watch-web/pkg/domain2"
 )
 
 type (
 	Result struct {
-		JobID     string
-		Label     string
-		Link      string
-		Previous  string
-		Current   string
-		ValueType ValueType
+		JobID    string
+		Label    string
+		Link     string
+		Previous domain2.ItemList
+		Current  domain2.ItemList
 	}
 )
 
-func NewResult(info *JobInfo, previous, current string, valueType ValueType) *Result {
+func NewResult(info *JobInfo, previous, current domain2.ItemList) *Result {
 	return &Result{
-		JobID:     info.ID,
-		Label:     info.Label,
-		Link:      info.Link,
-		Previous:  previous,
-		Current:   current,
-		ValueType: valueType,
+		JobID:    info.ID,
+		Label:    info.Label,
+		Link:     info.Link,
+		Previous: previous,
+		Current:  current,
 	}
 }
 
-func (r *Result) Diff() (DiffResult, error) {
-	switch r.ValueType {
-	case ValueTypeString:
-		return DiffString(r.Previous, r.Current), nil
-	case ValueTypeJSONObject:
-		return DiffJSONObject(r.Previous, r.Current)
-	case ValueTypeJSONArray:
-		return DiffJSONArray(r.Previous, r.Current)
-	default:
-		return nil, fmt.Errorf("unsupported value type: %v", r.ValueType)
-	}
+func (r *Result) Diff() domain2.Updates {
+	return domain2.CompareItemList(r.Previous, r.Current)
 }

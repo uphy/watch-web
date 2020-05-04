@@ -17,53 +17,52 @@ type (
 )
 
 // CompareItemList computes the differences between ItemLists.
-func CompareItemList(list1, list2 ItemList) *Updates {
+func CompareItemList(list1, list2 ItemList) Updates {
 	// Get ids and compare only id
-	idToItem1 := list1.idToItem()
-	idToItem2 := list2.idToItem()
-	ids1 := make([]string, 0)
-	for i := range idToItem1 {
-		ids1 = append(ids1, i)
+	idToItem1 := make(map[string]Item)
+	ids1 := make([]string, len(list1))
+	for i, item := range list1 {
+		id := item.ID()
+		idToItem1[id] = item
+		ids1[i] = id
 	}
-	ids2 := make([]string, 0)
-	for i := range idToItem2 {
-		ids2 = append(ids2, i)
+	idToItem2 := make(map[string]Item)
+	ids2 := make([]string, len(list2))
+	for i, item := range list2 {
+		id := item.ID()
+		idToItem2[id] = item
+		ids2[i] = id
 	}
-	// Currently I ignore item order in compare phase
-	sort.Strings(ids1)
-	sort.Strings(ids2)
 
 	// Compare IDs
 	ids1s := strings.Join(ids1, "\n")
 	ids2s := strings.Join(ids2, "\n")
 	diffs := diff(ids1s, ids2s)
-	addedItems := make([]Item, 0)
-	removedItems := make([]Item, 0)
-	changedItems := make([]ItemChange, 0)
+	updates := make(Updates, 0)
 	for _, d := range diffs {
 		switch d.diffType {
 		case diffmatchpatch.DiffInsert:
-			addedItems = append(addedItems, idToItem2[d.text])
+			updates = append(updates, *updateAdd(idToItem2[d.text]))
 		case diffmatchpatch.DiffDelete:
-			removedItems = append(removedItems, idToItem1[d.text])
+			updates = append(updates, *updateRemove(idToItem1[d.text]))
 		case diffmatchpatch.DiffEqual:
 			item1 := idToItem1[d.text]
 			item2 := idToItem2[d.text]
-			changed := compareItem(item1, item2)
+			changed := compareItem(item1.ID(), item1, item2)
 			if changed != nil {
-				changedItems = append(changedItems, *changed)
+				updates = append(updates, *updateChange(changed))
 			}
 		default:
 			continue
 		}
 	}
 
-	return &Updates{addedItems, removedItems, changedItems}
+	return updates
 }
 
 // diffItem compare 2 items.
 // return null if given items are exactly same.
-func compareItem(item1, item2 Item) *ItemChange {
+func compareItem(id string, item1, item2 Item) *ItemChange {
 	keys1 := make([]string, len(item1))
 	keys2 := make([]string, len(item2))
 
@@ -111,7 +110,7 @@ func compareItem(item1, item2 Item) *ItemChange {
 	if len(addedKeys) == 0 && len(removedKeys) == 0 && len(changedKeys) == 0 {
 		return nil
 	}
-	return &ItemChange{addedKeys, removedKeys, changedKeys}
+	return &ItemChange{id, addedKeys, removedKeys, changedKeys}
 }
 
 func diff(v1, v2 string) []diffItem {
@@ -130,7 +129,10 @@ func diff(v1, v2 string) []diffItem {
 	res := make([]diffItem, 0)
 	for _, diff := range d.DiffCharsToLines(diffs, c) {
 		text := strings.Trim(diff.Text, " \t\n")
-		res = append(res, diffItem{diff.Type, text})
+		splitted := strings.Split(text, "\n")
+		for _, s := range splitted {
+			res = append(res, diffItem{diff.Type, s})
+		}
 	}
 	return res
 }

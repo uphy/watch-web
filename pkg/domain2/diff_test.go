@@ -1,9 +1,42 @@
 package domain2
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 )
+
+func TestUnmarshalJSON(t *testing.T) {
+	updates := Updates{
+		*updateChange(
+			&ItemChange{
+				ID: "id1",
+				AddedKeys: map[string]string{
+					"add": "3",
+				},
+				ChangedKeys: map[string]ItemValueChange{
+					"change": ItemValueChange{
+						Old: "3",
+						New: "4",
+					},
+				},
+				RemovedKeys: map[string]string{
+					"remove": "2",
+				},
+			},
+		),
+		*updateRemove(Item{ItemKeyID: "item2", "c": "1", "d": "3"}),
+		*updateAdd(Item{ItemKeyID: "item3", "e": "4", "f": "5"}),
+	}
+	b, _ := json.MarshalIndent(updates, "", "   ")
+	var v Updates
+	if err := json.Unmarshal(b, &v); err != nil {
+		t.Error("Unmarshal failed:", err)
+	}
+	if !reflect.DeepEqual(updates, v) {
+		t.Error("unmarshal/marshal inconsistent")
+	}
+}
 
 func TestCompareItemList(t *testing.T) {
 	type args struct {
@@ -13,7 +46,7 @@ func TestCompareItemList(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *Updates
+		want Updates
 	}{
 		{
 			args: args{
@@ -26,20 +59,12 @@ func TestCompareItemList(t *testing.T) {
 					Item{ItemKeyID: "item3", "e": "4", "f": "5"},
 				},
 			},
-			want: &Updates{
-				Added: []Item{
-					Item{ItemKeyID: "item3", "e": "4", "f": "5"},
-				},
-				Removed: []Item{
-					Item{ItemKeyID: "item2", "c": "1", "d": "3"},
-				},
-				Changed: []ItemChange{
-					ItemChange{
+			want: Updates{
+				*updateChange(
+					&ItemChange{
+						ID: "item1",
 						AddedKeys: map[string]string{
 							"add": "3",
-						},
-						RemovedKeys: map[string]string{
-							"remove": "2",
 						},
 						ChangedKeys: map[string]ItemValueChange{
 							"change": ItemValueChange{
@@ -47,16 +72,42 @@ func TestCompareItemList(t *testing.T) {
 								New: "4",
 							},
 						},
+						RemovedKeys: map[string]string{
+							"remove": "2",
+						},
 					},
+				),
+				*updateRemove(Item{ItemKeyID: "item2", "c": "1", "d": "3"}),
+				*updateAdd(Item{ItemKeyID: "item3", "e": "4", "f": "5"}),
+			},
+		},
+		{
+			args: args{
+				list1: ItemList{
+					Item{ItemKeyID: "item1", "line1": ""},
+					Item{ItemKeyID: "item2", "line2": ""},
 				},
+				list2: ItemList{
+					Item{ItemKeyID: "item1", "line1": ""},
+					Item{ItemKeyID: "item3", "line3": ""},
+				},
+			},
+			want: Updates{
+				*updateRemove(Item{ItemKeyID: "item2", "line2": ""}),
+				*updateAdd(Item{ItemKeyID: "item3", "line3": ""}),
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := CompareItemList(tt.args.list1, tt.args.list2); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("CompareItemList() = %v, want %v", got, tt.want)
+				t.Errorf("CompareItemList() = %v, want %v", toJSON(got), toJSON(tt.want))
 			}
 		})
 	}
+}
+
+func toJSON(v interface{}) string {
+	b, _ := json.MarshalIndent(v, "", "   ")
+	return string(b)
 }

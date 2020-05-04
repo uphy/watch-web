@@ -8,48 +8,73 @@ tests:
     vars:
       current: |
         [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
-    previous: "[]"
+    previous: []
     expects:
-      result: |
-        [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
+      result:
+        - {"id":"000","price":"200","title":"TITLE1"}
+        - {"id":"001","price":"300","title":"TITLE1"}
       changed: true
-      diff: |
-        + {"id":"000","price":200,"title":"TITLE1"}
-        + {"id":"001","price":300,"title":"TITLE1"}
+      diff:
+        - add: {"id":"000","price":"200","title":"TITLE1"}
+        - add: {"id":"001","price":"300","title":"TITLE1"}
   - name: Empty String(Initial value)
     vars:
       current: |
         [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
     previous: ""
     expects:
-      result: |
-        [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
+      result:
+        - {"id":"000","price":"200","title":"TITLE1"}
+        - {"id":"001","price":"300","title":"TITLE1"}
       changed: true
-      diff: |
-        + {"id":"000","price":200,"title":"TITLE1"}
-        + {"id":"001","price":300,"title":"TITLE1"}
+      diff:
+        - add: {"id":"000","price":"200","title":"TITLE1"}
+        - add: {"id":"001","price":"300","title":"TITLE1"}
   - name: Removed
     vars:
       current: |
         [{"id":"000","price":200,"title":"TITLE1"}]
-    previous: |
-      [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
+    previous:
+      - {"id":"000","price":"200","title":"TITLE1"}
+      - {"id":"001","price":"300","title":"TITLE1"}
     expects:
-      result: |
-        [{"id":"000","price":200,"title":"TITLE1"}]
+      result:
+        - {"id":"000","price":"200","title":"TITLE1"}
       changed: true
-      diff: |2
-        - {"id":"001","price":300,"title":"TITLE1"}
+      diff:
+        - remove: {"id":"001","price":"300","title":"TITLE1"}
   - name: Mixed
     vars:
       current: |
         [{"id":"000","price":200,"title":"TITLE1"},{"id":"002","price":400,"title":"TITLE3"}]
-    previous: |
-      [{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]
+    previous:
+      - {"id":"000","price":"200","title":"TITLE1"}
+      - {"id":"001","price":"300","title":"TITLE1"}
     expects:
-      result: |
-        [{"id":"000","price":200,"title":"TITLE1"},{"id":"002","price":400,"title":"TITLE3"}]
+      result:
+        - {"id":"000","price":"200","title":"TITLE1"}
+        - {"id":"002","price":"400","title":"TITLE3"}
       changed: true
-      diff: |2
-        - {"id":"001","price":300,"title":"TITLE1"}
-        + {"id":"002","price":400,"title":"TITLE3"}
+      diff:
+        - remove: {"id":"001","price":"300","title":"TITLE1"}
+        - add: {"id":"002","price":"400","title":"TITLE3"}
+  - name: Element Changed
+    vars:
+      current: |
+        [{"__id__":"002","price":400,"newprop":"NEWPROP"},{"__id__":"003","price":1000}]
+    previous:
+      - {"__id__":"000","price":"200","title":"TITLE1"}
+      - {"__id__":"002","price":"500","title":"TITLE3"}
+    expects:
+      result:
+        - {"__id__":"002","price":"400","newprop":"NEWPROP"}
+        - {"__id__":"003","price":"1000"}
+      changed: true
+      diff:
+        - remove: {"__id__":"000","price":"200","title":"TITLE1"}
+        - change:
+            __id__: "002"
+            change: {"price":{"old":"500","new":"400"}}
+            add: {"newprop":"NEWPROP"}
+            remove: {"title":"TITLE3"}
+        - add: {"__id__":"003","price":"1000"}

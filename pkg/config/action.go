@@ -9,16 +9,12 @@ import (
 
 type (
 	ActionConfig struct {
-		Slack      *SlackActionConfig      `json:"slack,omitempty"`
-		LINENotify *LINENotifyActionConfig `json:"line_notify,omitempty"`
-		Console    *ConsoleActionConfig    `json:"console"`
+		Slack   *SlackActionConfig   `json:"slack,omitempty"`
+		Console *ConsoleActionConfig `json:"console"`
 	}
 	SlackActionConfig struct {
 		URL   domain.TemplateString `json:"url"`
 		Debug bool                  `json:"debug"`
-	}
-	LINENotifyActionConfig struct {
-		AccessToken domain.TemplateString `json:"access_token"`
 	}
 	ConsoleActionConfig struct {
 	}
@@ -27,9 +23,6 @@ type (
 func (a *ActionConfig) Action(ctx *domain.TemplateContext) (domain.Action, error) {
 	if a.Slack != nil {
 		return a.Slack.Action(ctx)
-	}
-	if a.LINENotify != nil {
-		return a.LINENotify.Action(ctx)
 	}
 	if a.Console != nil {
 		return actions.NewConsoleAction(), nil
@@ -43,12 +36,4 @@ func (s *SlackActionConfig) Action(ctx *domain.TemplateContext) (domain.Action, 
 		return nil, err
 	}
 	return actions.NewSlackAction(url, s.Debug), nil
-}
-
-func (s *LINENotifyActionConfig) Action(ctx *domain.TemplateContext) (domain.Action, error) {
-	token, err := s.AccessToken.Evaluate(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return actions.NewLINENotifyAction(token), nil
 }

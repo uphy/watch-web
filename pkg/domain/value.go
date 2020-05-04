@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"strings"
+
+	"github.com/uphy/watch-web/pkg/domain2"
 )
 
 const (
@@ -22,6 +24,7 @@ type (
 		Type() ValueType
 		JSONObject() JSONObject
 		JSONArray() JSONArray
+		ItemList() domain2.ItemList
 		String() string
 		Interface() interface{}
 		Empty() bool
