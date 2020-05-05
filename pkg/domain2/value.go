@@ -44,7 +44,7 @@ type (
 	}
 	// ItemChange represents changed item.
 	ItemChange struct {
-		ID string `json:"__id__"`
+		Item Item `json:"item"`
 		// AddedKeys exist in new item but not exist in old item.
 		AddedKeys map[string]string `json:"add,omitempty"`
 		// RemovedKeys don't exist in new item but exist in old item.

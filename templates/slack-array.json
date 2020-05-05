@@ -1,18 +1,18 @@
-{{ define "blocks" }}
+{{ define "add" }}
 {
-    "color": "{{ if eq .Type "insert"}}#0000FF{{ else }}#FF0000{{ end }}",
+    "color": "#0000FF",
     "blocks": [
         {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "*[{{ if eq .Type "insert" }}Add{{ else }}Remove{{ end }}]* <{{ .Object.link }}|{{ .Object.summary}}>\n{{ .Object.description }}"
+                "text": "*[Add]* <{{ .link }}|{{ .summary}}>\n{{ .description }}"
             }
         },
         {
             "type": "section",
             "fields": [
-                {{ range $index, $elm := (toArrayExcludes .Object "link" "summary" "description" "thumbnail") }}
+                {{ range $index, $elm := (toArrayExcludes . "link" "summary" "description" "thumbnail" "__id__") }}
                 {{     if not (eq $index 0) }},{{ end }}
                 {
                     "type": "mrkdwn",
@@ -21,11 +21,78 @@
                 {{ end }}
             ]
         },
+        {{ if .thumbnail }}
         {
             "type": "image",
-            "image_url": "{{ .Object.thumbnail }}",
-            "alt_text": "{{ .Object.summary }}"
+            "image_url": "{{ .thumbnail }}",
+            "alt_text": "{{ .summary }}"
         },
+        {{ end }}
+        {
+            "type": "divider"
+        }
+    ]
+}
+{{ end }}
+{{ define "remove" }}
+{
+    "color": "#FF0000",
+    "blocks": [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "*[Remove]* <{{ .link }}|~{{ .summary}}~>\n~{{ .description }}~"
+            }
+        },
+        {
+            "type": "divider"
+        }
+    ]
+}
+{{ end }}
+{{ define "change" }}
+{
+    "color": "#FFFF00",
+    "blocks": [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "*[Change]* <{{ .Item.link }}|{{ .Item.summary}}>\n{{ .Item.description }}"
+            }
+        },
+        {
+            "type": "section",
+            "fields": [
+                {{ range $index, $elm := (flatChanges .) }}
+                {{   if not (eq $index 0) }},{{ end }}
+                {{   if eq $elm.type "add" }}
+                {
+                    "type": "mrkdwn",
+                    "text": "*{{ $elm.key }}:*\n{{ $elm.value }}"
+                }
+                {{   else if eq $elm.type "remove" }}
+                {
+                    "type": "mrkdwn",
+                    "text": "~{{ $elm.key }}~:\n~{{ $elm.value }}~"
+                }
+                {{   else if eq $elm.type "change" }}
+                {
+                    "type": "mrkdwn",
+                    "text": "*{{ $elm.key }}:*\n~{{ $elm.value.Old }}~ -> {{ $elm.value.New }}"
+                }
+                {{   end }}
+                {{ end }}
+            ]
+        },
+        {{ if .Item.thumbnail }}
+        {
+            "type": "image",
+            "image_url": "{{ .Item.thumbnail }}",
+            "alt_text": "{{ .Item.summary }}"
+        },
+        {{ end }}
         {
             "type": "divider"
         }
@@ -36,10 +103,14 @@
     "text": "<!channel> <{{ .res.Link }}|{{ .res.Label }}> has been updated",
     "blocks": [],
     "attachments": [
-        {{ range $index, $change := .changes }}
-        {{   if not (eq $change.Type "equal") }}
-        {{     if $index }},{{ end }}
-        {{     template "blocks" $change }}
+        {{ range $index, $update := .updates }}
+        {{   if $index }},{{ end }}
+        {{   if (eq $update.Type "change") }}
+        {{     template "change" $update.Change }}
+        {{   else if (eq $update.Type "add") }}
+        {{     template "add" $update.Add }}
+        {{   else if (eq $update.Type "remove") }}
+        {{     template "remove" $update.Remove }}
         {{   end }}
         {{ end }}
     ]

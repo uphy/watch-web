@@ -3,14 +3,16 @@ package actions
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
-	"strconv"
 	"text/template"
 
-	"github.com/uphy/watch-web/pkg/domain"
+	"github.com/uphy/watch-web/pkg/domain2"
 	"github.com/uphy/watch-web/pkg/resources"
+
+	"github.com/uphy/watch-web/pkg/domain"
+	"gopkg.in/yaml.v2"
 )
 
 type (
@@ -25,19 +27,48 @@ func NewSlackAction(webhookURL string, debug bool) *SlackAction {
 }
 
 func (s *SlackAction) Run(ctx *domain.JobContext, res *domain.Result) error {
-	updates := res.Diff()
-	if !updates.Changes() {
+	payloadValue, err := s.run(ctx, res)
+	if err != nil {
+		return err
+	}
+	if payloadValue == nil {
 		return nil
 	}
-	return s.run(ctx, map[string]interface{}{
-		"res":     res,
-		"updates": updates,
-	}, resources.SlackArrayTemplate)
+
+	if s.Debug || len(s.URL) == 0 {
+		ctx.Log.Info("Slack action is debug mode.  No notification.")
+		payloadBytes, _ := yaml.Marshal(payloadValue)
+		fmt.Println("[Payload]")
+		fmt.Println(string(payloadBytes))
+	} else {
+		payloadBytes, err := json.Marshal(payloadValue)
+		if err != nil {
+			return err
+		}
+		resp, err := http.Post(s.URL, "application/json", bytes.NewReader(payloadBytes))
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != 200 {
+			b, _ := ioutil.ReadAll(resp.Body)
+			return fmt.Errorf("invalid status code: status=%d, body=%s", resp.StatusCode, string(b))
+		}
+	}
+	return nil
 }
 
-func (s *SlackAction) run(ctx *domain.JobContext, v interface{}, templateString string) error {
+func (s *SlackAction) run(ctx *domain.JobContext, res *domain.Result) (interface{}, error) {
+	updates := res.Diff()
+	if !updates.Changes() {
+		return nil, nil
+	}
+	v := map[string]interface{}{
+		"res":     res,
+		"updates": updates,
+	}
 	tmpl := template.Must(template.New("slack-template").Funcs(template.FuncMap{
-		"toArrayExcludes": func(v map[string]interface{}, excludes ...string) []map[string]interface{} {
+		"toArrayExcludes": func(v map[string]string, excludes ...string) []map[string]interface{} {
 			excludesSet := make(map[string]struct{})
 			for _, exclude := range excludes {
 				excludesSet[exclude] = struct{}{}
@@ -54,30 +85,52 @@ func (s *SlackAction) run(ctx *domain.JobContext, v interface{}, templateString 
 			}
 			return result
 		},
-	}).Parse(templateString))
+		"flatChanges": func(changes *domain2.ItemChange) []map[string]interface{} {
+			var result = make([]map[string]interface{}, 0)
+			for k, v := range changes.AddedKeys {
+				if k == domain2.ItemKeyID {
+					continue
+				}
+				result = append(result, map[string]interface{}{
+					"key":   k,
+					"value": v,
+					"type":  "add",
+				})
+			}
+			for k, v := range changes.RemovedKeys {
+				if k == domain2.ItemKeyID {
+					continue
+				}
+				result = append(result, map[string]interface{}{
+					"key":   k,
+					"value": v,
+					"type":  "remove",
+				})
+			}
+			for k, v := range changes.ChangedKeys {
+				if k == domain2.ItemKeyID {
+					continue
+				}
+				result = append(result, map[string]interface{}{
+					"key":   k,
+					"value": v,
+					"type":  "change",
+				})
+			}
+			return result
+		},
+	}).Parse(resources.SlackArrayTemplate))
 	buf := new(bytes.Buffer)
 	if err := tmpl.Execute(buf, v); err != nil {
-		return err
+		return nil, err
 	}
-	if s.Debug {
-		payload := buf.String()
-		ctx.Log.Info("Slack action is debug mode.  No notification.")
-		var v interface{}
-		if err := json.Unmarshal([]byte(payload), &v); err != nil {
-			ctx.Log.WithField("err", err).Error("Failed to parse payload as json")
-			fmt.Println(payload)
-		}
-		b, _ := json.MarshalIndent(v, "", "   ")
-		fmt.Println("Payload: ")
-		fmt.Println(string(b))
-	} else {
-		resp, err := http.Post(s.URL, "application/json", bytes.NewReader(buf.Bytes()))
-		if err != nil {
-			return err
-		}
-		if resp.StatusCode != 200 {
-			return errors.New("invalid status code: " + strconv.Itoa(resp.StatusCode))
-		}
+
+	payload := buf.String()
+	var payloadValue interface{}
+	if err := json.Unmarshal([]byte(payload), &payloadValue); err != nil {
+		ctx.Log.WithField("err", err).Error("Failed to parse payload as json")
+		fmt.Println(payload)
+		return nil, err
 	}
-	return nil
+	return payloadValue, nil
 }

@@ -48,7 +48,7 @@ func CompareItemList(list1, list2 ItemList) Updates {
 		case diffmatchpatch.DiffEqual:
 			item1 := idToItem1[d.text]
 			item2 := idToItem2[d.text]
-			changed := compareItem(item1.ID(), item1, item2)
+			changed := compareItem(item1, item2)
 			if changed != nil {
 				updates = append(updates, *updateChange(changed))
 			}
@@ -62,7 +62,7 @@ func CompareItemList(list1, list2 ItemList) Updates {
 
 // diffItem compare 2 items.
 // return null if given items are exactly same.
-func compareItem(id string, item1, item2 Item) *ItemChange {
+func compareItem(item1, item2 Item) *ItemChange {
 	keys1 := make([]string, len(item1))
 	keys2 := make([]string, len(item2))
 
@@ -110,7 +110,7 @@ func compareItem(id string, item1, item2 Item) *ItemChange {
 	if len(addedKeys) == 0 && len(removedKeys) == 0 && len(changedKeys) == 0 {
 		return nil
 	}
-	return &ItemChange{id, addedKeys, removedKeys, changedKeys}
+	return &ItemChange{item2, addedKeys, removedKeys, changedKeys}
 }
 
 func diff(v1, v2 string) []diffItem {

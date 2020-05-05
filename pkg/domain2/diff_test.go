@@ -10,7 +10,9 @@ func TestUnmarshalJSON(t *testing.T) {
 	updates := Updates{
 		*updateChange(
 			&ItemChange{
-				ID: "id1",
+				Item: Item{
+					ItemKeyID: "id1",
+				},
 				AddedKeys: map[string]string{
 					"add": "3",
 				},
@@ -62,7 +64,12 @@ func TestCompareItemList(t *testing.T) {
 			want: Updates{
 				*updateChange(
 					&ItemChange{
-						ID: "item1",
+						Item: Item{
+							ItemKeyID: "item1",
+							"a":       "1",
+							"add":     "3",
+							"change":  "4",
+						},
 						AddedKeys: map[string]string{
 							"add": "3",
 						},

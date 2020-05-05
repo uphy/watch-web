@@ -1,0 +1,65 @@
+{
+	"blocks": [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "*[Add]* <https://google.com/|Item 1>\nDescription asdfasdfasfasdf"
+			},
+			"accessory": {
+				"type": "image",
+				"image_url": "https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg",
+				"alt_text": "alt text for image"
+			},
+			"fields": [
+				{
+					"type": "mrkdwn",
+					"text": "*Key1*\nValue1"
+				},
+				{
+					"type": "mrkdwn",
+					"text": "*Key2*\nValue2"
+				},
+                				{
+					"type": "mrkdwn",
+					"text": "*Key3*\nValue3"
+				}
+			]
+		},
+        {
+            "type": "divider"
+        },
+        {
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "*[Removed]* <https://google.com/|~Item 2~>\n~Description asdfasdfasfasdf~"
+			}
+		},
+        {
+            "type": "divider"
+        },
+        {
+            "type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "*[Changed]* <https://google.com/|Item 3>\nDescription asdfasdfasfasdf"
+			},
+			"accessory": {
+				"type": "image",
+				"image_url": "https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg",
+				"alt_text": "alt text for image"
+			},
+            "fields": [
+				{
+					"type": "mrkdwn",
+					"text": "*Key1*\n~Value1~ -> VALUE1"
+				},
+                {
+					"type": "mrkdwn",
+					"text": "*Key3*\n~Value3~ -> VALUE3"
+				}
+			]
+        }
+	]
+}

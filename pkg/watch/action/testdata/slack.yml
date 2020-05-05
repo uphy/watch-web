@@ -1,0 +1,98 @@
+---
+# previous value
+- __id__: 001
+  summary: SUMMARY1
+  description: DESCRIPTION1
+  thumbnail: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
+  link: http://foo.com/link1
+  otherProp1: prop1
+- __id__: 002
+  summary: SUMMARY2
+  description: DESCRIPTION2
+  thumbnail: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
+  link: http://foo.com/link2
+  otherProp1: prop21
+  otherProp2: prop22
+---
+# current value
+- __id__: 002
+  summary: SUMMARY2+
+  description: DESCRIPTION2+
+  thumbnail: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
+  link: http://foo.com/link2
+  otherProp2: prop22-2
+  otherProp3: prop23
+- __id__: 003
+  summary: SUMMARY3
+  description: DESCRIPTION3
+  thumbnail: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
+  link: http://foo.com/link3
+  otherProp1: prop3
+---
+# slack request body
+attachments:
+- blocks:
+  - text:
+      text: |-
+        *[Remove]* <http://foo.com/link1|~SUMMARY1~>
+        ~DESCRIPTION1~
+      type: mrkdwn
+    type: section
+  - type: divider
+  color: '#FF0000'
+- blocks:
+  - accessory:
+      alt_text: SUMMARY2+
+      image_url: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
+      type: image
+    text:
+      text: |-
+        *[Change]* <http://foo.com/link2|SUMMARY2+>
+        DESCRIPTION2+
+      type: mrkdwn
+    type: section
+  - fields:
+    - text: |-
+        *otherProp3:*
+        prop23
+      type: mrkdwn
+    - text: |-
+        ~otherProp1~:
+        ~prop21~
+      type: mrkdwn
+    - text: |-
+        *description:*
+        ~DESCRIPTION2~ -> DESCRIPTION2+
+      type: mrkdwn
+    - text: |-
+        *otherProp2:*
+        ~prop22~ -> prop22-2
+      type: mrkdwn
+    - text: |-
+        *summary:*
+        ~SUMMARY2~ -> SUMMARY2+
+      type: mrkdwn
+    type: section
+  - type: divider
+  color: '#FFFF00'
+- blocks:
+  - accessory:
+      alt_text: SUMMARY3
+      image_url: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
+      type: image
+    text:
+      text: |-
+        *[Add]* <http://foo.com/link3|SUMMARY3>
+        DESCRIPTION3
+      type: mrkdwn
+    type: section
+  - fields:
+    - text: |-
+        *otherProp1:*
+        prop3
+      type: mrkdwn
+    type: section
+  - type: divider
+  color: '#0000FF'
+blocks: []
+text: <!channel> <|> has been updated

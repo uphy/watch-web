@@ -34,11 +34,11 @@ func (c *CLI) run() cli.Command {
 						continue
 					}
 					fmt.Println("[Result]")
-					fmt.Println(result.Current)
+					fmt.Println(result.Current.YAML())
 
 					fmt.Println("[Diff]")
 					diff := result.Diff()
-					fmt.Println(diff)
+					fmt.Println(diff.YAML())
 
 					if testAction {
 						if err := exe.DoActions(job, result); err != nil {

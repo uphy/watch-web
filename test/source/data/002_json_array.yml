@@ -73,7 +73,7 @@ tests:
       diff:
         - remove: {"__id__":"000","price":"200","title":"TITLE1"}
         - change:
-            __id__: "002"
+            item: {"__id__":"002","price":"400","newprop":"NEWPROP"}
             change: {"price":{"old":"500","new":"400"}}
             add: {"newprop":"NEWPROP"}
             remove: {"title":"TITLE3"}
