@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	_ "github.com/mattn/anko/packages"
 	"github.com/sirupsen/logrus"
 	"github.com/uphy/watch-web/pkg/cli"
 )
@@ -10,7 +11,6 @@ import (
 func main() {
 	log := logrus.New()
 	log.SetFormatter(new(logrus.TextFormatter))
-
 	if err := run(log); err != nil {
 		panic(err)
 	}

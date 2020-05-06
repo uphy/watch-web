@@ -43,7 +43,7 @@ var funcs = map[string]interface{}{
 	},
 	"dom": func(selector, html string) (interface{}, error) {
 		// this returns parsed DOM as map(json object value)
-		v, err := ParseDOM(html, selector)
+		v, err := SelectDOM(html, selector)
 		if err != nil {
 			return nil, err
 		}
@@ -106,7 +106,7 @@ func (t TemplateString) Evaluate(ctx *TemplateContext) (string, error) {
 	return buf.String(), nil
 }
 
-func ParseDOM(html string, selector string) (Value, error) {
+func SelectDOM(html string, selector string) (Value, error) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
 	if err != nil {
 		return nil, err

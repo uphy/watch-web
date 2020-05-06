@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/uphy/watch-web/pkg/domain"
 	"github.com/uphy/watch-web/pkg/watch/source"
@@ -23,6 +24,11 @@ type (
 		JSONArraySort *struct {
 			By string `json:"by"`
 		} `json:"json_array_sort"`
+		Script *struct {
+			Script   *domain.TemplateString `json:"script"`
+			Language *string                `json:"lang"`
+		} `json:"script,omitempty"`
+		Debug *bool `json:"debug"`
 	}
 )
 
@@ -63,6 +69,25 @@ func (t *TransformConfig) Transform(ctx *domain.TemplateContext) (domain.Transfo
 	}
 	if t.JSONArraySort != nil {
 		return transformer.NewJSONArraySortTransformer(t.JSONArraySort.By), nil
+	}
+	if t.Script != nil {
+		script, err := t.Script.Script.Evaluate(ctx)
+		if err != nil {
+			return nil, err
+		}
+		language := "anko"
+		if t.Script.Language != nil {
+			language = *t.Script.Language
+		}
+		switch language {
+		case "anko":
+			return transformer.NewScriptTransformer(script)
+		default:
+			return nil, fmt.Errorf("unsupported script language: %s", language)
+		}
+	}
+	if t.Debug != nil {
+		return transformer.NewDebugTransformer(*t.Debug), nil
 	}
 	return nil, errors.New("no transforms defined")
 }

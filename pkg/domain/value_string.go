@@ -12,7 +12,7 @@ type (
 	}
 )
 
-func NewStringValue(s string) Value {
+func NewStringValue(s string) *StringValue {
 	return &StringValue{strings.Trim(s, " \t\n")}
 }
 

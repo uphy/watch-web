@@ -15,11 +15,11 @@ type (
 	}
 )
 
-func NewJSONObjectValue(m map[string]interface{}) Value {
+func NewJSONObjectValue(m map[string]interface{}) *JSONObjectValue {
 	return &JSONObjectValue{m}
 }
 
-func NewJSONArrayValue(a []interface{}) Value {
+func NewJSONArrayValue(a []interface{}) *JSONArrayValue {
 	return &JSONArrayValue{a}
 }
 
@@ -92,6 +92,24 @@ func (j *JSONArrayValue) ItemList() domain2.ItemList {
 		}
 	}
 	return list
+}
+
+func (j *JSONArrayValue) Filter(filter func(value interface{}) bool) *JSONArrayValue {
+	filtered := make([]interface{}, 0)
+	for _, v := range j.a {
+		if filter(v) {
+			filtered = append(filtered, v)
+		}
+	}
+	return NewJSONArrayValue(filtered)
+}
+
+func (j *JSONArrayValue) Map(mapFunc func(value interface{}) interface{}) *JSONArrayValue {
+	mapped := make([]interface{}, 0)
+	for _, v := range j.a {
+		mapped = append(mapped, mapFunc(v))
+	}
+	return NewJSONArrayValue(mapped)
 }
 
 func (j *JSONArrayValue) String() string {

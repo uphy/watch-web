@@ -20,6 +20,7 @@ import (
 
 	"github.com/uphy/watch-web/pkg/domain"
 
+	_ "github.com/mattn/anko/packages"
 	"github.com/uphy/watch-web/pkg/config"
 )
 
@@ -55,9 +56,6 @@ func TestAll(t *testing.T) {
 		reporter.SetFileName(file.Name())
 		testData := LoadTestData(filepath.Join(dir, file.Name()))
 		for i, test := range testData.Tests {
-			if test.Name != "Element Changed" {
-				continue
-			}
 			reporter.SetTestName(test.Name)
 			ctx := domain.NewRootTemplateContext()
 			for k, v := range test.Vars {

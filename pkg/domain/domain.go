@@ -46,3 +46,7 @@ type (
 		SetStatus(jobID string, status *JobStatus) error
 	}
 )
+
+func NewDefaultJobContext() *JobContext {
+	return &JobContext{logrus.NewEntry(logrus.New())}
+}

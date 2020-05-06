@@ -16,7 +16,7 @@ type (
 	SourceConfig struct {
 		DOM        *DOMSourceConfig      `json:"dom,omitempty"`
 		Shell      *ShellSourceConfig    `json:"shell,omitempty"`
-		Constant   *ConstantSourceConfig `json:"constant",omitempty`
+		Constant   *ConstantSourceConfig `json:"constant,omitempty"`
 		Transforms TransformsConfig      `json:"transforms,omitempty"`
 
 		EmptyAction *source.EmptyAction `json:"empty,omitempty"`
