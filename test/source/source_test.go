@@ -54,14 +54,16 @@ func TestAll(t *testing.T) {
 	reporter := &reporter{t: t}
 	for _, file := range files {
 		reporter.SetFileName(file.Name())
-		testData := LoadTestData(filepath.Join(dir, file.Name()))
+		testDataPath := filepath.Join(dir, file.Name())
+		loader := config.NewLoader(logger, testDataPath)
+		testData := LoadTestData(testDataPath)
 		for i, test := range testData.Tests {
 			reporter.SetTestName(test.Name)
-			ctx := domain.NewRootTemplateContext()
+			ctx := loader.TemplateContext()
 			for k, v := range test.Vars {
 				ctx.Set(k, v)
 			}
-			source, err := testData.Source.Source(ctx)
+			source, err := loader.CreateSource(testData.Source)
 			if err != nil {
 				reporter.Error("failed to create source:", err)
 				continue

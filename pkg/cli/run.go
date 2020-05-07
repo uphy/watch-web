@@ -20,10 +20,7 @@ func (c *CLI) run() cli.Command {
 		Action: func(ctx *cli.Context) error {
 			all := ctx.Bool("all")
 			testAction := ctx.Bool("test-action")
-			exe, err := c.newExecutor()
-			if err != nil {
-				return fmt.Errorf("failed to create executor: %w", err)
-			}
+			exe := c.executor
 			if all {
 				exe.CheckAll()
 			} else {

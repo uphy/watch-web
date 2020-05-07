@@ -4,15 +4,15 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
-	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/uphy/watch-web/pkg/config"
+	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/urfave/cli"
 )
 
 type CLI struct {
-	app    *cli.App
-	config *config.Config
-	log    *logrus.Logger
+	app      *cli.App
+	executor *watch.Executor
+	log      *logrus.Logger
 }
 
 func New(log *logrus.Logger) *CLI {
@@ -43,14 +43,14 @@ func New(log *logrus.Logger) *CLI {
 		}
 		// load config file
 		configFile := ctx.String("config")
-		conf, err := config.LoadConfigFile(configFile)
+		e, err := config.LoadAndCreate(c.log, configFile)
 		if err != nil {
 			return fmt.Errorf("failed to load config file: %w", err)
 		}
+		c.executor = e
 		log.WithFields(logrus.Fields{
 			"file": configFile,
 		}).Debug("Config file loaded.")
-		c.config = conf
 		return nil
 	}
 	app.Commands = []cli.Command{
@@ -63,8 +63,4 @@ func New(log *logrus.Logger) *CLI {
 
 func (c *CLI) Run(args []string) error {
 	return c.app.Run(args)
-}
-
-func (c *CLI) newExecutor() (*watch.Executor, error) {
-	return c.config.NewExecutor(c.log)
 }
