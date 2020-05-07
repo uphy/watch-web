@@ -1,0 +1,13 @@
+source:
+  constant:
+    file: a.txt
+tests:
+  - name: test
+    previous: []
+    expects:
+      result:
+        - Hello:
+      changed: true
+      diff:
+        - add:
+            Hello:

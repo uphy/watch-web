@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/ghodss/yaml"
@@ -23,9 +24,10 @@ import (
 
 type (
 	Loader struct {
-		log  *logrus.Logger
-		file string
-		ctx  *domain.TemplateContext
+		log             *logrus.Logger
+		file            string
+		ctx             *domain.TemplateContext
+		configDirectory *configDirectory
 	}
 )
 
@@ -40,7 +42,8 @@ func LoadAndCreate(log *logrus.Logger, file string) (*watch.Executor, error) {
 
 func NewLoader(log *logrus.Logger, file string) *Loader {
 	ctx := domain.NewRootTemplateContext()
-	return &Loader{log, file, ctx}
+	dir, _ := filepath.Split(file)
+	return &Loader{log, file, ctx, newConfigDirectory(dir)}
 }
 
 func (l *Loader) TemplateContext() *domain.TemplateContext {
@@ -339,7 +342,12 @@ func (l *Loader) createSourceConstant(s *ConstantSourceConfig) (domain.Source, e
 		return source.NewConstantSource(v), nil
 	}
 	if s.File != nil {
-		f, err := os.Open(*s.File)
+		dir := l.configDirectory.child("constants")
+		file, err := dir.resolve(*s.File)
+		if err != nil {
+			return nil, fmt.Errorf("cannot resolve constant file: %w", err)
+		}
+		f, err := os.Open(file)
 		if err != nil {
 			return nil, err
 		}
