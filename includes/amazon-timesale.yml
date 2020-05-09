@@ -11,6 +11,9 @@ transforms:
           {{- if .source.minDealPrice }}¥{{- .source.minDealPrice }}{{ end -}}
           {{- if gt .source.maxPercentOff 0. }}({{ .source.maxPercentOff }}%OFF){{ end -}}
         link: '{{ .source.egressUrl }}'
+        id: '{{ .source.impressionAsin }}'
         "平均レビュー": '{{ .source.reviewRating }}'
         "レビュー数": '{{ .source.totalReviews }}'
         "セール期間": '{{ .source.msToStartFix | formatEpochMillis }} ~ {{ .source.msToEndFix | formatEpochMillis }}'
+  - json_array_sort:
+      by: id

@@ -1,12 +1,12 @@
 ---
 # previous value
-- __id__: 001
+- id: 001
   summary: SUMMARY1\nline2
   description: DESCRIPTION1
   thumbnail: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
   link: http://foo.com/link1
   otherProp1: prop1
-- __id__: 002
+- id: 002
   summary: SUMMARY2
   description: DESCRIPTION2
   thumbnail: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
@@ -15,14 +15,14 @@
   otherProp2: prop22
 ---
 # current value
-- __id__: 002
+- id: 002
   summary: SUMMARY2+
   description: DESCRIPTION2+
   thumbnail: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
   link: http://foo.com/link2
   otherProp2: prop22-2
   otherProp3: prop23
-- __id__: 003
+- id: 003
   summary: SUMMARY3
   description: DESCRIPTION3
   thumbnail: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg

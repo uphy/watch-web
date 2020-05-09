@@ -61,20 +61,20 @@ tests:
   - name: Element Changed
     vars:
       current: |
-        [{"__id__":"002","price":400,"newprop":"NEWPROP"},{"__id__":"003","price":1000}]
+        [{"id":"002","price":400,"newprop":"NEWPROP"},{"id":"003","price":1000}]
     previous:
-      - {"__id__":"000","price":"200","title":"TITLE1"}
-      - {"__id__":"002","price":"500","title":"TITLE3"}
+      - {"id":"000","price":"200","title":"TITLE1"}
+      - {"id":"002","price":"500","title":"TITLE3"}
     expects:
       result:
-        - {"__id__":"002","price":"400","newprop":"NEWPROP"}
-        - {"__id__":"003","price":"1000"}
+        - {"id":"002","price":"400","newprop":"NEWPROP"}
+        - {"id":"003","price":"1000"}
       changed: true
       diff:
-        - remove: {"__id__":"000","price":"200","title":"TITLE1"}
+        - remove: {"id":"000","price":"200","title":"TITLE1"}
         - change:
-            item: {"__id__":"002","price":"400","newprop":"NEWPROP"}
+            item: {"id":"002","price":"400","newprop":"NEWPROP"}
             change: {"price":{"old":"500","new":"400"}}
             add: {"newprop":"NEWPROP"}
             remove: {"title":"TITLE3"}
-        - add: {"__id__":"003","price":"1000"}
+        - add: {"id":"003","price":"1000"}

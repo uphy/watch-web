@@ -12,7 +12,7 @@
         {
             "type": "section",
             "fields": [
-                {{ range $index, $elm := (toArrayExcludes . "link" "summary" "description" "thumbnail" "__id__") }}
+                {{ range $index, $elm := (toArrayExcludes . "link" "summary" "description" "thumbnail" "id") }}
                 {{     if not (eq $index 0) }},{{ end }}
                 {
                     "type": "mrkdwn",

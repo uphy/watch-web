@@ -12,19 +12,11 @@ tests:
     previous: "[]"
     expects:
       result:
-        - description: ￥10,996 [在庫あり]
+        - id: B07H56HB8T
+          description: ￥10,996 [在庫あり]
           link: https://www.amazon.co.jp/dp/B07H56HB8T/
           summary: 【2400ml&1080P】TOPVISION プロジェクター小型 スピーカーが二つ内蔵 スマホ/パソコン/タブレット/ゲーム機/DVDプレイヤー/USBなど接続可
             HDMIケーブル付属 3年保証
           thumbnail: https://images-fe.ssl-images-amazon.com/images/I/51OZX4Nv8TL.__AC_SY300_QL70_ML2_.jpg        
           availability: "在庫あり"
           price: "￥10,996"
-      diff:
-        - add: 
-            description: ￥10,996 [在庫あり]
-            link: https://www.amazon.co.jp/dp/B07H56HB8T/
-            summary: 【2400ml&1080P】TOPVISION プロジェクター小型 スピーカーが二つ内蔵 スマホ/パソコン/タブレット/ゲーム機/DVDプレイヤー/USBなど接続可
-              HDMIケーブル付属 3年保証
-            thumbnail: https://images-fe.ssl-images-amazon.com/images/I/51OZX4Nv8TL.__AC_SY300_QL70_ML2_.jpg
-            availability: "在庫あり"
-            price: "￥10,996"

@@ -46,4 +46,5 @@ transforms:
           "link": "https://www.amazon.co.jp/dp/{{ .itemId }}/",
           "price": price,
           "availability": availability,
+          "id": "{{ .itemId }}",
         }

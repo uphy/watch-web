@@ -9,6 +9,7 @@ transforms:
   # json arrayの各要素をtransformによって変換する。
   - json_transform:
       transform:
+        id: '{{ .source.name }}'
         summary: '{{ .source.name }}({{ .source.type }})'
         description: |
           {{- with .source }}
@@ -36,4 +37,4 @@ transforms:
         "階数": '{{ .source.floor }} / {{ .source.floorAll }}'
   # サーバー側で順序が変わっても対応できるように、配列要素をsummaryでソート
   - json_array_sort:
-      by: summary
+      by: id

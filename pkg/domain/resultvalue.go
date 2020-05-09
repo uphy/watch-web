@@ -14,7 +14,7 @@ import (
 const (
 	// ItemKeyID is the item's special key which is the identifier of Item.
 	// By comparing old ID and new ID, we can detect CHANGED in addition to ADDED/REMOVED in diff.
-	ItemKeyID                   = "__id__"
+	ItemKeyID                   = "id"
 	UpdateTypeAdd    UpdateType = "add"
 	UpdateTypeRemove UpdateType = "remove"
 	UpdateTypeChange UpdateType = "change"
