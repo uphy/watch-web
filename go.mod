@@ -1,6 +1,6 @@
 module github.com/uphy/watch-web
 
-go 1.13
+go 1.14
 
 require (
 	github.com/PuerkitoBio/goquery v1.5.1
@@ -13,7 +13,6 @@ require (
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/markbates/pkger v0.15.1
 	github.com/mattn/anko v0.1.7
-	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	github.com/robfig/cron v1.2.0
 	github.com/sergi/go-diff v1.0.0
 	github.com/sirupsen/logrus v1.5.0
@@ -21,7 +20,5 @@ require (
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	golang.org/x/text v0.3.2
-	gopkg.in/olebedev/go-duktape.v3 v3.0.0-20200316214253-d7b0ff38cac9
-	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/yaml.v2 v2.2.7
 )
