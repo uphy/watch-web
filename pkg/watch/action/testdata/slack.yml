@@ -1,7 +1,7 @@
 ---
 # previous value
 - __id__: 001
-  summary: SUMMARY1
+  summary: SUMMARY1\nline2
   description: DESCRIPTION1
   thumbnail: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
   link: http://foo.com/link1
@@ -34,7 +34,8 @@ attachments:
 - blocks:
   - text:
       text: |-
-        *[Remove]* <http://foo.com/link1|~SUMMARY1~>
+        *[Remove]* <http://foo.com/link1|~SUMMARY1
+        line2~>
         ~DESCRIPTION1~
       type: mrkdwn
     type: section

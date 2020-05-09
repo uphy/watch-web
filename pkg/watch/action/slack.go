@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"text/template"
 
 	"github.com/uphy/watch-web/pkg/domain"
@@ -117,6 +118,10 @@ func (s *SlackAction) run(ctx *domain.JobContext, res *domain.Result) (interface
 				})
 			}
 			return result
+		},
+		"escape": func(s string) string {
+			s = strings.ReplaceAll(s, "\n", "\\n")
+			return s
 		},
 	}).Parse(resources.SlackArrayTemplate))
 	buf := new(bytes.Buffer)

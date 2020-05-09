@@ -6,7 +6,7 @@
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "*[Add]* <{{ .link }}|{{ .summary}}>\n{{ .description }}"
+                "text": "*[Add]* <{{ .link }}|{{ .summary | escape}}>\n{{ .description | escape }}"
             }
         },
         {
@@ -16,7 +16,7 @@
                 {{     if not (eq $index 0) }},{{ end }}
                 {
                     "type": "mrkdwn",
-                    "text": "*{{ $elm.key }}:*\n{{ $elm.value }}"
+                    "text": "*{{ $elm.key | escape }}:*\n{{ $elm.value | escape }}"
                 }
                 {{ end }}
             ]
@@ -25,7 +25,7 @@
         {
             "type": "image",
             "image_url": "{{ .thumbnail }}",
-            "alt_text": "{{ .summary }}"
+            "alt_text": "{{ .summary | escape}}"
         },
         {{ end }}
         {
@@ -42,7 +42,7 @@
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "*[Remove]* <{{ .link }}|~{{ .summary}}~>\n~{{ .description }}~"
+                "text": "*[Remove]* <{{ .link }}|~{{ .summary | escape }}~>\n~{{ .description | escape }}~"
             }
         },
         {
@@ -59,7 +59,7 @@
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "*[Change]* <{{ .Item.link }}|{{ .Item.summary}}>\n{{ .Item.description }}"
+                "text": "*[Change]* <{{ .Item.link }}|{{ .Item.summary | escape }}>\n{{ .Item.description | escape}}"
             }
         },
         {
@@ -70,17 +70,17 @@
                 {{   if eq $elm.type "add" }}
                 {
                     "type": "mrkdwn",
-                    "text": "*{{ $elm.key }}:*\n{{ $elm.value }}"
+                    "text": "*{{ $elm.key | escape }}:*\n{{ $elm.value | escape}}"
                 }
                 {{   else if eq $elm.type "remove" }}
                 {
                     "type": "mrkdwn",
-                    "text": "~{{ $elm.key }}~:\n~{{ $elm.value }}~"
+                    "text": "~{{ $elm.key | escape }}~:\n~{{ $elm.value | escape }}~"
                 }
                 {{   else if eq $elm.type "change" }}
                 {
                     "type": "mrkdwn",
-                    "text": "*{{ $elm.key }}:*\n~{{ $elm.value.Old }}~ -> {{ $elm.value.New }}"
+                    "text": "*{{ $elm.key | escape }}:*\n~{{ $elm.value.Old | escape }}~ -> {{ $elm.value.New | escape }}"
                 }
                 {{   end }}
                 {{ end }}
@@ -90,7 +90,7 @@
         {
             "type": "image",
             "image_url": "{{ .Item.thumbnail }}",
-            "alt_text": "{{ .Item.summary }}"
+            "alt_text": "{{ .Item.summary | escape }}"
         },
         {{ end }}
         {
@@ -100,7 +100,7 @@
 }
 {{ end }}
 {
-    "text": "<!channel> <{{ .res.Link }}|{{ .res.Label }}> has been updated",
+    "text": "<!channel> <{{ .res.Link }}|{{ .res.Label | escape }}> has been updated",
     "blocks": [],
     "attachments": [
         {{ range $index, $update := .updates }}
