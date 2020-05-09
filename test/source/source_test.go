@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"testing"
 
 	"github.com/ghodss/yaml"
@@ -43,12 +44,39 @@ type (
 		fileName string
 		testName string
 	}
+	sourceTestTarget struct {
+		*regexp.Regexp
+	}
 )
 
+func newSourceTestTarget(pattern string) *sourceTestTarget {
+	if len(pattern) == 0 {
+		pattern = ".*"
+	}
+	return &sourceTestTarget{regexp.MustCompile(pattern)}
+}
+
+func (s *sourceTestTarget) IsTarget(testName string) bool {
+	return s.MatchString(testName)
+}
+
+// [Test all]
+// go test github.com/uphy/watch-web/test/source
+//
+// [Test Partially]
+// SOURCE_TEST_TARGET="UR" go test github.com/uphy/watch-web/test/source
+//
+// optionally, you can enable debug log
+// DEBUG=1 SOURCE_TEST_TARGET="UR" go test github.com/uphy/watch-web/test/source
 func TestAll(t *testing.T) {
+	sourceTestTarget := newSourceTestTarget(os.Getenv("SOURCE_TEST_TARGET"))
+
 	dir := "data"
 	files, _ := ioutil.ReadDir("data")
 	logger := logrus.New()
+	if len(os.Getenv("DEBUG")) > 0 {
+		logger.SetLevel(logrus.DebugLevel)
+	}
 	reporter := &reporter{t: t}
 	for _, file := range files {
 		reporter.SetFileName(file.Name())
@@ -56,6 +84,9 @@ func TestAll(t *testing.T) {
 		loader := config.NewLoader(logger, testDataPath)
 		testData := LoadTestData(testDataPath)
 		for i, test := range testData.Tests {
+			if !sourceTestTarget.IsTarget(test.Name) {
+				continue
+			}
 			reporter.SetTestName(test.Name)
 			ctx := loader.TemplateContext()
 			for k, v := range test.Vars {

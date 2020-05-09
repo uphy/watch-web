@@ -406,7 +406,11 @@ func (l *Loader) createSourceInclude(c *IncludeSourceConfig) (domain.Source, err
 	l.ctx.PushScope()
 	defer l.ctx.PopScope()
 	for k, v := range c.Vars {
-		l.ctx.Set(k, v)
+		evaluated, err := v.Evaluate(l.ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to evaluate include var template: key=%s, template=%v, err=%w", k, v, err)
+		}
+		l.ctx.Set(k, evaluated)
 	}
 	// override config
 	if c.Overrides != nil && c.Overrides.Constant != nil {

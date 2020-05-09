@@ -39,7 +39,7 @@ func (c *ShellSource) Fetch(ctx *domain.JobContext) (domain.Value, error) {
 	}
 	b, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to execute shell command: command=%s, err=%v", c.Command, err)
 	}
 	return domain.NewStringValue(string(b)), nil
 }

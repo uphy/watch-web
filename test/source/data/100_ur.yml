@@ -1,7 +1,7 @@
 source:
   # シェルコマンドを実行する。実行結果は文字列になる。
   constant:
-    template: "{{ .current }}"
+    file: ur.json
   # sourceを変換するフィルタ定義。0個以上指定可能。
   transforms:
     # sourceは文字列なので、json arrayに変換する。
@@ -38,13 +38,29 @@ source:
     - json_array_sort:
         by: summary
 tests:
-  - name: New row added
+  - name: UR
     vars:
       current: |
         [{"pageIndex":"0","rowMax":"5","rowMaxSp":"3","rowMaxNext":"10","pageMax":"5","allCount":"1","block":"kanto","tdfk":"tokyo","shisya":"20","danchi":"688","shikibetu":"0","floorAll":"9階","roomDetailLink":"/chintai/kanto/tokyo/20_6880_room.html?JKSS=000070406","roomDetailLinkSp":"/chintai/sp/kanto/tokyo/20_6880_room.html?JKSS=000070406","system":[{"制度_IMG":"btn_kosodate.png","制度名":"子育て割","制度HTML":"kosodate"}],"parking":null,"design":[],"featureParam":[],"traffic":null,"place":null,"kanris":null,"kouzou":null,"soukosu":null,"id":"000070406","year":null,"name":"7号棟406号室","shikikin":"2か月","requirement":"ナシ","madori":"https://chintai.sumai.ur-net.go.jp/chintai/img_madori/20/20_688/20_688_0-00-0007_Nw_RA_01_00003.gif","rent":"74,800円","rent_normal":"93,500円","rent_normal_css":"","commonfee":"4,700円","commonfee_sp":null,"status":null,"type":"2DK","floorspace":"50&#13217;","floor":"4階","urlDetail":null,"urlDetail_sp":null,"feature":null}]
     previous: "[]"
     expects:
       result:
-        - {"description":"74,800円(子育て割)[共益費 4,700円, 通常 93,500円]","link":"https://www.ur-net.go.jp//chintai/sp/kanto/tokyo/20_6880_room.html?JKSS=000070406","summary":"7号棟406号室(2DK)","thumbnail":"https://chintai.sumai.ur-net.go.jp/chintai/img_madori/20/20_688/20_688_0-00-0007_Nw_RA_01_00003.gif","制度":"子育て割","平米数":"50㎡","敷金":"2か月","間取り":"2DK","階数":"4階 / 9階"}
-      diff:
-        - add: {"description":"74,800円(子育て割)[共益費 4,700円, 通常 93,500円]","link":"https://www.ur-net.go.jp//chintai/sp/kanto/tokyo/20_6880_room.html?JKSS=000070406","summary":"7号棟406号室(2DK)","thumbnail":"https://chintai.sumai.ur-net.go.jp/chintai/img_madori/20/20_688/20_688_0-00-0007_Nw_RA_01_00003.gif","制度":"子育て割","平米数":"50㎡","敷金":"2か月","間取り":"2DK","階数":"4階 / 9階"}
+        - description: 111,800円(近居割)[共益費 3,100円]
+          link: https://www.ur-net.go.jp//chintai/sp/kanto/tokyo/20_3990_room.html?JKSS=000050203
+          summary: 5号棟203号室(3LDK)
+          thumbnail: https://chintai.sumai.ur-net.go.jp/chintai/img_madori/20/20_399/20_399_0-00-0005_Kv_RA_01_00004.gif
+          制度: 近居割
+          平米数: 64㎡
+          敷金: 2か月
+          間取り: 3LDK
+          階数: 2階 / 5階
+        - description: 111,800円(近居割)[共益費 3,100円]
+          link: https://www.ur-net.go.jp//chintai/sp/kanto/tokyo/20_3990_room.html?JKSS=000050302
+          summary: 5号棟302号室(3LDK)
+          thumbnail: https://chintai.sumai.ur-net.go.jp/chintai/img_madori/20/20_399/20_399_0-00-0005_Kv_RA_01_00004.gif
+          制度: 近居割
+          平米数: 64㎡
+          敷金: 2か月
+          間取り: 3LDK
+          階数: 3階 / 5階
+  

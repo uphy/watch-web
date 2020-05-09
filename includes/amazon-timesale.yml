@@ -1,0 +1,16 @@
+shell:
+  command: curl -sSL https://a-timesale.com/deals/api/items
+transforms:
+  - json_array:
+      condition: '{{ .source.title | contains .keyword }}'
+  - json_transform:
+      transform:
+        summary: '{{ .source.title | truncate 20 }}'
+        thumbnail: '{{ .source.primaryImage }}'
+        description: |
+          {{- if .source.minDealPrice }}¥{{- .source.minDealPrice }}{{ end -}}
+          {{- if gt .source.maxPercentOff 0. }}({{ .source.maxPercentOff }}%OFF){{ end -}}
+        link: '{{ .source.egressUrl }}'
+        "平均レビュー": '{{ .source.reviewRating }}'
+        "レビュー数": '{{ .source.totalReviews }}'
+        "セール期間": '{{ .source.msToStartFix | formatEpochMillis }} ~ {{ .source.msToEndFix | formatEpochMillis }}'

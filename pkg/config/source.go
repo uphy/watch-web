@@ -34,7 +34,7 @@ type (
 		// Overrides defines a source config.
 		// `File`'s source will be overriden by this source.
 		// This is for testing
-		Overrides *SourceConfig     `json:"overrides,omitempty"`
-		Vars      map[string]string `json:"vars,omitempty"`
+		Overrides *SourceConfig                    `json:"overrides,omitempty"`
+		Vars      map[string]domain.TemplateString `json:"vars,omitempty"`
 	}
 )

@@ -1,0 +1,39 @@
+# シェルコマンドを実行する。実行結果は文字列になる。
+shell:
+  # 実行するコマンド。APIがjson arrayを返してくれるが、shellなので実行結果は文字列
+  command: ur {{ .shisya }} {{ .danchi }}
+# sourceを変換するフィルタ定義。0個以上指定可能。
+transforms:
+  # sourceは文字列なので、json arrayに変換する。
+  - json_array: {}
+  # json arrayの各要素をtransformによって変換する。
+  - json_transform:
+      transform:
+        summary: '{{ .source.name }}({{ .source.type }})'
+        description: |
+          {{- with .source }}
+          {{- .rent }}
+          {{-  if .system }}(
+          {{-    range $index, $s := .system }}
+          {{-      if $index }}, {{end}}
+          {{-      $s.制度名 }}
+          {{-    end }})
+          {{-  end -}}
+          [共益費 {{ .commonfee }}{{ if .rent_normal }}, 通常 {{ .rent_normal }}{{ end }}]
+          {{- end -}}
+        link: 'https://www.ur-net.go.jp/{{ .source.roomDetailLinkSp }}'
+        thumbnail: '{{ .source.madori }}'
+        "制度": |
+          {{-  if .source.system }}
+          {{-    range $index, $s := .source.system }}
+          {{-      if $index }}, {{end}}
+          {{-      $s.制度名 }}
+          {{-    end }}
+          {{-  end -}}
+        "敷金": '{{ .source.shikikin }}'
+        "間取り": '{{ .source.type }}'
+        "平米数": '{{ .source.floorspace | match "(\\d+).*" }}㎡'
+        "階数": '{{ .source.floor }} / {{ .source.floorAll }}'
+  # サーバー側で順序が変わっても対応できるように、配列要素をsummaryでソート
+  - json_array_sort:
+      by: summary
