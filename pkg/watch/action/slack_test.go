@@ -7,7 +7,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/uphy/watch-web/pkg/domain"
-	"github.com/uphy/watch-web/pkg/domain2"
 	"gopkg.in/yaml.v2"
 )
 
@@ -20,12 +19,12 @@ func TestSlackAction_Run(t *testing.T) {
 	defer f.Close()
 	decoder := yaml.NewDecoder(f)
 
-	var itemList1 domain2.ItemList
+	var itemList1 domain.ItemList
 	if err := decoder.Decode(&itemList1); err != nil {
 		t.Error("failed to decode itemList1: ", err)
 		return
 	}
-	var itemList2 domain2.ItemList
+	var itemList2 domain.ItemList
 	if err := decoder.Decode(&itemList2); err != nil {
 		t.Error("failed to decode itemList2: ", err)
 		return

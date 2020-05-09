@@ -10,6 +10,7 @@ type (
 		DOM        *DOMSourceConfig      `json:"dom,omitempty"`
 		Shell      *ShellSourceConfig    `json:"shell,omitempty"`
 		Constant   *ConstantSourceConfig `json:"constant,omitempty"`
+		Include    *IncludeSourceConfig  `json:"include,omitempty"`
 		Transforms TransformsConfig      `json:"transforms,omitempty"`
 
 		EmptyAction *source.EmptyAction `json:"empty,omitempty"`
@@ -27,5 +28,13 @@ type (
 		Value    interface{}            `json:"value,omitempty"`
 		Template *domain.TemplateString `json:"template,omitempty"`
 		File     *string                `json:"file,omitempty"`
+	}
+	IncludeSourceConfig struct {
+		File domain.TemplateString `json:"file"`
+		// Overrides defines a source config.
+		// `File`'s source will be overriden by this source.
+		// This is for testing
+		Overrides *SourceConfig     `json:"overrides,omitempty"`
+		Vars      map[string]string `json:"vars,omitempty"`
 	}
 )

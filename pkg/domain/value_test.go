@@ -3,15 +3,13 @@ package domain
 import (
 	"reflect"
 	"testing"
-
-	"github.com/uphy/watch-web/pkg/domain2"
 )
 
 func TestItemList(t *testing.T) {
 	tests := []struct {
 		name  string
 		value Value
-		want  domain2.ItemList
+		want  ItemList
 	}{
 		{
 			value: NewJSONObjectValue(map[string]interface{}{
@@ -19,8 +17,8 @@ func TestItemList(t *testing.T) {
 				"b": 1,
 				"c": true,
 			}),
-			want: domain2.ItemList{
-				domain2.Item{
+			want: ItemList{
+				Item{
 					"a": "A",
 					"b": "1",
 					"c": "true",
@@ -35,8 +33,8 @@ func TestItemList(t *testing.T) {
 					"d": 1,
 				},
 			}),
-			want: domain2.ItemList{
-				domain2.Item{
+			want: ItemList{
+				Item{
 					"a": "A",
 					"b": "1",
 					"c": "map[d:1]",
@@ -56,13 +54,13 @@ func TestItemList(t *testing.T) {
 					"c": false,
 				},
 			}),
-			want: domain2.ItemList{
-				domain2.Item{
+			want: ItemList{
+				Item{
 					"a": "A",
 					"b": "1",
 					"c": "true",
 				},
-				domain2.Item{
+				Item{
 					"a": "AA",
 					"b": "2",
 					"c": "false",
@@ -74,15 +72,15 @@ func TestItemList(t *testing.T) {
 				1,
 				"a",
 			}),
-			want: domain2.ItemList{
-				domain2.Item{"1": ""},
-				domain2.Item{"a": ""},
+			want: ItemList{
+				Item{"1": ""},
+				Item{"a": ""},
 			},
 		},
 		{
 			value: NewStringValue("aaa"),
-			want: domain2.ItemList{
-				domain2.Item{"aaa": ""},
+			want: ItemList{
+				Item{"aaa": ""},
 			},
 		},
 	}

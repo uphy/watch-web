@@ -2,8 +2,6 @@ package domain
 
 import (
 	"strings"
-
-	"github.com/uphy/watch-web/pkg/domain2"
 )
 
 type (
@@ -30,12 +28,12 @@ func (s *StringValue) JSONArray() JSONArray {
 	return []interface{}{s.s}
 }
 
-func (j *StringValue) ItemList() domain2.ItemList {
+func (j *StringValue) ItemList() ItemList {
 	s := strings.Trim(j.s, " \t\n")
 	splitted := strings.Split(s, "\n")
-	list := make(domain2.ItemList, len(splitted))
+	list := make(ItemList, len(splitted))
 	for i, line := range splitted {
-		list[i] = domain2.Item{line: ""}
+		list[i] = Item{line: ""}
 	}
 	return list
 }

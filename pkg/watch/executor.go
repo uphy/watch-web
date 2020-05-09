@@ -6,12 +6,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/uphy/watch-web/pkg/domain2"
+	"github.com/uphy/watch-web/pkg/domain"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/robfig/cron"
 	"github.com/sirupsen/logrus"
-	"github.com/uphy/watch-web/pkg/domain"
 	"github.com/uphy/watch-web/pkg/watch/store"
 )
 
@@ -109,10 +108,10 @@ func (e *Executor) Check(job *Job) (res *domain.Result, err error) {
 			return nil, err
 		}
 	}
-	previousItemList, err := domain2.NewItemListFromJSON(previous)
+	previousItemList, err := domain.NewItemListFromJSON(previous)
 	if err != nil {
 		job.failed(status, "failed to restore item list", err)
-		previousItemList = make(domain2.ItemList, 0)
+		previousItemList = make(domain.ItemList, 0)
 	}
 
 	now := time.Now()
@@ -166,8 +165,8 @@ func (e *Executor) TestActions(job *Job) error {
 		JobID:    job.ID(),
 		Label:    "test action",
 		Link:     "https://google.com",
-		Previous: domain2.ItemList{domain2.Item{"This is test action.": ""}},
-		Current:  domain2.ItemList{domain2.Item{"This is test action.\naaaaaa": ""}},
+		Previous: domain.ItemList{domain.Item{"This is test action.": ""}},
+		Current:  domain.ItemList{domain.Item{"This is test action.\naaaaaa": ""}},
 	})
 }
 

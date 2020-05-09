@@ -13,12 +13,10 @@ import (
 	"github.com/ghodss/yaml"
 
 	"github.com/sirupsen/logrus"
-	"github.com/uphy/watch-web/pkg/domain2"
+	"github.com/uphy/watch-web/pkg/domain"
 	"github.com/uphy/watch-web/pkg/watch/store"
 
 	"github.com/uphy/watch-web/pkg/watch"
-
-	"github.com/uphy/watch-web/pkg/domain"
 
 	_ "github.com/mattn/anko/packages"
 	"github.com/uphy/watch-web/pkg/config"
@@ -36,9 +34,9 @@ type (
 		Expects  Expects           `json:"expects"`
 	}
 	Expects struct {
-		Result  domain2.ItemList `json:"result"`
-		Changed *bool            `json:"changed"`
-		Diff    domain2.Updates  `json:"diff"`
+		Result  domain.ItemList `json:"result"`
+		Changed *bool           `json:"changed"`
+		Diff    domain.Updates  `json:"diff"`
 	}
 	reporter struct {
 		t        *testing.T
@@ -113,7 +111,7 @@ func TestAll(t *testing.T) {
 	}
 }
 
-func compareResult(reporter *reporter, label string, expected, actual domain2.ItemList) {
+func compareResult(reporter *reporter, label string, expected, actual domain.ItemList) {
 	if !reflect.DeepEqual(expected, actual) {
 		reporter.Errorf(`%s wrong:
 expected:
@@ -125,7 +123,7 @@ actual:
 	}
 }
 
-func compareUpdates(reporter *reporter, label string, expected, actual domain2.Updates) {
+func compareUpdates(reporter *reporter, label string, expected, actual domain.Updates) {
 	y1 := expected.YAML()
 	y2 := actual.YAML()
 	if !reflect.DeepEqual(y1, y2) {

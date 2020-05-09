@@ -49,7 +49,6 @@ source.Map(func(v){
 			}),
 		},
 	}
-	t.Fail()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			transformer, err := NewScriptTransformer(tt.args.script)

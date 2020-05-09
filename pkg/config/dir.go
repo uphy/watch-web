@@ -8,6 +8,7 @@ import (
 
 type (
 	configDirectory struct {
+		parent *configDirectory
 		// baseDirectory which is the relative path from the parent
 		baseDirectory string
 		// paths are the additional relative paths from the baseDirectory
@@ -30,7 +31,7 @@ type (
  */
 
 func newConfigDirectory(baseDirectory string) *configDirectory {
-	return &configDirectory{baseDirectory, make([]string, 0)}
+	return &configDirectory{nil, baseDirectory, make([]string, 0)}
 }
 
 func (d *configDirectory) resolve(file string) (string, error) {
@@ -47,6 +48,9 @@ func (d *configDirectory) resolve(file string) (string, error) {
 			return f, nil
 		}
 	}
+	if d.parent != nil {
+		return d.parent.resolve(file)
+	}
 	return "", fmt.Errorf("file not found: file=%s, %v", file, d)
 }
 
@@ -62,8 +66,12 @@ func (d *configDirectory) addPath(path string) {
 }
 
 func (d *configDirectory) child(baseDirectory string) *configDirectory {
-	base := filepath.Join(d.baseDirectory, baseDirectory)
-	return &configDirectory{base, make([]string, 0)}
+	return &configDirectory{d, baseDirectory, make([]string, 0)}
+}
+
+func (d *configDirectory) childRelative(relativeBaseDirectory string) *configDirectory {
+	base := filepath.Join(d.baseDirectory, relativeBaseDirectory)
+	return &configDirectory{d, base, make([]string, 0)}
 }
 
 func (d *configDirectory) String() string {

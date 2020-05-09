@@ -1,71 +1,119 @@
 package domain
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"sort"
 	"strings"
 
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
-const (
-	ChangeTypeInsert ChangeType = "insert"
-	ChangeTypeDelete ChangeType = "delete"
-	ChangeTypeEqual  ChangeType = "equal"
-)
-
 type (
-	DiffResult interface {
-		Changed() bool
-		String() string
-	}
-
-	ChangeType       string
-	StringDiffResult []Line
-	Line             struct {
-		Text string
-		Type ChangeType
-	}
-	JSONObjectDiffResult []JSONField
-	JSONField            struct {
-		Name  string
-		Value interface{}
-		Type  ChangeType
-	}
-	JSONArrayDiffResult []JSONArrayElement
-	JSONArrayElement    struct {
-		Object JSONObject
-		Type   ChangeType
+	diffItem struct {
+		diffType diffmatchpatch.Operation
+		text     string
 	}
 )
 
-func DiffString(v1, v2 string) StringDiffResult {
-	d := diff(v1, v2)
-	lines := make([]Line, 0)
-	for _, l := range d {
-		var t ChangeType
-		switch l.Type {
+// CompareItemList computes the differences between ItemLists.
+func CompareItemList(list1, list2 ItemList) Updates {
+	// Get ids and compare only id
+	idToItem1 := make(map[string]Item)
+	ids1 := make([]string, len(list1))
+	for i, item := range list1 {
+		id := item.ID()
+		idToItem1[id] = item
+		ids1[i] = id
+	}
+	idToItem2 := make(map[string]Item)
+	ids2 := make([]string, len(list2))
+	for i, item := range list2 {
+		id := item.ID()
+		idToItem2[id] = item
+		ids2[i] = id
+	}
+
+	// Compare IDs
+	ids1s := strings.Join(ids1, "\n")
+	ids2s := strings.Join(ids2, "\n")
+	diffs := diff(ids1s, ids2s)
+	updates := make(Updates, 0)
+	for _, d := range diffs {
+		switch d.diffType {
 		case diffmatchpatch.DiffInsert:
-			t = ChangeTypeInsert
+			updates = append(updates, *updateAdd(idToItem2[d.text]))
 		case diffmatchpatch.DiffDelete:
-			t = ChangeTypeDelete
+			updates = append(updates, *updateRemove(idToItem1[d.text]))
 		case diffmatchpatch.DiffEqual:
-			t = ChangeTypeEqual
+			item1 := idToItem1[d.text]
+			item2 := idToItem2[d.text]
+			changed := compareItem(item1, item2)
+			if changed != nil {
+				updates = append(updates, *updateChange(changed))
+			}
 		default:
-			log.Fatal("unexpected type: ", l.Type)
-		}
-		texts := strings.Split(strings.TrimRight(l.Text, "\n"), "\n")
-		for _, text := range texts {
-			lines = append(lines, Line{text, t})
+			continue
 		}
 	}
-	return lines
+
+	return updates
 }
 
-func diff(v1, v2 string) []diffmatchpatch.Diff {
+// diffItem compare 2 items.
+// return null if given items are exactly same.
+func compareItem(item1, item2 Item) *ItemChange {
+	keys1 := make([]string, len(item1))
+	keys2 := make([]string, len(item2))
+
+	// Extract keys
+	index := 0
+	for k := range item1 {
+		keys1[index] = k
+		index++
+	}
+	index = 0
+	for k := range item2 {
+		keys2[index] = k
+		index++
+	}
+	// Sort keys
+	sort.Strings(keys1)
+	sort.Strings(keys2)
+
+	// Compare them
+	keys1s := strings.Join(keys1, "\n")
+	keys2s := strings.Join(keys2, "\n")
+	diffs := diff(keys1s, keys2s)
+	addedKeys := make(map[string]string, 0)
+	removedKeys := make(map[string]string, 0)
+	changedKeys := make(map[string]ItemValueChange, 0)
+	for _, d := range diffs {
+		switch d.diffType {
+		case diffmatchpatch.DiffInsert:
+			addedKeys[d.text] = item2[d.text]
+		case diffmatchpatch.DiffDelete:
+			removedKeys[d.text] = item1[d.text]
+		case diffmatchpatch.DiffEqual:
+			v1 := item1[d.text]
+			v2 := item2[d.text]
+			if v1 != v2 {
+				changedKeys[d.text] = ItemValueChange{
+					Old: v1,
+					New: v2,
+				}
+			}
+		default:
+			continue
+		}
+	}
+	if len(addedKeys) == 0 && len(removedKeys) == 0 && len(changedKeys) == 0 {
+		return nil
+	}
+	return &ItemChange{item2, addedKeys, removedKeys, changedKeys}
+}
+
+func diff(v1, v2 string) []diffItem {
 	v1 = strings.Trim(v1, " \t\n")
 	if len(v1) > 0 {
 		v1 = v1 + "\n"
@@ -78,166 +126,28 @@ func diff(v1, v2 string) []diffmatchpatch.Diff {
 	d := diffmatchpatch.New()
 	a, b, c := d.DiffLinesToChars(v1, v2)
 	diffs := d.DiffMain(a, b, false)
-	return d.DiffCharsToLines(diffs, c)
+	res := make([]diffItem, 0)
+	for _, diff := range d.DiffCharsToLines(diffs, c) {
+		text := strings.Trim(diff.Text, " \t\n")
+		splitted := strings.Split(text, "\n")
+		for _, s := range splitted {
+			res = append(res, diffItem{diff.Type, s})
+		}
+	}
+	return res
 }
 
-func DiffJSONArray(jsonArray1, jsonArray2 string) (JSONArrayDiffResult, error) {
-	v1, err := splitJSONArray(jsonArray1)
-	if err != nil {
-		return nil, err
-	}
-	v2, err := splitJSONArray(jsonArray2)
-	if err != nil {
-		return nil, err
-	}
-	d := DiffString(v1, v2)
-	elements := make([]JSONArrayElement, len(d))
-	for i, line := range d {
-		var v JSONObject
-		if err := json.Unmarshal([]byte(line.Text), &v); err != nil {
-			return nil, err
-		}
-		elements[i] = JSONArrayElement{v, line.Type}
-	}
-	return elements, nil
-}
+func (u *ItemChange) String() string {
+	var res = make(map[string]map[string]string)
+	res["added"] = u.AddedKeys
+	res["removed"] = u.RemovedKeys
 
-func DiffJSONObject(jsonObject1, jsonObject2 string) (JSONObjectDiffResult, error) {
-	v1, err := splitJSONObject(jsonObject1)
-	if err != nil {
-		return nil, err
+	changed := make(map[string]string)
+	for k, i := range u.ChangedKeys {
+		changed[k] = fmt.Sprintf("%s -> %s", i.Old, i.New)
 	}
-	v2, err := splitJSONObject(jsonObject2)
-	if err != nil {
-		return nil, err
-	}
-	d := DiffString(v1, v2)
-	fields := make([]JSONField, len(d))
-	for i, line := range d {
-		var f JSONObject
-		if err := json.Unmarshal([]byte(line.Text), &f); err != nil {
-			return nil, err
-		}
-		if len(f) != 1 {
-			return nil, fmt.Errorf("expected a field but %v", f)
-		}
-		for k, v := range f {
-			fields[i] = JSONField{k, v, line.Type}
-			break
-		}
-	}
-	sort.Slice(fields, func(i, j int) bool {
-		return strings.Compare(fields[i].Name, fields[j].Name) < 0
-	})
-	return fields, nil
-}
+	res["changed"] = changed
 
-// splitJSONArray splits the input json array string into elements separated with line break.
-func splitJSONArray(jsonArray string) (string, error) {
-	if jsonArray == "" {
-		// Replace empty string with empty array
-		// because initial state is empty string "".
-		jsonArray = "[]"
-	}
-	var v []interface{}
-	if err := json.Unmarshal([]byte(jsonArray), &v); err != nil {
-		return "", err
-	}
-	var s []string
-	for _, elm := range v {
-		b, err := json.Marshal(elm)
-		if err != nil {
-			return "", err
-		}
-		s = append(s, string(b))
-	}
-	return strings.Join(s, "\n"), nil
-}
-
-// splitJSONObject splits the input json object string into single field objects separated with line break
-func splitJSONObject(jsonObject string) (string, error) {
-	var obj map[string]interface{}
-	if err := json.Unmarshal([]byte(jsonObject), &obj); err != nil {
-		return "", err
-	}
-	var s []string
-	for k, v := range obj {
-		m := map[string]interface{}{
-			k: v,
-		}
-		b, err := json.Marshal(m)
-		if err != nil {
-			return "", err
-		}
-		s = append(s, string(b))
-	}
-	return strings.Join(s, "\n"), nil
-}
-
-func (r StringDiffResult) Changed() bool {
-	for _, l := range r {
-		if l.Type != ChangeTypeEqual {
-			return true
-		}
-	}
-	return false
-}
-
-func (r StringDiffResult) String() string {
-	w := new(bytes.Buffer)
-	for _, l := range r {
-		if l.Type != ChangeTypeEqual {
-			fmt.Fprintln(w, diffLineToString(l.Text, l.Type))
-		}
-	}
-	return w.String()
-}
-
-func diffLineToString(line string, t ChangeType) string {
-	switch t {
-	case ChangeTypeInsert:
-		return "+ " + line
-	case ChangeTypeDelete:
-		return "- " + line
-	default:
-		return "  " + line
-	}
-}
-
-func (r JSONObjectDiffResult) Changed() bool {
-	for _, l := range r {
-		if l.Type != ChangeTypeEqual {
-			return true
-		}
-	}
-	return false
-}
-
-func (r JSONObjectDiffResult) String() string {
-	w := new(bytes.Buffer)
-	for _, l := range r {
-		if l.Type != ChangeTypeEqual {
-			fmt.Fprintln(w, diffLineToString(fmt.Sprintf("%s = %v", l.Name, l.Value), l.Type))
-		}
-	}
-	return w.String()
-}
-
-func (r JSONArrayDiffResult) Changed() bool {
-	for _, l := range r {
-		if l.Type != ChangeTypeEqual {
-			return true
-		}
-	}
-	return false
-}
-
-func (r JSONArrayDiffResult) String() string {
-	w := new(bytes.Buffer)
-	for _, l := range r {
-		if l.Type != ChangeTypeEqual {
-			fmt.Fprintln(w, diffLineToString(fmt.Sprintf("%v", l.Object), l.Type))
-		}
-	}
-	return w.String()
+	b, _ := json.Marshal(res)
+	return string(b)
 }

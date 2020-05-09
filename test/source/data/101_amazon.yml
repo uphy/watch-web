@@ -1,68 +1,30 @@
 source:
-  shell:
-    command: |
-      curl --compressed -sSL https://www.amazon.co.jp/dp/B07H56HB8T/
-  transforms:
-    - script:
-        script: |
-          strings = import("strings")
-
-          html = source.String()
-          title, err = selectDOM(html, "#productTitle")
-          if err != nil {
-            return nil, err
-          }
-          title = strings.Trim(title.text, " \t\n")
-          title, _ = regexReplace(title, "[ \n]+", " ")
-          var price, err = selectDOM(html, "#priceblock_saleprice")
-          if err != nil {
-            return nil, err
-          }
-          if !price.text {
-            price, err = selectDOM(html, "#priceblock_ourprice")
-            if err != nil {
-              return nil, err
-            }
-          }
-          price = price.text
-
-          var availability, err = selectDOM(html, "#availability>.a-size-medium")
-          if err != nil {
-            return nil, err
-          }
-          availability = availability.text
-          availability = strings.Trim(availability, " \t\n")
-          availability = strings.Replace(availability, "。", "", -1)
-
-          var thumbnail, err = selectDOM(html, "#imgTagWrapperId>img")
-          if err != nil {
-            return nil, err
-          }
-          thumbnail = thumbnail.nodes[0].src
-
-          map[string]interface{
-            "summary": title,
-            "description": sprintf("%s [%s]", price, availability),
-            "thumbnail": thumbnail,
-            "link": "https://www.amazon.co.jp/dp/B07H56HB8T/",
-          }
-    - debug: true
+  include:
+    file: ../../../includes/amazon.yml
+    overrides:
+      constant:
+        file: amazon.html
+    vars:
+      itemId: B07H56HB8T
 tests:
   - name: Amazon
     vars: {}
     previous: "[]"
     expects:
       result:
-        - description: ￥12,399 [在庫あり]
+        - description: ￥10,996 [在庫あり]
           link: https://www.amazon.co.jp/dp/B07H56HB8T/
           summary: 【2400ml&1080P】TOPVISION プロジェクター小型 スピーカーが二つ内蔵 スマホ/パソコン/タブレット/ゲーム機/DVDプレイヤー/USBなど接続可
             HDMIケーブル付属 3年保証
           thumbnail: https://images-fe.ssl-images-amazon.com/images/I/51OZX4Nv8TL.__AC_SY300_QL70_ML2_.jpg        
+          availability: "在庫あり"
+          price: "￥10,996"
       diff:
         - add: 
-            description: ￥12,399 [在庫あり]
+            description: ￥10,996 [在庫あり]
             link: https://www.amazon.co.jp/dp/B07H56HB8T/
             summary: 【2400ml&1080P】TOPVISION プロジェクター小型 スピーカーが二つ内蔵 スマホ/パソコン/タブレット/ゲーム機/DVDプレイヤー/USBなど接続可
               HDMIケーブル付属 3年保証
             thumbnail: https://images-fe.ssl-images-amazon.com/images/I/51OZX4Nv8TL.__AC_SY300_QL70_ML2_.jpg
-        
+            availability: "在庫あり"
+            price: "￥10,996"

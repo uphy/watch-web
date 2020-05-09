@@ -1,0 +1,49 @@
+shell:
+  command: |
+    curl --compressed -sSL https://www.amazon.co.jp/dp/{{ .itemId }}/
+transforms:
+  - script:
+      script: |
+        strings = import("strings")
+
+        html = source.String()
+        title, err = selectDOM(html, "#productTitle")
+        if err != nil {
+          return nil, err
+        }
+        title = strings.Trim(title.text, " \t\n")
+        title, _ = regexReplace(title, "[ \n]+", " ")
+        var price, err = selectDOM(html, "#priceblock_saleprice")
+        if err != nil {
+          return nil, err
+        }
+        if !price.text {
+          price, err = selectDOM(html, "#priceblock_ourprice")
+          if err != nil {
+            return nil, err
+          }
+        }
+        price = price.text
+
+        var availability, err = selectDOM(html, "#availability>.a-size-medium")
+        if err != nil {
+          return nil, err
+        }
+        availability = availability.text
+        availability = strings.Trim(availability, " \t\n")
+        availability = strings.Replace(availability, "。", "", -1)
+
+        var thumbnail, err = selectDOM(html, "#imgTagWrapperId>img")
+        if err != nil {
+          return nil, err
+        }
+        thumbnail = thumbnail.nodes[0].src
+
+        map[string]interface{
+          "summary": title,
+          "description": sprintf("%s [%s]", price, availability),
+          "thumbnail": thumbnail,
+          "link": "https://www.amazon.co.jp/dp/{{ .itemId }}/",
+          "price": price,
+          "availability": availability,
+        }

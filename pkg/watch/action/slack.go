@@ -8,10 +8,9 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/uphy/watch-web/pkg/domain2"
+	"github.com/uphy/watch-web/pkg/domain"
 	"github.com/uphy/watch-web/pkg/resources"
 
-	"github.com/uphy/watch-web/pkg/domain"
 	"gopkg.in/yaml.v2"
 )
 
@@ -85,10 +84,10 @@ func (s *SlackAction) run(ctx *domain.JobContext, res *domain.Result) (interface
 			}
 			return result
 		},
-		"flatChanges": func(changes *domain2.ItemChange) []map[string]interface{} {
+		"flatChanges": func(changes *domain.ItemChange) []map[string]interface{} {
 			var result = make([]map[string]interface{}, 0)
 			for k, v := range changes.AddedKeys {
-				if k == domain2.ItemKeyID {
+				if k == domain.ItemKeyID {
 					continue
 				}
 				result = append(result, map[string]interface{}{
@@ -98,7 +97,7 @@ func (s *SlackAction) run(ctx *domain.JobContext, res *domain.Result) (interface
 				})
 			}
 			for k, v := range changes.RemovedKeys {
-				if k == domain2.ItemKeyID {
+				if k == domain.ItemKeyID {
 					continue
 				}
 				result = append(result, map[string]interface{}{
@@ -108,7 +107,7 @@ func (s *SlackAction) run(ctx *domain.JobContext, res *domain.Result) (interface
 				})
 			}
 			for k, v := range changes.ChangedKeys {
-				if k == domain2.ItemKeyID {
+				if k == domain.ItemKeyID {
 					continue
 				}
 				result = append(result, map[string]interface{}{

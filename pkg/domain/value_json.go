@@ -2,8 +2,6 @@ package domain
 
 import (
 	"fmt"
-
-	"github.com/uphy/watch-web/pkg/domain2"
 )
 
 type (
@@ -35,12 +33,12 @@ func (j *JSONObjectValue) JSONArray() JSONArray {
 	return []interface{}{j.m}
 }
 
-func (j *JSONObjectValue) ItemList() domain2.ItemList {
-	elm := make(domain2.Item)
+func (j *JSONObjectValue) ItemList() ItemList {
+	elm := make(Item)
 	for k, v := range j.m {
 		elm[k] = fmt.Sprint(v)
 	}
-	return domain2.ItemList{elm}
+	return ItemList{elm}
 }
 
 func (j *JSONObjectValue) String() string {
@@ -69,18 +67,18 @@ func (j *JSONArrayValue) JSONArray() JSONArray {
 	return j.a
 }
 
-func (j *JSONArrayValue) ItemList() domain2.ItemList {
-	list := make(domain2.ItemList, len(j.a))
+func (j *JSONArrayValue) ItemList() ItemList {
+	list := make(ItemList, len(j.a))
 	for i, arrayElement := range j.a {
 		switch v := arrayElement.(type) {
 		case JSONObject:
-			elm := make(domain2.Item)
+			elm := make(Item)
 			for k, v := range v {
 				elm[k] = fmt.Sprint(v)
 			}
 			list[i] = elm
 		case map[string]interface{}:
-			elm := make(domain2.Item)
+			elm := make(Item)
 			for k, v := range v {
 				elm[k] = fmt.Sprint(v)
 			}

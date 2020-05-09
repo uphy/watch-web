@@ -25,15 +25,15 @@ import (
 type (
 	Loader struct {
 		log             *logrus.Logger
-		file            string
 		ctx             *domain.TemplateContext
 		configDirectory *configDirectory
 	}
 )
 
 func LoadAndCreate(log *logrus.Logger, file string) (*watch.Executor, error) {
-	l := NewLoader(log, file)
-	conf, err := l.Load()
+	baseDirectory, _ := filepath.Split(file)
+	l := NewLoader(log, baseDirectory)
+	conf, err := l.Load(file)
 	if err != nil {
 		return nil, err
 	}
@@ -43,16 +43,20 @@ func LoadAndCreate(log *logrus.Logger, file string) (*watch.Executor, error) {
 func NewLoader(log *logrus.Logger, file string) *Loader {
 	ctx := domain.NewRootTemplateContext()
 	dir, _ := filepath.Split(file)
-	return &Loader{log, file, ctx, newConfigDirectory(dir)}
+	return &Loader{log, ctx, newConfigDirectory(dir)}
 }
 
 func (l *Loader) TemplateContext() *domain.TemplateContext {
 	return l.ctx
 }
 
-func (l *Loader) Load() (*Config, error) {
+func (l *Loader) Load(file string) (*Config, error) {
 	// read file
-	f, err := os.Open(l.file)
+	resolved, err := l.configDirectory.resolve(file)
+	if err != nil {
+		return nil, fmt.Errorf("config file not found: file=%s", file)
+	}
+	f, err := os.Open(resolved)
 	if err != nil {
 		return nil, err
 	}
@@ -275,13 +279,17 @@ func (l *Loader) CreateSource(s *SourceConfig) (domain.Source, error) {
 	// load raw source
 	var src domain.Source
 	var err error
-	if s.DOM != nil {
+	// constant source must be evaluated first for include source's override config.
+	if s.Constant != nil {
+		src, err = l.createSourceConstant(s.Constant)
+	} else if s.DOM != nil {
 		src, err = l.createSourceDOM(s.DOM)
 	} else if s.Shell != nil {
 		src, err = l.createSourceShell(s.Shell)
-	} else if s.Constant != nil {
-		src, err = l.createSourceConstant(s.Constant)
+	} else if s.Include != nil {
+		src, err = l.createSourceInclude(s.Include)
 	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -342,7 +350,7 @@ func (l *Loader) createSourceConstant(s *ConstantSourceConfig) (domain.Source, e
 		return source.NewConstantSource(v), nil
 	}
 	if s.File != nil {
-		dir := l.configDirectory.child("constants")
+		dir := l.configDirectory.childRelative("constants")
 		file, err := dir.resolve(*s.File)
 		if err != nil {
 			return nil, fmt.Errorf("cannot resolve constant file: %w", err)
@@ -366,6 +374,53 @@ func (l *Loader) createSourceConstant(s *ConstantSourceConfig) (domain.Source, e
 		return source.NewConstantSource(domain.NewStringValue(string(value))), nil
 	}
 	return nil, errors.New("unsupported constant source")
+}
+
+func (l *Loader) createSourceInclude(c *IncludeSourceConfig) (domain.Source, error) {
+	// resolve file
+	filePath, err := c.File.Evaluate(l.ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to evaluate include file path template: file=%s, err=%w", filePath, err)
+	}
+	dir := l.configDirectory.childRelative("includes")
+	resolvedFilePath, err := dir.resolve(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("include file not found: file=%s", filePath)
+	}
+	// open
+	f, err := os.Open(resolvedFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open include file: file=%s, err=%w", resolvedFilePath, err)
+	}
+	defer f.Close()
+	// read as yaml
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+	var srcConfig *SourceConfig
+	if err := yaml.Unmarshal(b, &srcConfig); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal include yaml file: file=%s, err=%w", resolvedFilePath, err)
+	}
+	// initialize template variables for override config and source
+	l.ctx.PushScope()
+	defer l.ctx.PopScope()
+	for k, v := range c.Vars {
+		l.ctx.Set(k, v)
+	}
+	// override config
+	if c.Overrides != nil && c.Overrides.Constant != nil {
+		srcConfig.Constant = c.Overrides.Constant
+		// srcConfig may have another source such as dom, shell
+		// but I don't need to clear them because they won't be evaluated
+		// because constant source is evaluated first in CreateSource().
+	}
+	// create source
+	src, err := l.CreateSource(srcConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create included source: file=%s, err=%w", resolvedFilePath, err)
+	}
+	return src, nil
 }
 
 func (l *Loader) createTransforms(t TransformsConfig, src domain.Source) (domain.Source, error) {

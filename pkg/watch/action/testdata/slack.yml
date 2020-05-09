@@ -41,11 +41,7 @@ attachments:
   - type: divider
   color: '#FF0000'
 - blocks:
-  - accessory:
-      alt_text: SUMMARY2+
-      image_url: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
-      type: image
-    text:
+  - text:
       text: |-
         *[Change]* <http://foo.com/link2|SUMMARY2+>
         DESCRIPTION2+
@@ -73,14 +69,13 @@ attachments:
         ~SUMMARY2~ -> SUMMARY2+
       type: mrkdwn
     type: section
+  - alt_text: SUMMARY2+
+    image_url: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
+    type: image
   - type: divider
   color: '#FFFF00'
 - blocks:
-  - accessory:
-      alt_text: SUMMARY3
-      image_url: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
-      type: image
-    text:
+  - text:
       text: |-
         *[Add]* <http://foo.com/link3|SUMMARY3>
         DESCRIPTION3
@@ -92,6 +87,9 @@ attachments:
         prop3
       type: mrkdwn
     type: section
+  - alt_text: SUMMARY3
+    image_url: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
+    type: image
   - type: divider
   color: '#0000FF'
 blocks: []

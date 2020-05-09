@@ -64,23 +64,10 @@ jobs:
     label: '{{ .item.name }}'
     link: https://www.amazon.co.jp/dp/{{ .item.id }}/
     source:
-      shell:
-        command: |
-          curl --compressed -sSL https://www.amazon.co.jp/dp/{{ .item.id }}/
-      transforms:
-        - template: |
-            {{- $saleprice := (.source | dom "#priceblock_saleprice").text -}}
-            {{- if $saleprice }}{{ $saleprice -}}
-            {{- else -}}
-            {{- (.source | dom "#priceblock_ourprice").text -}}
-            {{- end -}}
-            {{- $availability := (.source | dom "#availability>.a-size-medium").text | trim | replace "。" "" -}}
-            {{- if $availability }}({{ $availability }}){{ end -}}
-      # デフォルトではtransformしたあとのsourceの値が空でも空の値として継続する。
-      # failを設定した場合には、空の場合実行失敗とみなす。
-      empty: fail
-      # sourceの収集中に失敗した場合、指定した回数リトライする。デフォルトではリトライしない。
-      retry: 3
+      include:
+        file: amazon.yml
+        vars:
+          itemId: {{ .item.id }}
     with_items:
       - { id: 'B07H56HB8T', name: 'TOPVISION プロジェクター' }
   - id: amazon-timesale-{{ .itemIndex }}
