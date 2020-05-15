@@ -40,7 +40,7 @@ func (j *JSONArrayTransformer) Transform(ctx *domain.JobContext, v domain.Value)
 				result = append(result, elm)
 			}
 		}
-		return domain.NewJSONArrayValue(result), nil
+		return domain.NewJSONArray(result), nil
 	}
 	return domain.ConvertAs(v.String(), domain.ValueTypeJSONArray)
 }

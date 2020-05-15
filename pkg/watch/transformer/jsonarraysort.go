@@ -41,7 +41,7 @@ func (j *JSONArraySortTransformer) Transform(ctx *domain.JobContext, v domain.Va
 		v2 := extract(array[j])
 		return strings.Compare(v1, v2) < 0
 	})
-	return domain.NewJSONArrayValue(array), nil
+	return domain.NewJSONArray(array), nil
 }
 
 func (j *JSONArraySortTransformer) String() string {

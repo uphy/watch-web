@@ -31,7 +31,7 @@ func (t transform) transform(ctx *domain.TemplateContext, v domain.Value) (domai
 		}
 		transformed[k] = evaluated
 	}
-	return domain.NewJSONObjectValue(transformed), nil
+	return domain.NewJSONObject(transformed), nil
 }
 
 func (t *JSONTransformTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
@@ -51,7 +51,7 @@ func (t *JSONTransformTransformer) Transform(ctx *domain.JobContext, v domain.Va
 			}
 			result = append(result, transformed.Interface())
 		}
-		return domain.NewJSONArrayValue(result), nil
+		return domain.NewJSONArray(result), nil
 	default:
 		return nil, fmt.Errorf("unsupported value type: %s", v.Type())
 	}

@@ -6,7 +6,7 @@ transforms:
       script: |
         strings = import("strings")
 
-        html = source.String()
+        html = source
         title, err = selectDOM(html, "#productTitle")
         if err != nil {
           return nil, err

@@ -72,13 +72,13 @@ func (t ScriptTransformer) Transform(ctx *domain.JobContext, v domain.Value) (do
 	case domain.Value:
 		return res, nil
 	case map[string]interface{}:
-		return domain.NewJSONObjectValue(res), nil
+		return domain.NewJSONObject(res), nil
 	case map[string]string:
 		m := make(map[string]interface{})
 		for key, value := range res {
 			m[key] = value
 		}
-		return domain.NewJSONObjectValue(m), nil
+		return domain.NewJSONObject(m), nil
 	case string:
 		return domain.NewStringValue(res), nil
 	}

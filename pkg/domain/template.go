@@ -123,7 +123,7 @@ func SelectDOM(html string, selector string) (Value, error) {
 	selectedHTML, _ := selection.Html()
 	result["html"] = selectedHTML
 	result["nodes"] = nodes
-	return NewJSONObjectValue(result), nil
+	return NewJSONObject(result), nil
 }
 
 func nodeToMap(n *html.Node) map[string]interface{} {

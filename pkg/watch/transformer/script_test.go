@@ -20,7 +20,7 @@ func TestScriptTransformer_Transform(t *testing.T) {
 	}{
 		{
 			args: args{
-				v: domain.NewJSONArrayValue([]interface{}{
+				v: domain.NewJSONArray([]interface{}{
 					map[string]interface{}{
 						"id":    "000",
 						"price": 100,
@@ -40,7 +40,7 @@ source.Map(func(v){
 })
 `,
 			},
-			want: domain.NewJSONArrayValue([]interface{}{
+			want: domain.NewJSONArray([]interface{}{
 				map[string]interface{}{
 					"id":          "000",
 					"description": "ID: 000 (100 yen)",

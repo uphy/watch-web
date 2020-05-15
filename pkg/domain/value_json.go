@@ -1,75 +1,72 @@
 package domain
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 )
 
-type (
-	JSONObjectValue struct {
-		m JSONObject
-	}
-	JSONArrayValue struct {
-		a JSONArray
-	}
-)
-
-func NewJSONObjectValue(m map[string]interface{}) *JSONObjectValue {
-	return &JSONObjectValue{m}
+func NewJSONObject(m map[string]interface{}) JSONObject {
+	return JSONObject(m)
 }
 
-func NewJSONArrayValue(a []interface{}) *JSONArrayValue {
-	return &JSONArrayValue{a}
+func NewJSONArray(a []interface{}) JSONArray {
+	return JSONArray(a)
 }
 
-func (j *JSONObjectValue) Type() ValueType {
+func (j JSONObject) Type() ValueType {
 	return ValueTypeJSONObject
 }
 
-func (j *JSONObjectValue) JSONObject() JSONObject {
-	return j.m
+func (j JSONObject) JSONObject() JSONObject {
+	return JSONObject(j)
 }
 
-func (j *JSONObjectValue) JSONArray() JSONArray {
-	return []interface{}{j.m}
+func (j JSONObject) JSONArray() JSONArray {
+	return []interface{}{j}
 }
 
-func (j *JSONObjectValue) ItemList() ItemList {
+func (j JSONObject) ItemList() ItemList {
 	elm := make(Item)
-	for k, v := range j.m {
+	for k, v := range j {
 		elm[k] = fmt.Sprint(v)
 	}
 	return ItemList{elm}
 }
 
-func (j *JSONObjectValue) String() string {
-	return j.m.String()
+func (j JSONObject) Interface() interface{} {
+	return j
 }
 
-func (j *JSONObjectValue) Interface() interface{} {
-	return j.m
+func (j JSONObject) Empty() bool {
+	return len(j) == 0
 }
 
-func (j *JSONObjectValue) Empty() bool {
-	return len(j.m) == 0
+func (j JSONObject) String() string {
+	b, err := json.Marshal(j)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
 }
 
-func (j *JSONArrayValue) Type() ValueType {
+func (j JSONArray) Type() ValueType {
 	return ValueTypeJSONArray
 }
 
-func (j *JSONArrayValue) JSONObject() JSONObject {
+func (j JSONArray) JSONObject() JSONObject {
 	return map[string]interface{}{
-		"values": j.a,
+		"values": j,
 	}
 }
 
-func (j *JSONArrayValue) JSONArray() JSONArray {
-	return j.a
+func (j JSONArray) JSONArray() JSONArray {
+	return JSONArray(j)
 }
 
-func (j *JSONArrayValue) ItemList() ItemList {
-	list := make(ItemList, len(j.a))
-	for i, arrayElement := range j.a {
+func (j JSONArray) ItemList() ItemList {
+	list := make(ItemList, len(j))
+	for i, arrayElement := range j {
 		switch v := arrayElement.(type) {
 		case JSONObject:
 			elm := make(Item)
@@ -92,32 +89,36 @@ func (j *JSONArrayValue) ItemList() ItemList {
 	return list
 }
 
-func (j *JSONArrayValue) Filter(filter func(value interface{}) bool) *JSONArrayValue {
+func (j JSONArray) Filter(filter func(value interface{}) bool) JSONArray {
 	filtered := make([]interface{}, 0)
-	for _, v := range j.a {
+	for _, v := range j {
 		if filter(v) {
 			filtered = append(filtered, v)
 		}
 	}
-	return NewJSONArrayValue(filtered)
+	return NewJSONArray(filtered)
 }
 
-func (j *JSONArrayValue) Map(mapFunc func(value interface{}) interface{}) *JSONArrayValue {
+func (j JSONArray) Map(mapFunc func(value interface{}) interface{}) JSONArray {
 	mapped := make([]interface{}, 0)
-	for _, v := range j.a {
+	for _, v := range j {
 		mapped = append(mapped, mapFunc(v))
 	}
-	return NewJSONArrayValue(mapped)
+	return NewJSONArray(mapped)
 }
 
-func (j *JSONArrayValue) String() string {
-	return j.a.String()
+func (j JSONArray) Interface() interface{} {
+	return j
 }
 
-func (j *JSONArrayValue) Interface() interface{} {
-	return j.a
+func (j JSONArray) Empty() bool {
+	return len(j) == 0
 }
 
-func (j *JSONArrayValue) Empty() bool {
-	return len(j.a) == 0
+func (j JSONArray) String() string {
+	b, err := json.Marshal(j)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
 }

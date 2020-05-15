@@ -5,31 +5,29 @@ import (
 )
 
 type (
-	StringValue struct {
-		s string
-	}
+	StringValue string
 )
 
-func NewStringValue(s string) *StringValue {
-	return &StringValue{strings.Trim(s, " \t\n")}
+func NewStringValue(s string) StringValue {
+	return StringValue(strings.Trim(s, " \t\n"))
 }
 
-func (s *StringValue) Type() ValueType {
+func (s StringValue) Type() ValueType {
 	return ValueTypeString
 }
 
-func (s *StringValue) JSONObject() JSONObject {
+func (s StringValue) JSONObject() JSONObject {
 	return map[string]interface{}{
-		s.s: "",
+		string(s): "",
 	}
 }
 
-func (s *StringValue) JSONArray() JSONArray {
-	return []interface{}{s.s}
+func (s StringValue) JSONArray() JSONArray {
+	return []interface{}{string(s)}
 }
 
-func (j *StringValue) ItemList() ItemList {
-	s := strings.Trim(j.s, " \t\n")
+func (j StringValue) ItemList() ItemList {
+	s := strings.Trim(string(j), " \t\n")
 	splitted := strings.Split(s, "\n")
 	list := make(ItemList, len(splitted))
 	for i, line := range splitted {
@@ -38,14 +36,14 @@ func (j *StringValue) ItemList() ItemList {
 	return list
 }
 
-func (s *StringValue) String() string {
-	return s.s
+func (s StringValue) String() string {
+	return string(s)
 }
 
-func (s *StringValue) Interface() interface{} {
-	return s.s
+func (s StringValue) Interface() interface{} {
+	return string(s)
 }
 
-func (s *StringValue) Empty() bool {
-	return len(s.s) == 0
+func (s StringValue) Empty() bool {
+	return len(s) == 0
 }

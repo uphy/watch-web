@@ -12,7 +12,7 @@ func TestItemList(t *testing.T) {
 		want  ItemList
 	}{
 		{
-			value: NewJSONObjectValue(map[string]interface{}{
+			value: NewJSONObject(map[string]interface{}{
 				"a": "A",
 				"b": 1,
 				"c": true,
@@ -26,7 +26,7 @@ func TestItemList(t *testing.T) {
 			},
 		},
 		{
-			value: NewJSONObjectValue(map[string]interface{}{
+			value: NewJSONObject(map[string]interface{}{
 				"a": "A",
 				"b": 1,
 				"c": map[string]interface{}{
@@ -42,7 +42,7 @@ func TestItemList(t *testing.T) {
 			},
 		},
 		{
-			value: NewJSONArrayValue([]interface{}{
+			value: NewJSONArray([]interface{}{
 				map[string]interface{}{
 					"a": "A",
 					"b": 1,
@@ -68,7 +68,7 @@ func TestItemList(t *testing.T) {
 			},
 		},
 		{
-			value: NewJSONArrayValue([]interface{}{
+			value: NewJSONArray([]interface{}{
 				1,
 				"a",
 			}),
