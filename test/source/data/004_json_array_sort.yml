@@ -3,7 +3,7 @@ source:
     template: "{{ .current }}"
   transforms:
     - json_array: {}
-    - json_array_sort:
+    - sort:
         by: id
 tests:
   - name: Added

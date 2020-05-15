@@ -10,16 +10,16 @@ import (
 )
 
 type (
-	JSONArraySortTransformer struct {
+	SortTransformer struct {
 		by string
 	}
 )
 
-func NewJSONArraySortTransformer(by string) *JSONArraySortTransformer {
-	return &JSONArraySortTransformer{by}
+func NewSortTransformer(by string) *SortTransformer {
+	return &SortTransformer{by}
 }
 
-func (j *JSONArraySortTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
+func (j *SortTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
 	array := v.JSONArray()
 	extract := func(v interface{}) string {
 		b, err := json.Marshal(v)
@@ -44,6 +44,6 @@ func (j *JSONArraySortTransformer) Transform(ctx *domain.JobContext, v domain.Va
 	return domain.NewJSONArray(array), nil
 }
 
-func (j *JSONArraySortTransformer) String() string {
+func (j *SortTransformer) String() string {
 	return fmt.Sprintf("JSONArraySort[by=%s]", j.by)
 }

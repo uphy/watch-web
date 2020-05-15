@@ -453,8 +453,8 @@ func (l *Loader) createTransform(t *TransformConfig) (domain.Transformer, error)
 		}
 		return transformer.NewDOMTransformer(selector), nil
 	}
-	if t.JSONTransform != nil {
-		return transformer.NewJSONTransformTransformer(t.JSONTransform.Transform, l.ctx.Snapshot()), nil
+	if t.Map != nil {
+		return transformer.NewMapTransformer(t.Map.Template, l.ctx.Snapshot()), nil
 	}
 	if t.JSONObject != nil {
 		return transformer.NewJSONObjectTransformer(), nil
@@ -462,8 +462,8 @@ func (l *Loader) createTransform(t *TransformConfig) (domain.Transformer, error)
 	if t.JSONArray != nil {
 		return transformer.NewJSONArrayTransformer(l.ctx.Snapshot(), t.JSONArray.Condition), nil
 	}
-	if t.JSONArraySort != nil {
-		return transformer.NewJSONArraySortTransformer(t.JSONArraySort.By), nil
+	if t.Sort != nil {
+		return transformer.NewSortTransformer(t.Sort.By), nil
 	}
 	if t.Script != nil {
 		script, err := t.Script.Script.Evaluate(l.ctx)

@@ -7,15 +7,15 @@ import (
 )
 
 type (
-	transform                map[string]domain.TemplateString
-	JSONTransformTransformer struct {
+	transform      map[string]domain.TemplateString
+	MapTransformer struct {
 		transform transform
 		ctx       *domain.TemplateContext
 	}
 )
 
-func NewJSONTransformTransformer(transform map[string]domain.TemplateString, ctx *domain.TemplateContext) *JSONTransformTransformer {
-	return &JSONTransformTransformer{transform, ctx}
+func NewMapTransformer(transform map[string]domain.TemplateString, ctx *domain.TemplateContext) *MapTransformer {
+	return &MapTransformer{transform, ctx}
 }
 
 func (t transform) transform(ctx *domain.TemplateContext, v domain.Value) (domain.Value, error) {
@@ -34,7 +34,7 @@ func (t transform) transform(ctx *domain.TemplateContext, v domain.Value) (domai
 	return domain.NewJSONObject(transformed), nil
 }
 
-func (t *JSONTransformTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
+func (t *MapTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
 	switch v.Type() {
 	case domain.ValueTypeString, domain.ValueTypeJSONObject:
 		return t.transform.transform(t.ctx, v)

@@ -12,13 +12,13 @@ type (
 		JSONArray *struct {
 			Condition *domain.TemplateString `json:"condition,omitempty"`
 		} `json:"json_array,omitempty"`
-		JSONObject    *struct{} `json:"json_object,omitempty"`
-		JSONTransform *struct {
-			Transform map[string]domain.TemplateString `json:"transform,omitempty"`
-		} `json:"json_transform,omitempty"`
-		JSONArraySort *struct {
+		JSONObject *struct{} `json:"json_object,omitempty"`
+		Map        *struct {
+			Template map[string]domain.TemplateString `json:"template,omitempty"`
+		} `json:"map,omitempty"`
+		Sort *struct {
 			By string `json:"by"`
-		} `json:"json_array_sort"`
+		} `json:"sort,omitempty"`
 		Script *struct {
 			Script   *domain.TemplateString `json:"script"`
 			Language *string                `json:"lang"`

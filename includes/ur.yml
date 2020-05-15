@@ -7,8 +7,8 @@ transforms:
   # sourceは文字列なので、json arrayに変換する。
   - json_array: {}
   # json arrayの各要素をtransformによって変換する。
-  - json_transform:
-      transform:
+  - map:
+      template:
         id: '{{ .source.name }}'
         summary: '{{ .source.name }}({{ .source.type }})'
         description: |
@@ -36,5 +36,5 @@ transforms:
         "平米数": '{{ .source.floorspace | match "(\\d+).*" }}㎡'
         "階数": '{{ .source.floor }} / {{ .source.floorAll }}'
   # サーバー側で順序が変わっても対応できるように、配列要素をsummaryでソート
-  - json_array_sort:
+  - sort:
       by: id

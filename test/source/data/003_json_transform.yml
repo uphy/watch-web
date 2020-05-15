@@ -3,8 +3,8 @@ source:
     template: "{{ .current }}"
   transforms:
     - json_array: {}
-    - json_transform:
-        transform:
+    - map:
+        template:
           id: "{{ .source.id }}"
           a: "{{ .source.price }}"
           b: "bbb"

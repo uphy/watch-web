@@ -3,8 +3,8 @@ shell:
 transforms:
   - json_array:
       condition: '{{ .source.title | contains .keyword }}'
-  - json_transform:
-      transform:
+  - map:
+      template:
         summary: '{{ .source.title | truncate 20 }}'
         thumbnail: '{{ .source.primaryImage }}'
         description: |
@@ -15,5 +15,5 @@ transforms:
         "平均レビュー": '{{ .source.reviewRating }}'
         "レビュー数": '{{ .source.totalReviews }}'
         "セール期間": '{{ .source.msToStartFix | formatEpochMillis }} ~ {{ .source.msToEndFix | formatEpochMillis }}'
-  - json_array_sort:
+  - sort:
       by: id
