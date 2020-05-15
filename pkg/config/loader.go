@@ -13,6 +13,7 @@ import (
 	"github.com/go-redis/redis/v7"
 	"github.com/sirupsen/logrus"
 	"github.com/uphy/watch-web/pkg/domain"
+	"github.com/uphy/watch-web/pkg/domain/script"
 	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/uphy/watch-web/pkg/watch/action"
 	"github.com/uphy/watch-web/pkg/watch/source"
@@ -466,7 +467,7 @@ func (l *Loader) createTransform(t *TransformConfig) (domain.Transformer, error)
 		return transformer.NewSortTransformer(t.Sort.By), nil
 	}
 	if t.Script != nil {
-		script, err := t.Script.Script.Evaluate(l.ctx)
+		scriptString, err := t.Script.Script.Evaluate(l.ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -474,12 +475,18 @@ func (l *Loader) createTransform(t *TransformConfig) (domain.Transformer, error)
 		if t.Script.Language != nil {
 			language = *t.Script.Language
 		}
+		var scriptEngine domain.ScriptEngine
 		switch language {
 		case "anko":
-			return transformer.NewScriptTransformer(script)
+			scriptEngine = script.NewAnkoScriptEngine()
 		default:
 			return nil, fmt.Errorf("unsupported script language: %s", language)
 		}
+		s, err := scriptEngine.NewScript(scriptString)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse script: %v", err)
+		}
+		return transformer.NewScriptTransformer(s)
 	}
 	if t.Debug != nil {
 		return transformer.NewDebugTransformer(*t.Debug), nil

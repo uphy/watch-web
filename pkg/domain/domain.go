@@ -45,6 +45,12 @@ type (
 		GetStatus(jobID string) (*JobStatus, error)
 		SetStatus(jobID string, status *JobStatus) error
 	}
+	ScriptEngine interface {
+		NewScript(script string) (Script, error)
+	}
+	Script interface {
+		Evaluate(args map[string]interface{}) (interface{}, error)
+	}
 )
 
 func NewDefaultJobContext() *JobContext {

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/uphy/watch-web/pkg/domain"
+	"github.com/uphy/watch-web/pkg/domain/script"
 )
 
 func TestScriptTransformer_Transform(t *testing.T) {
@@ -49,9 +50,15 @@ source.Map(func(v){
 			}),
 		},
 	}
+	scriptEngine := script.NewAnkoScriptEngine()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			transformer, err := NewScriptTransformer(tt.args.script)
+			script, err := scriptEngine.NewScript(tt.args.script)
+			if err != nil {
+				t.Errorf("failed to create script object: %v", err)
+				return
+			}
+			transformer, err := NewScriptTransformer(script)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("JavaScriptTransformer.Transform() error = %v, wantErr %v", err, tt.wantErr)
 				return
