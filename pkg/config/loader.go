@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/ghodss/yaml"
 	"github.com/go-redis/redis/v7"
@@ -476,9 +477,11 @@ func (l *Loader) createTransform(t *TransformConfig) (domain.Transformer, error)
 			language = *t.Script.Language
 		}
 		var scriptEngine domain.ScriptEngine
-		switch language {
+		switch strings.ToLower(language) {
 		case "anko":
 			scriptEngine = script.NewAnkoScriptEngine()
+		case "javascript", "js":
+			scriptEngine = script.NewJavaScriptEngine()
 		default:
 			return nil, fmt.Errorf("unsupported script language: %s", language)
 		}
