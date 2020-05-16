@@ -63,6 +63,13 @@ func TestJavaScript_Evaluate(t *testing.T) {
 				"b": 2.,
 			}),
 		},
+		{
+			script: "a < 2",
+			args: map[string]interface{}{
+				"a": 1,
+			},
+			want: true,
+		},
 	}
 	engine := NewJavaScriptEngine()
 	for _, tt := range tests {

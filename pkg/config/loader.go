@@ -472,6 +472,13 @@ func (l *Loader) createTransform(t *TransformConfig) (domain.Transformer, error)
 		}
 		return transformer.NewScriptTransformer(scr)
 	}
+	if t.Filter != nil {
+		scr, err := t.Filter.NewScript(l.ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse script: %v", err)
+		}
+		return transformer.NewFilterTransformer(scr), nil
+	}
 	if t.Debug != nil {
 		return transformer.NewDebugTransformer(*t.Debug), nil
 	}

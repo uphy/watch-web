@@ -1,0 +1,16 @@
+source:
+  constant:
+    template: "{{ .current }}"
+  transforms:
+    - json_array: {}
+    - filter:
+        javascript: 'source.price < 300'
+tests:
+  - name: Added
+    vars:
+      current: |
+        [{"id":"001","price":200,"title":"TITLE1"},{"id":"000","price":300,"title":"TITLE0"},{"id":"002","price":400,"title":"TITLE2"}]
+    previous: []
+    expects:
+      result:
+        - {"id":"001","price":"200","title":"TITLE1"}

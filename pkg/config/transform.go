@@ -20,6 +20,7 @@ type (
 			By string `json:"by"`
 		} `json:"sort,omitempty"`
 		Script *ScriptConfig `json:"script,omitempty"`
+		Filter *ScriptConfig `json:"filter,omitempty"`
 		Debug  *bool         `json:"debug"`
 	}
 )
