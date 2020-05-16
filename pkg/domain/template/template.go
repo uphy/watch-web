@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/uphy/watch-web/pkg/domain/value"
 	"os"
 	"regexp"
 	"strings"
@@ -12,12 +11,13 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/uphy/watch-web/pkg/domain/value"
 	"golang.org/x/net/html"
 )
 
-type (
-	TemplateString string
-)
+type Template struct {
+	template *template.Template
+}
 
 var funcs = map[string]interface{}{
 	"env": func(name string) string {
@@ -95,14 +95,18 @@ var funcs = map[string]interface{}{
 	},
 }
 
-func (t TemplateString) Evaluate(ctx *TemplateContext) (string, error) {
-	var buf = new(bytes.Buffer)
-	tmpl, err := template.New("template-string").Funcs(funcs).Parse(string(t))
+func Parse(s string) (*Template, error) {
+	tmpl, err := template.New("template-string").Funcs(funcs).Parse(s)
 	if err != nil {
-		return "", fmt.Errorf("cannot parse template: template=%v, error=%w", t, err)
+		return nil, fmt.Errorf("cannot parse template: %w", err)
 	}
-	if err := tmpl.Execute(buf, ctx.Get()); err != nil {
-		return "", fmt.Errorf("cannot evaluate %s: %w", t, err)
+	return &Template{tmpl}, nil
+}
+
+func (t *Template) Evaluate(ctx *TemplateContext) (string, error) {
+	var buf = new(bytes.Buffer)
+	if err := t.template.Execute(buf, ctx.Get()); err != nil {
+		return "", fmt.Errorf("cannot evaluate: %w", err)
 	}
 	return buf.String(), nil
 }
