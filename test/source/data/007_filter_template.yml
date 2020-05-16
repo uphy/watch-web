@@ -1,0 +1,17 @@
+source:
+  constant:
+    template: "{{ .current }}"
+  transforms:
+    - json_array: {}
+    - filter:
+        template: |
+          {{ if eq .source.id "001" }}true{{ else }}false{{ end }}
+tests:
+  - name: filter template simple
+    vars:
+      current: |
+        [{"id":"001","price":200,"title":"TITLE1"},{"id":"000","price":300,"title":"TITLE0"},{"id":"002","price":400,"title":"TITLE2"}]
+    previous: []
+    expects:
+      result:
+        - {"id":"001","price":"200","title":"TITLE1"}

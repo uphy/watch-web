@@ -2,6 +2,9 @@ package transformer
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/uphy/watch-web/pkg/domain/value"
 
 	"github.com/uphy/watch-web/pkg/domain"
@@ -38,6 +41,17 @@ func (f *FilterTransformer) Transform(ctx *domain.JobContext, v value.Value) (va
 			if r == 0 {
 				continue
 			}
+		case string:
+			r = strings.Trim(r, " \n\t")
+			b, err := strconv.ParseBool(r)
+			if err != nil {
+				return nil, fmt.Errorf("cannot parse script result as boolean: value=%v, err=%w", r, err)
+			}
+			if !b {
+				continue
+			}
+		default:
+			return nil, fmt.Errorf("cannot use the result value of the script for filter: unsupported type: %v", r)
 		}
 		filtered = append(filtered, elm)
 	}

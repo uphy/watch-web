@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+
 	"github.com/uphy/watch-web/pkg/domain/template"
 
 	"github.com/uphy/watch-web/pkg/domain"
@@ -12,6 +13,7 @@ type (
 	ScriptConfig struct {
 		JavaScript *template.TemplateString `json:"javascript"`
 		Anko       *template.TemplateString `json:"anko"`
+		Template   *string                  `json:"template"`
 	}
 )
 
@@ -29,6 +31,9 @@ func (s *ScriptConfig) NewScript(ctx *template.TemplateContext) (domain.Script, 
 			return nil, err
 		}
 		return script.NewAnkoScriptEngine().NewScript(scr)
+	}
+	if s.Template != nil {
+		return script.NewTemplateScriptEngine(ctx).NewScript(*s.Template)
 	}
 	return nil, errors.New("no script engine defined")
 }
