@@ -1,10 +1,9 @@
 package script
 
 import (
+	"github.com/uphy/watch-web/pkg/domain/value"
 	"reflect"
 	"testing"
-
-	"github.com/uphy/watch-web/pkg/domain"
 )
 
 func TestJavaScript_Evaluate(t *testing.T) {
@@ -37,7 +36,7 @@ func TestJavaScript_Evaluate(t *testing.T) {
 		{
 			script: "a.b",
 			args: map[string]interface{}{
-				"a": domain.NewJSONObject(map[string]interface{}{
+				"a": value.NewJSONObject(map[string]interface{}{
 					"b": 1,
 				}),
 			},
@@ -46,7 +45,7 @@ func TestJavaScript_Evaluate(t *testing.T) {
 		{
 			script: "a.b *= 2;a.b",
 			args: map[string]interface{}{
-				"a": domain.NewJSONObject(map[string]interface{}{
+				"a": value.NewJSONObject(map[string]interface{}{
 					"b": 1,
 				}),
 			},
@@ -55,11 +54,11 @@ func TestJavaScript_Evaluate(t *testing.T) {
 		{
 			script: "a.b *= 2;a",
 			args: map[string]interface{}{
-				"a": domain.NewJSONObject(map[string]interface{}{
+				"a": value.NewJSONObject(map[string]interface{}{
 					"b": 1,
 				}),
 			},
-			want: domain.NewJSONObject(map[string]interface{}{
+			want: value.NewJSONObject(map[string]interface{}{
 				"b": 2.,
 			}),
 		},

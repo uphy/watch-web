@@ -3,6 +3,7 @@ package source
 import (
 	"errors"
 	"fmt"
+	"github.com/uphy/watch-web/pkg/domain/value"
 	"math"
 	"time"
 
@@ -27,14 +28,14 @@ func NewRetrySource(src domain.Source, emptyAction *EmptyAction, retry *int) *So
 	return &SourceWithRetry{src, emptyAction, retry}
 }
 
-func (s *SourceWithRetry) Fetch(ctx *domain.JobContext) (domain.Value, error) {
+func (s *SourceWithRetry) Fetch(ctx *domain.JobContext) (value.Value, error) {
 	if s.retry == nil {
 		return s.fetch(ctx)
 	}
 	retry := *s.retry
 	var err error
 	for i := 0; i <= retry; i++ {
-		var v domain.Value
+		var v value.Value
 		v, err = s.fetch(ctx)
 		if err == nil {
 			return v, nil
@@ -48,7 +49,7 @@ func (s *SourceWithRetry) Fetch(ctx *domain.JobContext) (domain.Value, error) {
 	return nil, fmt.Errorf("too many retries: lastError=%w", err)
 }
 
-func (s *SourceWithRetry) fetch(ctx *domain.JobContext) (domain.Value, error) {
+func (s *SourceWithRetry) fetch(ctx *domain.JobContext) (value.Value, error) {
 	v, err := s.source.Fetch(ctx)
 	if err != nil {
 		return nil, err

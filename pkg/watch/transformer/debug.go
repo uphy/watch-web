@@ -2,6 +2,7 @@ package transformer
 
 import (
 	"fmt"
+	"github.com/uphy/watch-web/pkg/domain/value"
 
 	"github.com/ghodss/yaml"
 	"github.com/uphy/watch-web/pkg/domain"
@@ -17,7 +18,7 @@ func NewDebugTransformer(debug bool) *DebugTransformer {
 	return &DebugTransformer{debug}
 }
 
-func (t DebugTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
+func (t DebugTransformer) Transform(ctx *domain.JobContext, v value.Value) (value.Value, error) {
 	b, err := yaml.Marshal(v.Interface())
 	if err != nil {
 		return nil, err

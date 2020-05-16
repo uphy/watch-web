@@ -3,11 +3,14 @@ package config
 import (
 	"errors"
 	"fmt"
+	"github.com/uphy/watch-web/pkg/domain/template"
 	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/uphy/watch-web/pkg/domain/value"
 
 	"github.com/ghodss/yaml"
 	"github.com/go-redis/redis/v7"
@@ -25,7 +28,7 @@ import (
 type (
 	Loader struct {
 		log             *logrus.Logger
-		ctx             *domain.TemplateContext
+		ctx             *template.TemplateContext
 		configDirectory *configDirectory
 	}
 )
@@ -41,12 +44,12 @@ func LoadAndCreate(log *logrus.Logger, file string) (*watch.Executor, error) {
 }
 
 func NewLoader(log *logrus.Logger, file string) *Loader {
-	ctx := domain.NewRootTemplateContext()
+	ctx := template.NewRootTemplateContext()
 	dir, _ := filepath.Split(file)
 	return &Loader{log, ctx, newConfigDirectory(dir)}
 }
 
-func (l *Loader) TemplateContext() *domain.TemplateContext {
+func (l *Loader) TemplateContext() *template.TemplateContext {
 	return l.ctx
 }
 
@@ -218,12 +221,12 @@ func (l *Loader) addJobTo(c *JobConfig, e *watch.Executor) ([]*watch.Job, error)
 	return jobs, nil
 }
 
-func evaluateItemAsTemplate(ctx *domain.TemplateContext, v interface{}) (interface{}, error) {
+func evaluateItemAsTemplate(ctx *template.TemplateContext, v interface{}) (interface{}, error) {
 	m, ok := v.(map[string]interface{})
 	if ok {
 		evaluated := make(map[string]interface{})
 		for key, value := range m {
-			ekey, err := domain.TemplateString(key).Evaluate(ctx)
+			ekey, err := template.TemplateString(key).Evaluate(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -235,7 +238,7 @@ func evaluateItemAsTemplate(ctx *domain.TemplateContext, v interface{}) (interfa
 		}
 		return evaluated, nil
 	}
-	e, err := domain.TemplateString(fmt.Sprint(v)).Evaluate(ctx)
+	e, err := template.TemplateString(fmt.Sprint(v)).Evaluate(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -343,7 +346,7 @@ func (l *Loader) createSourceShell(d *ShellSourceConfig) (domain.Source, error) 
 
 func (l *Loader) createSourceConstant(s *ConstantSourceConfig) (domain.Source, error) {
 	if s.Value != nil {
-		v, err := domain.ConvertInterfaceAs(s.Value, domain.ValueTypeAutoDetect)
+		v, err := value.ConvertInterfaceAs(s.Value, value.ValueTypeAutoDetect)
 		if err != nil {
 			return nil, err
 		}
@@ -364,14 +367,14 @@ func (l *Loader) createSourceConstant(s *ConstantSourceConfig) (domain.Source, e
 		if err != nil {
 			return nil, err
 		}
-		return source.NewConstantSource(domain.NewStringValue(string(b))), nil
+		return source.NewConstantSource(value.NewStringValue(string(b))), nil
 	}
 	if s.Template != nil {
-		value, err := s.Template.Evaluate(l.ctx)
+		v, err := s.Template.Evaluate(l.ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to evaluate constant source template: %w", err)
 		}
-		return source.NewConstantSource(domain.NewStringValue(string(value))), nil
+		return source.NewConstantSource(value.NewStringValue(v)), nil
 	}
 	return nil, errors.New("unsupported constant source")
 }

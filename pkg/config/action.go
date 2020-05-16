@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/uphy/watch-web/pkg/domain"
+	"github.com/uphy/watch-web/pkg/domain/template"
 )
 
 type (
@@ -10,8 +10,8 @@ type (
 		Console *ConsoleActionConfig `json:"console"`
 	}
 	SlackActionConfig struct {
-		URL   domain.TemplateString `json:"url"`
-		Debug bool                  `json:"debug"`
+		URL   template.TemplateString `json:"url"`
+		Debug bool                    `json:"debug"`
 	}
 	ConsoleActionConfig struct {
 	}

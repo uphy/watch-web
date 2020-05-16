@@ -3,6 +3,7 @@ package source
 import (
 	"bytes"
 	"errors"
+	"github.com/uphy/watch-web/pkg/domain/value"
 	"io"
 	"net/http"
 	"strconv"
@@ -30,7 +31,7 @@ func NewDOMSource(url, selector string, encoding encoding.Encoding) *DOMSource {
 	}
 }
 
-func (d *DOMSource) Fetch(ctx *domain.JobContext) (domain.Value, error) {
+func (d *DOMSource) Fetch(ctx *domain.JobContext) (value.Value, error) {
 	resp, err := http.Get(d.URL)
 	if err != nil {
 		return nil, err
@@ -59,5 +60,5 @@ func (d *DOMSource) Fetch(ctx *domain.JobContext) (domain.Value, error) {
 
 		buf.WriteString(text)
 	})
-	return domain.NewStringValue(buf.String()), nil
+	return value.NewStringValue(buf.String()), nil
 }

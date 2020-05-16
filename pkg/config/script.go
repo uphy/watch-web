@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"github.com/uphy/watch-web/pkg/domain/template"
 
 	"github.com/uphy/watch-web/pkg/domain"
 	"github.com/uphy/watch-web/pkg/domain/script"
@@ -9,12 +10,12 @@ import (
 
 type (
 	ScriptConfig struct {
-		JavaScript *domain.TemplateString `json:"javascript"`
-		Anko       *domain.TemplateString `json:"anko"`
+		JavaScript *template.TemplateString `json:"javascript"`
+		Anko       *template.TemplateString `json:"anko"`
 	}
 )
 
-func (s *ScriptConfig) NewScript(ctx *domain.TemplateContext) (domain.Script, error) {
+func (s *ScriptConfig) NewScript(ctx *template.TemplateContext) (domain.Script, error) {
 	if s.JavaScript != nil {
 		scr, err := s.JavaScript.Evaluate(ctx)
 		if err != nil {

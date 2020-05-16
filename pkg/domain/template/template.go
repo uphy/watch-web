@@ -1,9 +1,10 @@
-package domain
+package template
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/uphy/watch-web/pkg/domain/value"
 	"os"
 	"regexp"
 	"strings"
@@ -106,7 +107,7 @@ func (t TemplateString) Evaluate(ctx *TemplateContext) (string, error) {
 	return buf.String(), nil
 }
 
-func SelectDOM(html string, selector string) (Value, error) {
+func SelectDOM(html string, selector string) (value.Value, error) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
 	if err != nil {
 		return nil, err
@@ -123,7 +124,7 @@ func SelectDOM(html string, selector string) (Value, error) {
 	selectedHTML, _ := selection.Html()
 	result["html"] = selectedHTML
 	result["nodes"] = nodes
-	return NewJSONObject(result), nil
+	return value.NewJSONObject(result), nil
 }
 
 func nodeToMap(n *html.Node) map[string]interface{} {

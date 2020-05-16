@@ -2,18 +2,18 @@ package config
 
 import (
 	"bytes"
+	"github.com/uphy/watch-web/pkg/domain/template"
 	"io"
 
 	"github.com/ghodss/yaml"
-	"github.com/uphy/watch-web/pkg/domain"
 )
 
 type (
 	Config struct {
-		Jobs       []JobConfig            `json:"jobs"`
-		InitialRun *domain.TemplateString `json:"initial_run,omitempty"`
-		Actions    []ActionConfig         `json:"actions"`
-		Store      *StoreConfig           `json:"store"`
+		Jobs       []JobConfig              `json:"jobs"`
+		InitialRun *template.TemplateString `json:"initial_run,omitempty"`
+		Actions    []ActionConfig           `json:"actions"`
+		Store      *StoreConfig             `json:"store"`
 	}
 )
 

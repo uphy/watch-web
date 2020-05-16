@@ -2,7 +2,6 @@ package action
 
 import (
 	"fmt"
-
 	"github.com/uphy/watch-web/pkg/domain"
 )
 

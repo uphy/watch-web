@@ -2,23 +2,24 @@ package source
 
 import (
 	"fmt"
+	value2 "github.com/uphy/watch-web/pkg/domain/value"
 
 	"github.com/uphy/watch-web/pkg/domain"
 )
 
 type (
 	ConstantSource struct {
-		value domain.Value
+		value value2.Value
 	}
 )
 
-func NewConstantSource(constant domain.Value) *ConstantSource {
+func NewConstantSource(constant value2.Value) *ConstantSource {
 	return &ConstantSource{
 		value: constant,
 	}
 }
 
-func (c *ConstantSource) Fetch(ctx *domain.JobContext) (domain.Value, error) {
+func (c *ConstantSource) Fetch(ctx *domain.JobContext) (value2.Value, error) {
 	return c.value, nil
 }
 

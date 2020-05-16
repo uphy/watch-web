@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/uphy/watch-web/pkg/domain"
+	"github.com/uphy/watch-web/pkg/domain/template"
 )
 
 type (
@@ -9,8 +9,8 @@ type (
 		Redis *RedisConfig `json:"redis,omitempty"`
 	}
 	RedisConfig struct {
-		Address   *domain.TemplateString `json:"address"`
-		Password  *domain.TemplateString `json:"password"`
-		RedisToGo *domain.TemplateString `json:"redistogo"`
+		Address   *template.TemplateString `json:"address"`
+		Password  *template.TemplateString `json:"password"`
+		RedisToGo *template.TemplateString `json:"redistogo"`
 	}
 )

@@ -3,6 +3,7 @@ package transformer
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/uphy/watch-web/pkg/domain/value"
 	"sort"
 	"strings"
 
@@ -19,7 +20,7 @@ func NewSortTransformer(by string) *SortTransformer {
 	return &SortTransformer{by}
 }
 
-func (j *SortTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
+func (j *SortTransformer) Transform(ctx *domain.JobContext, v value.Value) (value.Value, error) {
 	array := v.JSONArray()
 	extract := func(v interface{}) string {
 		b, err := json.Marshal(v)
@@ -41,7 +42,7 @@ func (j *SortTransformer) Transform(ctx *domain.JobContext, v domain.Value) (dom
 		v2 := extract(array[j])
 		return strings.Compare(v1, v2) < 0
 	})
-	return domain.NewJSONArray(array), nil
+	return value.NewJSONArray(array), nil
 }
 
 func (j *SortTransformer) String() string {

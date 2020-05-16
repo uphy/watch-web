@@ -1,6 +1,7 @@
 package transformer
 
 import (
+	"github.com/uphy/watch-web/pkg/domain/value"
 	"reflect"
 	"testing"
 
@@ -10,18 +11,18 @@ import (
 
 func TestScriptTransformer_Transform(t *testing.T) {
 	type args struct {
-		v      domain.Value
+		v      value.Value
 		script string
 	}
 	tests := []struct {
 		name    string
 		args    args
-		want    domain.Value
+		want    value.Value
 		wantErr bool
 	}{
 		{
 			args: args{
-				v: domain.NewJSONArray([]interface{}{
+				v: value.NewJSONArray([]interface{}{
 					map[string]interface{}{
 						"id":    "000",
 						"price": 100,
@@ -41,7 +42,7 @@ source.Map(func(v){
 })
 `,
 			},
-			want: domain.NewJSONArray([]interface{}{
+			want: value.NewJSONArray([]interface{}{
 				map[string]interface{}{
 					"id":          "000",
 					"description": "ID: 000 (100 yen)",

@@ -2,23 +2,25 @@ package transformer
 
 import (
 	"fmt"
+	"github.com/uphy/watch-web/pkg/domain/template"
+	"github.com/uphy/watch-web/pkg/domain/value"
 
 	"github.com/uphy/watch-web/pkg/domain"
 )
 
 type (
-	transform      map[string]domain.TemplateString
+	transform      map[string]template.TemplateString
 	MapTransformer struct {
 		transform transform
-		ctx       *domain.TemplateContext
+		ctx       *template.TemplateContext
 	}
 )
 
-func NewMapTransformer(transform map[string]domain.TemplateString, ctx *domain.TemplateContext) *MapTransformer {
+func NewMapTransformer(transform map[string]template.TemplateString, ctx *template.TemplateContext) *MapTransformer {
 	return &MapTransformer{transform, ctx}
 }
 
-func (t transform) transform(ctx *domain.TemplateContext, v domain.Value) (domain.Value, error) {
+func (t transform) transform(ctx *template.TemplateContext, v value.Value) (value.Value, error) {
 	ctx.PushScope()
 	ctx.Set("source", v.Interface())
 	defer ctx.PopScope()
@@ -31,17 +33,17 @@ func (t transform) transform(ctx *domain.TemplateContext, v domain.Value) (domai
 		}
 		transformed[k] = evaluated
 	}
-	return domain.NewJSONObject(transformed), nil
+	return value.NewJSONObject(transformed), nil
 }
 
-func (t *MapTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
+func (t *MapTransformer) Transform(ctx *domain.JobContext, v value.Value) (value.Value, error) {
 	switch v.Type() {
-	case domain.ValueTypeString, domain.ValueTypeJSONObject:
+	case value.ValueTypeString, value.ValueTypeJSONObject:
 		return t.transform.transform(t.ctx, v)
-	case domain.ValueTypeJSONArray:
+	case value.ValueTypeJSONArray:
 		var result = make([]interface{}, 0)
 		for _, elm := range v.JSONArray() {
-			value, err := domain.ConvertInterfaceAs(elm, domain.ValueTypeJSONObject)
+			value, err := value.ConvertInterfaceAs(elm, value.ValueTypeJSONObject)
 			if err != nil {
 				return nil, err
 			}
@@ -51,7 +53,7 @@ func (t *MapTransformer) Transform(ctx *domain.JobContext, v domain.Value) (doma
 			}
 			result = append(result, transformed.Interface())
 		}
-		return domain.NewJSONArray(result), nil
+		return value.NewJSONArray(result), nil
 	default:
 		return nil, fmt.Errorf("unsupported value type: %s", v.Type())
 	}

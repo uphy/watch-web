@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/uphy/watch-web/pkg/domain/value"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -85,10 +86,10 @@ func (s *SlackAction) run(ctx *domain.JobContext, res *domain.Result) (interface
 			}
 			return result
 		},
-		"flatChanges": func(changes *domain.ItemChange) []map[string]interface{} {
+		"flatChanges": func(changes *value.ItemChange) []map[string]interface{} {
 			var result = make([]map[string]interface{}, 0)
 			for k, v := range changes.AddedKeys {
-				if k == domain.ItemKeyID {
+				if k == value.ItemKeyID {
 					continue
 				}
 				result = append(result, map[string]interface{}{
@@ -98,7 +99,7 @@ func (s *SlackAction) run(ctx *domain.JobContext, res *domain.Result) (interface
 				})
 			}
 			for k, v := range changes.RemovedKeys {
-				if k == domain.ItemKeyID {
+				if k == value.ItemKeyID {
 					continue
 				}
 				result = append(result, map[string]interface{}{
@@ -108,7 +109,7 @@ func (s *SlackAction) run(ctx *domain.JobContext, res *domain.Result) (interface
 				})
 			}
 			for k, v := range changes.ChangedKeys {
-				if k == domain.ItemKeyID {
+				if k == value.ItemKeyID {
 					continue
 				}
 				result = append(result, map[string]interface{}{

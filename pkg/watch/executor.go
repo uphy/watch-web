@@ -2,6 +2,7 @@ package watch
 
 import (
 	"fmt"
+	"github.com/uphy/watch-web/pkg/domain/value"
 	"log"
 	"sync"
 	"time"
@@ -108,10 +109,10 @@ func (e *Executor) Check(job *Job) (res *domain.Result, err error) {
 			return nil, err
 		}
 	}
-	previousItemList, err := domain.NewItemListFromJSON(previous)
+	previousItemList, err := value.NewItemListFromJSON(previous)
 	if err != nil {
 		job.failed(status, "failed to restore item list", err)
-		previousItemList = make(domain.ItemList, 0)
+		previousItemList = make(value.ItemList, 0)
 	}
 
 	now := time.Now()
@@ -165,8 +166,8 @@ func (e *Executor) TestActions(job *Job) error {
 		JobID:    job.ID(),
 		Label:    "test action",
 		Link:     "https://google.com",
-		Previous: domain.ItemList{domain.Item{"This is test action.": ""}},
-		Current:  domain.ItemList{domain.Item{"This is test action.\naaaaaa": ""}},
+		Previous: value.ItemList{value.Item{"This is test action.": ""}},
+		Current:  value.ItemList{value.Item{"This is test action.\naaaaaa": ""}},
 	})
 }
 

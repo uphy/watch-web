@@ -2,6 +2,7 @@ package source
 
 import (
 	"fmt"
+	"github.com/uphy/watch-web/pkg/domain/value"
 
 	"github.com/sirupsen/logrus"
 	"github.com/uphy/watch-web/pkg/domain"
@@ -18,7 +19,7 @@ func NewTransformerSource(source domain.Source, transformers []domain.Transforme
 	return &TransformerSource{source, transformers}
 }
 
-func (f *TransformerSource) Fetch(ctx *domain.JobContext) (domain.Value, error) {
+func (f *TransformerSource) Fetch(ctx *domain.JobContext) (value.Value, error) {
 	v, err := f.source.Fetch(ctx)
 	if err != nil {
 		return nil, err

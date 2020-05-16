@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/uphy/watch-web/pkg/domain"
+	"github.com/uphy/watch-web/pkg/domain/template"
 	"github.com/uphy/watch-web/pkg/watch/source"
 )
 
@@ -17,24 +17,24 @@ type (
 		Retry       *int                `json:"retry,omitempty"`
 	}
 	DOMSourceConfig struct {
-		URL      domain.TemplateString  `json:"url"`
-		Selector domain.TemplateString  `json:"selector"`
-		Encoding *domain.TemplateString `json:"encoding"`
+		URL      template.TemplateString  `json:"url"`
+		Selector template.TemplateString  `json:"selector"`
+		Encoding *template.TemplateString `json:"encoding"`
 	}
 	ShellSourceConfig struct {
-		Command *domain.TemplateString `json:"command"`
+		Command *template.TemplateString `json:"command"`
 	}
 	ConstantSourceConfig struct {
-		Value    interface{}            `json:"value,omitempty"`
-		Template *domain.TemplateString `json:"template,omitempty"`
-		File     *string                `json:"file,omitempty"`
+		Value    interface{}              `json:"value,omitempty"`
+		Template *template.TemplateString `json:"template,omitempty"`
+		File     *string                  `json:"file,omitempty"`
 	}
 	IncludeSourceConfig struct {
-		File domain.TemplateString `json:"file"`
+		File template.TemplateString `json:"file"`
 		// Overrides defines a source config.
 		// `File`'s source will be overriden by this source.
 		// This is for testing
-		Overrides *SourceConfig                    `json:"overrides,omitempty"`
-		Vars      map[string]domain.TemplateString `json:"vars,omitempty"`
+		Overrides *SourceConfig                      `json:"overrides,omitempty"`
+		Vars      map[string]template.TemplateString `json:"vars,omitempty"`
 	}
 )

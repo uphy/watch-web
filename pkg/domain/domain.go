@@ -3,6 +3,8 @@ package domain
 import (
 	"time"
 
+	"github.com/uphy/watch-web/pkg/domain/value"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -31,10 +33,10 @@ type (
 		Log *logrus.Entry
 	}
 	Source interface {
-		Fetch(ctx *JobContext) (Value, error)
+		Fetch(ctx *JobContext) (value.Value, error)
 	}
 	Transformer interface {
-		Transform(ctx *JobContext, v Value) (Value, error)
+		Transform(ctx *JobContext, v value.Value) (value.Value, error)
 	}
 	Action interface {
 		Run(ctx *JobContext, result *Result) error

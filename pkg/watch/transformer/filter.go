@@ -2,6 +2,7 @@ package transformer
 
 import (
 	"fmt"
+	"github.com/uphy/watch-web/pkg/domain/value"
 
 	"github.com/uphy/watch-web/pkg/domain"
 )
@@ -14,9 +15,9 @@ func NewFilterTransformer(script domain.Script) *FilterTransformer {
 	return &FilterTransformer{script}
 }
 
-func (f *FilterTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
+func (f *FilterTransformer) Transform(ctx *domain.JobContext, v value.Value) (value.Value, error) {
 	a := v.JSONArray()
-	filtered := make(domain.JSONArray, 0)
+	filtered := make(value.JSONArray, 0)
 	for _, elm := range a {
 		result, err := f.script.Evaluate(map[string]interface{}{
 			"source": elm,
@@ -40,5 +41,5 @@ func (f *FilterTransformer) Transform(ctx *domain.JobContext, v domain.Value) (d
 		}
 		filtered = append(filtered, elm)
 	}
-	return domain.NewJSONArray(filtered), nil
+	return value.NewJSONArray(filtered), nil
 }

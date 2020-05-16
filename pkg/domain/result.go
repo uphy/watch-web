@@ -1,16 +1,18 @@
 package domain
 
+import "github.com/uphy/watch-web/pkg/domain/value"
+
 type (
 	Result struct {
 		JobID    string
 		Label    string
 		Link     string
-		Previous ItemList
-		Current  ItemList
+		Previous value.ItemList
+		Current  value.ItemList
 	}
 )
 
-func NewResult(info *JobInfo, previous, current ItemList) *Result {
+func NewResult(info *JobInfo, previous, current value.ItemList) *Result {
 	return &Result{
 		JobID:    info.ID,
 		Label:    info.Label,
@@ -20,6 +22,6 @@ func NewResult(info *JobInfo, previous, current ItemList) *Result {
 	}
 }
 
-func (r *Result) Diff() Updates {
-	return CompareItemList(r.Previous, r.Current)
+func (r *Result) Diff() value.Updates {
+	return value.CompareItemList(r.Previous, r.Current)
 }

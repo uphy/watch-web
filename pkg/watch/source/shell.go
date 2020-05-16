@@ -2,6 +2,7 @@ package source
 
 import (
 	"fmt"
+	"github.com/uphy/watch-web/pkg/domain/value"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -22,7 +23,7 @@ func NewShellSource(command string) *ShellSource {
 	}
 }
 
-func (c *ShellSource) Fetch(ctx *domain.JobContext) (domain.Value, error) {
+func (c *ShellSource) Fetch(ctx *domain.JobContext) (value.Value, error) {
 	ctx.Log.WithField("command", c.Command).Debug("Run shell command.")
 	cmd := exec.Command("sh", "-c", c.Command)
 	for _, env := range os.Environ() {
@@ -41,7 +42,7 @@ func (c *ShellSource) Fetch(ctx *domain.JobContext) (domain.Value, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute shell command: command=%s, err=%v", c.Command, err)
 	}
-	return domain.NewStringValue(string(b)), nil
+	return value.NewStringValue(string(b)), nil
 }
 
 func (c *ShellSource) String() string {

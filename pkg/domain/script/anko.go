@@ -2,6 +2,7 @@ package script
 
 import (
 	"fmt"
+	"github.com/uphy/watch-web/pkg/domain/template"
 	"regexp"
 
 	"github.com/mattn/anko/core"
@@ -31,7 +32,7 @@ func (a *AnkoScriptEngine) NewScript(script string) (domain.Script, error) {
 	funcs := map[string]interface{}{
 		"sprintf": fmt.Sprintf,
 		"selectDOM": func(html, selector string) (interface{}, error) {
-			v, err := domain.SelectDOM(html, selector)
+			v, err := template.SelectDOM(html, selector)
 			if err != nil {
 				return nil, err
 			}

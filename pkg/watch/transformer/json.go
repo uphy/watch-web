@@ -2,6 +2,8 @@ package transformer
 
 import (
 	"fmt"
+	"github.com/uphy/watch-web/pkg/domain/template"
+	"github.com/uphy/watch-web/pkg/domain/value"
 	"strconv"
 
 	"github.com/uphy/watch-web/pkg/domain"
@@ -9,24 +11,24 @@ import (
 
 type (
 	JSONArrayTransformer struct {
-		condition *domain.TemplateString
-		ctx       *domain.TemplateContext
+		condition *template.TemplateString
+		ctx       *template.TemplateContext
 	}
 	JSONObjectTransformer struct {
 	}
 )
 
-func NewJSONArrayTransformer(ctx *domain.TemplateContext, condition *domain.TemplateString) *JSONArrayTransformer {
+func NewJSONArrayTransformer(ctx *template.TemplateContext, condition *template.TemplateString) *JSONArrayTransformer {
 	return &JSONArrayTransformer{condition, ctx}
 }
 
-func (j *JSONArrayTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
+func (j *JSONArrayTransformer) Transform(ctx *domain.JobContext, v value.Value) (value.Value, error) {
 	if j.condition != nil {
-		array, err := domain.ConvertAs(v.String(), domain.ValueTypeJSONArray)
+		array, err := value.ConvertAs(v.String(), value.ValueTypeJSONArray)
 		if err != nil {
 			return nil, err
 		}
-		result := make(domain.JSONArray, 0)
+		result := make(value.JSONArray, 0)
 		for _, elm := range array.JSONArray() {
 			j.ctx.PushScope()
 			j.ctx.Set("source", elm)
@@ -40,9 +42,9 @@ func (j *JSONArrayTransformer) Transform(ctx *domain.JobContext, v domain.Value)
 				result = append(result, elm)
 			}
 		}
-		return domain.NewJSONArray(result), nil
+		return value.NewJSONArray(result), nil
 	}
-	return domain.ConvertAs(v.String(), domain.ValueTypeJSONArray)
+	return value.ConvertAs(v.String(), value.ValueTypeJSONArray)
 }
 
 func (j *JSONArrayTransformer) String() string {
@@ -53,8 +55,8 @@ func NewJSONObjectTransformer() *JSONObjectTransformer {
 	return &JSONObjectTransformer{}
 }
 
-func (j *JSONObjectTransformer) Transform(ctx *domain.JobContext, v domain.Value) (domain.Value, error) {
-	return domain.ConvertAs(v.String(), domain.ValueTypeJSONObject)
+func (j *JSONObjectTransformer) Transform(ctx *domain.JobContext, v value.Value) (value.Value, error) {
+	return value.ConvertAs(v.String(), value.ValueTypeJSONObject)
 }
 
 func (j *JSONObjectTransformer) String() string {

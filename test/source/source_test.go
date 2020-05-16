@@ -3,6 +3,7 @@ package source
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/uphy/watch-web/pkg/domain/value"
 	"io/ioutil"
 	"log"
 	"os"
@@ -35,9 +36,9 @@ type (
 		Expects  Expects           `json:"expects"`
 	}
 	Expects struct {
-		Result  domain.ItemList `json:"result"`
-		Changed *bool           `json:"changed"`
-		Diff    domain.Updates  `json:"diff"`
+		Result  value.ItemList `json:"result"`
+		Changed *bool          `json:"changed"`
+		Diff    value.Updates  `json:"diff"`
 	}
 	reporter struct {
 		t        *testing.T
@@ -142,7 +143,7 @@ func TestAll(t *testing.T) {
 	}
 }
 
-func compareResult(reporter *reporter, label string, expected, actual domain.ItemList) {
+func compareResult(reporter *reporter, label string, expected, actual value.ItemList) {
 	if !reflect.DeepEqual(expected, actual) {
 		reporter.Errorf(`%s wrong:
 expected:
@@ -154,7 +155,7 @@ actual:
 	}
 }
 
-func compareUpdates(reporter *reporter, label string, expected, actual domain.Updates) {
+func compareUpdates(reporter *reporter, label string, expected, actual value.Updates) {
 	y1 := expected.YAML()
 	y2 := actual.YAML()
 	if !reflect.DeepEqual(y1, y2) {
