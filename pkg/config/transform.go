@@ -19,10 +19,7 @@ type (
 		Sort *struct {
 			By string `json:"by"`
 		} `json:"sort,omitempty"`
-		Script *struct {
-			Script   *domain.TemplateString `json:"script"`
-			Language *string                `json:"lang"`
-		} `json:"script,omitempty"`
-		Debug *bool `json:"debug"`
+		Script *ScriptConfig `json:"script,omitempty"`
+		Debug  *bool         `json:"debug"`
 	}
 )

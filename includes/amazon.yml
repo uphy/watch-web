@@ -3,7 +3,7 @@ shell:
     curl --compressed -sSL https://www.amazon.co.jp/dp/{{ .itemId }}/
 transforms:
   - script:
-      script: |
+      anko: |
         strings = import("strings")
 
         html = source
