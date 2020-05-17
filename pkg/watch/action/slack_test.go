@@ -1,10 +1,11 @@
 package action
 
 import (
-	"github.com/uphy/watch-web/pkg/domain/value"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/uphy/watch-web/pkg/domain/value"
 
 	"github.com/sirupsen/logrus"
 	"github.com/uphy/watch-web/pkg/domain"
@@ -12,6 +13,9 @@ import (
 )
 
 func TestSlackAction_Run(t *testing.T) {
+	if os.Getenv("SLACK_TEST") == "" {
+		return
+	}
 	f, err := os.Open("testdata/slack.yml")
 	if err != nil {
 		t.Error("failed to open test data: ", err)
@@ -41,7 +45,7 @@ func TestSlackAction_Run(t *testing.T) {
 	logger := logrus.New()
 	ctx := &domain.JobContext{Log: logger.WithFields(logrus.Fields{})}
 	res := domain.NewResult(&domain.JobInfo{}, itemList1, itemList2)
-	actual, err := sut.run(ctx, res)
+	actual, err := sut.run(ctx, res, res.Diff())
 	if err != nil {
 		t.Error("error occurred during run function: ", err)
 		return

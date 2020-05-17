@@ -4,16 +4,21 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/uphy/watch-web/pkg/domain/value"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"text/template"
 
+	"github.com/uphy/watch-web/pkg/domain/value"
+
 	"github.com/uphy/watch-web/pkg/domain"
 	"github.com/uphy/watch-web/pkg/resources"
 
 	"gopkg.in/yaml.v2"
+)
+
+const (
+	DiffSplitSize = 5
 )
 
 type (
@@ -28,42 +33,60 @@ func NewSlackAction(webhookURL string, debug bool) *SlackAction {
 }
 
 func (s *SlackAction) Run(ctx *domain.JobContext, res *domain.Result) error {
-	payloadValue, err := s.run(ctx, res)
-	if err != nil {
-		return err
-	}
-	if payloadValue == nil {
-		return nil
-	}
+	splittedUpdates := s.splitUpdates(res.Diff())
+	for _, updates := range splittedUpdates {
+		if !updates.Changes() {
+			continue
+		}
+		payloadValue, err := s.run(ctx, res, updates)
+		if err != nil {
+			return err
+		}
+		if payloadValue == nil {
+			return nil
+		}
 
-	if s.Debug || len(s.URL) == 0 {
-		ctx.Log.Info("Slack action is debug mode.  No notification.")
-		payloadBytes, _ := yaml.Marshal(payloadValue)
-		fmt.Println("[Payload]")
-		fmt.Println(string(payloadBytes))
-	} else {
-		payloadBytes, err := json.Marshal(payloadValue)
-		if err != nil {
-			return err
-		}
-		resp, err := http.Post(s.URL, "application/json", bytes.NewReader(payloadBytes))
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode != 200 {
-			b, _ := ioutil.ReadAll(resp.Body)
-			return fmt.Errorf("invalid status code: status=%d, body=%s", resp.StatusCode, string(b))
+		if s.Debug || len(s.URL) == 0 {
+			ctx.Log.Info("Slack action is debug mode.  No notification.")
+			payloadBytes, _ := yaml.Marshal(payloadValue)
+			fmt.Println("[Payload]")
+			fmt.Println(string(payloadBytes))
+		} else {
+			payloadBytes, err := json.Marshal(payloadValue)
+			if err != nil {
+				return err
+			}
+			resp, err := http.Post(s.URL, "application/json", bytes.NewReader(payloadBytes))
+			if err != nil {
+				return err
+			}
+			defer resp.Body.Close()
+			if resp.StatusCode != 200 {
+				b, _ := ioutil.ReadAll(resp.Body)
+				return fmt.Errorf("invalid status code: status=%d, body=%s", resp.StatusCode, string(b))
+			}
 		}
 	}
 	return nil
 }
 
-func (s *SlackAction) run(ctx *domain.JobContext, res *domain.Result) (interface{}, error) {
-	updates := res.Diff()
-	if !updates.Changes() {
-		return nil, nil
+func (s *SlackAction) splitUpdates(updates value.Updates) []value.Updates {
+	splitted := make([]value.Updates, 0)
+	tmpUpdates := make(value.Updates, 0)
+	for _, update := range updates {
+		tmpUpdates = append(tmpUpdates, update)
+		if len(tmpUpdates) >= DiffSplitSize {
+			splitted = append(splitted, tmpUpdates)
+			tmpUpdates = make(value.Updates, 0)
+		}
 	}
+	if len(tmpUpdates) >= 0 {
+		splitted = append(splitted, tmpUpdates)
+	}
+	return splitted
+}
+
+func (s *SlackAction) run(ctx *domain.JobContext, res *domain.Result, updates value.Updates) (interface{}, error) {
 	v := map[string]interface{}{
 		"res":     res,
 		"updates": updates,
