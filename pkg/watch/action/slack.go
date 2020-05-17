@@ -145,6 +145,7 @@ func (s *SlackAction) run(ctx *domain.JobContext, res *domain.Result, updates va
 		},
 		"escape": func(s string) string {
 			s = strings.ReplaceAll(s, "\n", "\\n")
+			s = strings.ReplaceAll(s, "\"", "”")
 			return s
 		},
 	}).Parse(resources.SlackArrayTemplate))
