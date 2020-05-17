@@ -121,7 +121,7 @@ func (u *Update) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (u *Update) item() interface{} {
+func (u *Update) Item() interface{} {
 	if u.Add != nil {
 		return u.Add
 	}
@@ -134,9 +134,22 @@ func (u *Update) item() interface{} {
 	return nil
 }
 
+func (u *Update) ItemID() string {
+	if u.Add != nil {
+		return u.Add.ID()
+	}
+	if u.Remove != nil {
+		return u.Remove.ID()
+	}
+	if u.Change != nil {
+		return u.Change.Item.ID()
+	}
+	return ""
+}
+
 func (u *Update) MarshalJSON() ([]byte, error) {
 	m := map[UpdateType]interface{}{
-		u.Type: u.item(),
+		u.Type: u.Item(),
 	}
 	return json.Marshal(m)
 }
@@ -214,6 +227,11 @@ func (i Item) forCompare() Item {
 	for k := range r {
 		if strings.HasPrefix(k, InternalPropertyPrefix) {
 			delete(r, k)
+		}
+	}
+	for _, requiredParameter := range []string{"label", "link", "summary"} {
+		if _, exist := r[requiredParameter]; !exist {
+			r[requiredParameter] = ""
 		}
 	}
 	return r

@@ -1,0 +1,12 @@
+{
+    "text": "<!channel> *[Remove]* <{{ .item.link }}|~{{ .res.Label | escape }} - {{ .item.summary | escape }}~>",
+    "blocks": [],
+    "attachments": {
+        "color": "#FF0000",
+        "blocks": [
+            {
+                "type": "divider"
+            }
+        ]
+    }
+}

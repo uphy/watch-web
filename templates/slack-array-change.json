@@ -1,0 +1,43 @@
+{
+    "text": "<!channel> *[Change]* <{{ .item.link }}|{{ .res.Label | escape }} - {{ .item.summary | escape }}>",
+    "blocks": [],
+    "attachments": {
+        "color": "#FFFF00",
+        "blocks": [
+            {
+                "type": "section",
+                "fields": [
+                    {{ range $index, $elm := .fields }}
+                    {{   if not (eq $index 0) }},{{ end }}
+                    {{   if eq $elm.type "add" }}
+                    {
+                        "type": "mrkdwn",
+                        "text": "*{{ $elm.key | escape }}:*\n{{ $elm.value | escape}}"
+                    }
+                    {{   else if eq $elm.type "remove" }}
+                    {
+                        "type": "mrkdwn",
+                        "text": "~{{ $elm.key | escape }}~:\n~{{ $elm.value | escape }}~"
+                    }
+                    {{   else if eq $elm.type "change" }}
+                    {
+                        "type": "mrkdwn",
+                        "text": "*{{ $elm.key | escape }}:*\n~{{ $elm.old | escape }}~ -> {{ $elm.new | escape }}"
+                    }
+                    {{   end }}
+                    {{ end }}
+                ]
+            },
+            {{ if .item.thumbnail }}
+            {
+                "type": "image",
+                "image_url": "{{ .item.thumbnail }}",
+                "alt_text": "{{ .item.summary | escape }}"
+            },
+            {{ end }}
+            {
+                "type": "divider"
+            }
+        ]
+    }
+}

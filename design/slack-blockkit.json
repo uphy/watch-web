@@ -4,7 +4,7 @@
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": "*[Add]* <https://google.com/|Item 1>\nDescription asdfasdfasfasdf"
+				"text": "*[Add]* <https://google.com/|UR - Item 1>"
 			},
 			"fields": [
 				{
@@ -33,7 +33,7 @@
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": "*[Removed]* <https://google.com/|~Item 2~>\n~Description asdfasdfasfasdf~"
+				"text": "*[Removed]* <https://google.com/|~UR - Item 2~>"
 			}
 		},
 		{
@@ -43,7 +43,7 @@
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": "*[Changed]* <https://google.com/|Item 3>\nDescription asdfasdfasfasdf"
+				"text": "*[Changed]* <https://google.com/|UR - Item 3>"
 			},
 			"fields": [
 				{

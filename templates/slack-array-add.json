@@ -1,0 +1,31 @@
+{
+    "text": "<!channel> *[Add]* <{{ .item.link }}|{{ .res.Label }} - {{ .item.summary | escape }}>",
+    "blocks": [],
+    "attachments": {
+        "color": "#0000FF",
+        "blocks": [
+            {
+                "type": "section",
+                "fields": [
+                    {{ range $index, $elm := .fields }}
+                    {{     if not (eq $index 0) }},{{ end }}
+                    {
+                        "type": "mrkdwn",
+                        "text": "*{{ $elm.key | escape }}:*\n{{ $elm.value | escape }}"
+                    }
+                    {{ end }}
+                ]
+            },
+            {{ if .item.thumbnail }}
+            {
+                "type": "image",
+                "image_url": "{{ .item.thumbnail }}",
+                "alt_text": "{{ .item.summary | escape}}"
+            },
+            {{ end }}
+            {
+                "type": "divider"
+            }
+        ]
+    }
+}

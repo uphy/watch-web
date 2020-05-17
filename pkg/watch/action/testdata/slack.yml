@@ -29,41 +29,35 @@
   link: http://foo.com/link3
   otherProp1: prop3
 ---
-# slack request body
+# slack request body 1
 attachments:
-- blocks:
-  - text:
-      text: |-
-        *[Remove]* <http://foo.com/link1|~SUMMARY1
-        line2~>
-        ~DESCRIPTION1~
-      type: mrkdwn
-    type: section
+  blocks:
   - type: divider
   color: '#FF0000'
-- blocks:
-  - text:
-      text: |-
-        *[Change]* <http://foo.com/link2|SUMMARY2+>
-        DESCRIPTION2+
-      type: mrkdwn
-    type: section
+blocks: []
+text: |-
+  <!channel> *[Remove]* <http://foo.com/link1|~ - SUMMARY1
+  line2~>
+---
+# slack request body 2
+attachments:
+  blocks:
   - fields:
     - text: |-
-        *otherProp3:*
-        prop23
+        *description:*
+        ~DESCRIPTION2~ -> DESCRIPTION2+
       type: mrkdwn
     - text: |-
         ~otherProp1~:
         ~prop21~
       type: mrkdwn
     - text: |-
-        *description:*
-        ~DESCRIPTION2~ -> DESCRIPTION2+
-      type: mrkdwn
-    - text: |-
         *otherProp2:*
         ~prop22~ -> prop22-2
+      type: mrkdwn
+    - text: |-
+        *otherProp3:*
+        prop23
       type: mrkdwn
     - text: |-
         *summary:*
@@ -75,14 +69,20 @@ attachments:
     type: image
   - type: divider
   color: '#FFFF00'
-- blocks:
-  - text:
-      text: |-
-        *[Add]* <http://foo.com/link3|SUMMARY3>
+blocks: []
+text: <!channel> *[Change]* <http://foo.com/link2| - SUMMARY2+>
+---
+# slack request body 3
+attachments:
+  blocks:
+  - fields:
+    - text: |-
+        *description:*
         DESCRIPTION3
       type: mrkdwn
-    type: section
-  - fields:
+    - text: |
+        *label:*
+      type: mrkdwn
     - text: |-
         *otherProp1:*
         prop3
@@ -94,4 +94,4 @@ attachments:
   - type: divider
   color: '#0000FF'
 blocks: []
-text: <!channel> <|> has been updated
+text: <!channel> *[Add]* <http://foo.com/link3| - SUMMARY3>

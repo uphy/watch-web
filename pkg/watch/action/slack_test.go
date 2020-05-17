@@ -13,9 +13,6 @@ import (
 )
 
 func TestSlackAction_Run(t *testing.T) {
-	if os.Getenv("SLACK_TEST") == "" {
-		return
-	}
 	f, err := os.Open("testdata/slack.yml")
 	if err != nil {
 		t.Error("failed to open test data: ", err)
@@ -35,22 +32,24 @@ func TestSlackAction_Run(t *testing.T) {
 		return
 	}
 
-	var payload interface{}
-	if err := decoder.Decode(&payload); err != nil {
-		t.Error("failed to decode payload: ", err)
-		return
-	}
-
 	sut := NewSlackAction("", true)
 	logger := logrus.New()
 	ctx := &domain.JobContext{Log: logger.WithFields(logrus.Fields{})}
 	res := domain.NewResult(&domain.JobInfo{}, itemList1, itemList2)
-	actual, err := sut.run(ctx, res, res.Diff())
-	if err != nil {
-		t.Error("error occurred during run function: ", err)
-		return
+	updates := res.Diff()
+	for _, update := range updates {
+		actual, err := sut.run(ctx, res, update)
+		if err != nil {
+			t.Error("error occurred during run function: ", err)
+			return
+		}
+		var payload interface{}
+		if err := decoder.Decode(&payload); err != nil {
+			t.Error("failed to decode payload: ", err)
+			return
+		}
+		compareYAML(t, actual, payload)
 	}
-	compareYAML(t, actual, payload)
 }
 
 func compareYAML(t *testing.T, actual, expected interface{}) {

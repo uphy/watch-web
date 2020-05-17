@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -15,10 +16,6 @@ import (
 	"github.com/uphy/watch-web/pkg/resources"
 
 	"gopkg.in/yaml.v2"
-)
-
-const (
-	DiffSplitSize = 5
 )
 
 type (
@@ -33,12 +30,12 @@ func NewSlackAction(webhookURL string, debug bool) *SlackAction {
 }
 
 func (s *SlackAction) Run(ctx *domain.JobContext, res *domain.Result) error {
-	splittedUpdates := s.splitUpdates(res.Diff())
-	for _, updates := range splittedUpdates {
-		if !updates.Changes() {
-			continue
-		}
-		payloadValue, err := s.run(ctx, res, updates)
+	updates := res.Diff()
+	if !updates.Changes() {
+		return nil
+	}
+	for _, update := range updates {
+		payloadValue, err := s.run(ctx, res, update)
 		if err != nil {
 			return err
 		}
@@ -61,8 +58,8 @@ func (s *SlackAction) Run(ctx *domain.JobContext, res *domain.Result) error {
 				return err
 			}
 			defer resp.Body.Close()
+			b, _ := ioutil.ReadAll(resp.Body)
 			if resp.StatusCode != 200 {
-				b, _ := ioutil.ReadAll(resp.Body)
 				return fmt.Errorf("invalid status code: status=%d, body=%s", resp.StatusCode, string(b))
 			}
 		}
@@ -70,92 +67,84 @@ func (s *SlackAction) Run(ctx *domain.JobContext, res *domain.Result) error {
 	return nil
 }
 
-func (s *SlackAction) splitUpdates(updates value.Updates) []value.Updates {
-	splitted := make([]value.Updates, 0)
-	tmpUpdates := make(value.Updates, 0)
-	for _, update := range updates {
-		tmpUpdates = append(tmpUpdates, update)
-		if len(tmpUpdates) >= DiffSplitSize {
-			splitted = append(splitted, tmpUpdates)
-			tmpUpdates = make(value.Updates, 0)
-		}
-	}
-	if len(tmpUpdates) >= 0 {
-		splitted = append(splitted, tmpUpdates)
-	}
-	return splitted
-}
-
-func (s *SlackAction) run(ctx *domain.JobContext, res *domain.Result, updates value.Updates) (interface{}, error) {
-	v := map[string]interface{}{
-		"res":     res,
-		"updates": updates,
-	}
-	tmpl := template.Must(template.New("slack-template").Funcs(template.FuncMap{
-		"toArrayExcludes": func(v map[string]string, excludes ...string) []map[string]interface{} {
-			excludesSet := make(map[string]struct{})
-			for _, exclude := range excludes {
-				excludesSet[exclude] = struct{}{}
-			}
-			var result = make([]map[string]interface{}, 0)
-			for k, v := range v {
-				if _, isExclude := excludesSet[k]; isExclude {
-					continue
-				}
-				result = append(result, map[string]interface{}{
-					"key":   k,
-					"value": v,
-				})
-			}
-			return result
-		},
-		"flatChanges": func(changes *value.ItemChange) []map[string]interface{} {
-			var result = make([]map[string]interface{}, 0)
-			for k, v := range changes.AddedKeys {
-				if k == value.ItemKeyID {
-					continue
-				}
-				result = append(result, map[string]interface{}{
-					"key":   k,
-					"value": v,
-					"type":  "add",
-				})
-			}
-			for k, v := range changes.RemovedKeys {
-				if k == value.ItemKeyID {
-					continue
-				}
-				result = append(result, map[string]interface{}{
-					"key":   k,
-					"value": v,
-					"type":  "remove",
-				})
-			}
-			for k, v := range changes.ChangedKeys {
-				if k == value.ItemKeyID {
-					continue
-				}
-				result = append(result, map[string]interface{}{
-					"key":   k,
-					"value": v,
-					"type":  "change",
-				})
-			}
-			return result
-		},
+func (s *SlackAction) run(ctx *domain.JobContext, res *domain.Result, update value.Update) (map[string]interface{}, error) {
+	tmpl := template.New("slack-template-" + strings.ToLower(string(update.Type))).Funcs(template.FuncMap{
 		"escape": func(s string) string {
 			s = strings.ReplaceAll(s, "\n", "\\n")
 			s = strings.ReplaceAll(s, "\"", "”")
 			return s
 		},
-	}).Parse(resources.SlackArrayTemplate))
+	})
+	args := map[string]interface{}{
+		"res": res,
+	}
+	switch item := update.Item().(type) {
+	// add or remove
+	case value.Item:
+		if update.Type == value.UpdateTypeAdd {
+			tmpl = template.Must(tmpl.Parse(resources.SlackArrayTemplateAdd))
+		} else {
+			tmpl = template.Must(tmpl.Parse(resources.SlackArrayTemplateRemove))
+		}
+		fields := make([]map[string]string, 0)
+		for k, v := range item {
+			if k == "link" || k == "summary" || k == "thumbnail" || k == "id" {
+				continue
+			}
+			fields = append(fields, map[string]string{
+				"key":   k,
+				"value": v,
+			})
+		}
+		sort.Slice(fields, func(i, j int) bool {
+			k1 := fields[i]["key"]
+			k2 := fields[j]["key"]
+			return strings.Compare(k1, k2) < 0
+		})
+		args["fields"] = fields
+		args["item"] = update.Item().(value.Item)
+	// change
+	case *value.ItemChange:
+		tmpl = template.Must(tmpl.Parse(resources.SlackArrayTemplateChange))
+		fields := make([]map[string]string, 0)
+		for k, v := range item.AddedKeys {
+			fields = append(fields, map[string]string{
+				"type":  "add",
+				"key":   k,
+				"value": v,
+			})
+		}
+		for k, v := range item.ChangedKeys {
+			fields = append(fields, map[string]string{
+				"type": "change",
+				"key":  k,
+				"old":  v.Old,
+				"new":  v.New,
+			})
+		}
+		for k, v := range item.RemovedKeys {
+			fields = append(fields, map[string]string{
+				"type":  "remove",
+				"key":   k,
+				"value": v,
+			})
+		}
+		sort.Slice(fields, func(i, j int) bool {
+			k1 := fields[i]["key"]
+			k2 := fields[j]["key"]
+			return strings.Compare(k1, k2) < 0
+		})
+		args["fields"] = fields
+		args["item"] = update.Change.Item
+	}
+
 	buf := new(bytes.Buffer)
-	if err := tmpl.Execute(buf, v); err != nil {
+	if err := tmpl.Execute(buf, args); err != nil {
 		return nil, err
 	}
 
 	payload := buf.String()
-	var payloadValue interface{}
+	var payloadValue map[string]interface{}
 	if err := json.Unmarshal([]byte(payload), &payloadValue); err != nil {
 		ctx.Log.WithField("err", err).Error("Failed to parse payload as json")
 		fmt.Println(payload)
