@@ -3,17 +3,22 @@ shell:
 transforms:
   - json_array:
       condition: '{{ .source.title | contains .keyword }}'
+  - filter:
+      javascript: source.dealState != "EXPIRED" && source.minDealPrice !== undefined && source.maxPercentOff > 0
   - map:
       template:
         summary: '{{ .source.title | truncate 20 }}'
         thumbnail: '{{ .source.primaryImage }}'
-        description: |
-          {{- if .source.minDealPrice }}¥{{- .source.minDealPrice }}{{ end -}}
-          {{- if gt .source.maxPercentOff 0. }}({{ .source.maxPercentOff }}%OFF){{ end -}}
+        description: ¥{{- .source.minDealPrice }}({{ .source.maxPercentOff }}%OFF)
         link: '{{ .source.egressUrl }}'
         id: '{{ .source.impressionAsin }}'
         "平均レビュー": '{{ .source.reviewRating }}'
         "レビュー数": '{{ .source.totalReviews }}'
         "セール期間": '{{ .source.msToStartFix | formatEpochMillis }} ~ {{ .source.msToEndFix | formatEpochMillis }}'
+        "状態": '{{ .source.dealState }}'
+
+        # for additional filtering, export these properties
+        "_price": '{{ .source.minDealPrice }}'
+        "_off": '{{ .source.maxPercentOff }}'
   - sort:
       by: id

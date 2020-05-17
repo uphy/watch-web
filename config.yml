@@ -45,6 +45,9 @@ jobs:
         file: amazon-timesale.yml
         vars:
           keyword: '{{ .item.keyword }}'
+      transforms:
+        - filter:
+            javascript: source._price >= 4000 && source._price <= 20000
     with_items:
       - { keyword: 'プロジェクタ' }
 actions:
