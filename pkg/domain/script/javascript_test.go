@@ -1,9 +1,10 @@
 package script
 
 import (
-	"github.com/uphy/watch-web/pkg/domain/value"
 	"reflect"
 	"testing"
+
+	"github.com/uphy/watch-web/pkg/domain/value"
 )
 
 func TestJavaScript_Evaluate(t *testing.T) {
@@ -16,6 +17,16 @@ func TestJavaScript_Evaluate(t *testing.T) {
 	}{
 		{
 			script: "1+1",
+			args:   nil,
+			want:   2.,
+		},
+		{
+			script: "(function(){if(true) {return 1+1} else { return 0 }})()",
+			args:   nil,
+			want:   2.,
+		},
+		{
+			script: "if(true){1+1}else{0}",
 			args:   nil,
 			want:   2.,
 		},
