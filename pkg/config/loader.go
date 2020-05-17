@@ -3,12 +3,13 @@ package config
 import (
 	"errors"
 	"fmt"
-	"github.com/uphy/watch-web/pkg/domain/template"
 	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/uphy/watch-web/pkg/domain/template"
 
 	"github.com/uphy/watch-web/pkg/domain/value"
 
@@ -367,7 +368,11 @@ func (l *Loader) createSourceConstant(s *ConstantSourceConfig) (domain.Source, e
 		if err != nil {
 			return nil, err
 		}
-		return source.NewConstantSource(value.NewStringValue(string(b))), nil
+		text, err := template.TemplateString(string(b)).Evaluate(l.ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to evaluate template of constant source file: %w", err)
+		}
+		return source.NewConstantSource(value.NewStringValue(text)), nil
 	}
 	if s.Template != nil {
 		v, err := s.Template.Evaluate(l.ctx)
