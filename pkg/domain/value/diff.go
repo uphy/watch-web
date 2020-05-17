@@ -18,6 +18,9 @@ type (
 
 // CompareItemList computes the differences between ItemLists.
 func CompareItemList(list1, list2 ItemList) Updates {
+	list1 = list1.forCompare()
+	list2 = list2.forCompare()
+
 	// Get ids and compare only id
 	idToItem1 := make(map[string]Item)
 	ids1 := make([]string, len(list1))

@@ -17,7 +17,7 @@ func TestUnmarshalJSON(t *testing.T) {
 					"add": "3",
 				},
 				ChangedKeys: map[string]ItemValueChange{
-					"change": ItemValueChange{
+					"change": {
 						Old: "3",
 						New: "4",
 					},
@@ -53,8 +53,8 @@ func TestCompareItemList(t *testing.T) {
 		{
 			args: args{
 				list1: ItemList{
-					Item{ItemKeyID: "item1", "a": "1", "remove": "2", "change": "3"},
-					Item{ItemKeyID: "item2", "c": "1", "d": "3"},
+					Item{ItemKeyID: "item1", "a": "1", "remove": "2", "change": "3", "_ignore1": "1"},
+					Item{ItemKeyID: "item2", "c": "1", "d": "3", "_ignored2": "0"},
 				},
 				list2: ItemList{
 					Item{ItemKeyID: "item1", "a": "1", "add": "3", "change": "4"},
@@ -74,7 +74,7 @@ func TestCompareItemList(t *testing.T) {
 							"add": "3",
 						},
 						ChangedKeys: map[string]ItemValueChange{
-							"change": ItemValueChange{
+							"change": {
 								Old: "3",
 								New: "4",
 							},

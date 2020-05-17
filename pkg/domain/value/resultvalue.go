@@ -14,10 +14,13 @@ import (
 const (
 	// ItemKeyID is the item's special key which is the identifier of Item.
 	// By comparing old ID and new ID, we can detect CHANGED in addition to ADDED/REMOVED in diff.
-	ItemKeyID                   = "id"
-	UpdateTypeAdd    UpdateType = "add"
-	UpdateTypeRemove UpdateType = "remove"
-	UpdateTypeChange UpdateType = "change"
+	ItemKeyID = "id"
+	// InternalPropertyPrefix is the prefix for internal properties.
+	// Internal properties not used for diff.
+	InternalPropertyPrefix            = "_"
+	UpdateTypeAdd          UpdateType = "add"
+	UpdateTypeRemove       UpdateType = "remove"
+	UpdateTypeChange       UpdateType = "change"
 )
 
 type (
@@ -189,6 +192,14 @@ func (i ItemList) YAML() string {
 	return string(b)
 }
 
+func (i ItemList) forCompare() ItemList {
+	r := i.Clone()
+	for i, item := range r {
+		r[i] = item.forCompare()
+	}
+	return r
+}
+
 // Clone returns the deep-copied struct.
 func (i Item) Clone() Item {
 	clone := make(map[string]string, len(i))
@@ -196,6 +207,16 @@ func (i Item) Clone() Item {
 		clone[k] = v
 	}
 	return clone
+}
+
+func (i Item) forCompare() Item {
+	r := i.Clone()
+	for k := range r {
+		if strings.HasPrefix(k, InternalPropertyPrefix) {
+			delete(r, k)
+		}
+	}
+	return r
 }
 
 // NewItem create new Item
