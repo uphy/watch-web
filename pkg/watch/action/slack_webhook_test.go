@@ -32,7 +32,7 @@ func TestSlackAction_Run(t *testing.T) {
 		return
 	}
 
-	sut := NewSlackAction("", true)
+	sut := NewSlackWebhookAction("", true)
 	logger := logrus.New()
 	ctx := &domain.JobContext{Log: logger.WithFields(logrus.Fields{})}
 	res := domain.NewResult(&domain.JobInfo{}, itemList1, itemList2)

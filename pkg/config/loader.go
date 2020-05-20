@@ -180,8 +180,8 @@ func parseRedisToGoURL(redisToGo string) (addr string, password string, err erro
 }
 
 func (l *Loader) createAction(a *ActionConfig) (domain.Action, error) {
-	if a.Slack != nil {
-		return l.createActionSlack(a.Slack)
+	if a.SlackWebhook != nil {
+		return l.createActionSlackWebhook(a.SlackWebhook)
 	}
 	if a.Console != nil {
 		return action.NewConsoleAction(), nil
@@ -189,12 +189,12 @@ func (l *Loader) createAction(a *ActionConfig) (domain.Action, error) {
 	return nil, errors.New("no action defined")
 }
 
-func (l *Loader) createActionSlack(s *SlackActionConfig) (domain.Action, error) {
+func (l *Loader) createActionSlackWebhook(s *SlackWebhookActionConfig) (domain.Action, error) {
 	url, err := s.URL.Evaluate(l.ctx)
 	if err != nil {
 		return nil, err
 	}
-	return action.NewSlackAction(url, s.Debug), nil
+	return action.NewSlackWebhookAction(url, s.Debug), nil
 }
 
 func (l *Loader) addJobTo(c *JobConfig, e *watch.Executor) ([]*watch.Job, error) {

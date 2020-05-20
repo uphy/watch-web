@@ -6,10 +6,10 @@ import (
 
 type (
 	ActionConfig struct {
-		Slack   *SlackActionConfig   `json:"slack,omitempty"`
-		Console *ConsoleActionConfig `json:"console"`
+		SlackWebhook *SlackWebhookActionConfig `json:"slack_webhook,omitempty"`
+		Console      *ConsoleActionConfig      `json:"console"`
 	}
-	SlackActionConfig struct {
+	SlackWebhookActionConfig struct {
 		URL   template.TemplateString `json:"url"`
 		Debug bool                    `json:"debug"`
 	}

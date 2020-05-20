@@ -19,17 +19,17 @@ import (
 )
 
 type (
-	SlackAction struct {
+	SlackWebhookAction struct {
 		URL   string
 		Debug bool
 	}
 )
 
-func NewSlackAction(webhookURL string, debug bool) *SlackAction {
-	return &SlackAction{webhookURL, debug}
+func NewSlackWebhookAction(webhookURL string, debug bool) *SlackWebhookAction {
+	return &SlackWebhookAction{webhookURL, debug}
 }
 
-func (s *SlackAction) Run(ctx *domain.JobContext, res *domain.Result) error {
+func (s *SlackWebhookAction) Run(ctx *domain.JobContext, res *domain.Result) error {
 	updates := res.Diff()
 	if !updates.Changes() {
 		return nil
@@ -67,7 +67,7 @@ func (s *SlackAction) Run(ctx *domain.JobContext, res *domain.Result) error {
 	return nil
 }
 
-func (s *SlackAction) run(ctx *domain.JobContext, res *domain.Result, update value.Update) (map[string]interface{}, error) {
+func (s *SlackWebhookAction) run(ctx *domain.JobContext, res *domain.Result, update value.Update) (map[string]interface{}, error) {
 	tmpl := template.New("slack-template-" + strings.ToLower(string(update.Type))).Funcs(template.FuncMap{
 		"escape": func(s string) string {
 			s = strings.ReplaceAll(s, "\n", "\\n")
