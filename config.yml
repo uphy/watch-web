@@ -34,9 +34,8 @@ jobs:
         file: amazon.yml
         vars:
           itemId: '{{ .item.id }}'
-    with_items:
-      - { id: 'B07H56HB8T', name: 'TOPVISION プロジェクター' }
-  - id: amazon-timesale-{{ .itemIndex }}
+    with_items: []
+  - id: amazon-timesale
     schedule: "@every 10m"
     label: '{{ .item.keyword }}'
     link: https://a-timesale.com/deals/?search={{ .item.keyword | urlquery}}
@@ -44,12 +43,10 @@ jobs:
       include:
         file: amazon-timesale.yml
         vars:
-          keyword: '{{ .item.keyword }}'
+          keyword: 'HDMI'
       transforms:
         - filter:
-            javascript: source._price >= 4000 && source._price <= 20000
-    with_items:
-      - { keyword: 'プロジェクタ' }
+            javascript: source.summary.indexOf("切替器") >= 0
 actions:
   - slack:
       url: '{{ env "SLACK_WEBHOOK_URL" }}'
