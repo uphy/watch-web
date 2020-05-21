@@ -117,6 +117,9 @@ func (l *Loader) Create(c *Config) (*watch.Executor, error) {
 		if err != nil {
 			return nil, err
 		}
+		if len(jobs) == 0 {
+			continue
+		}
 		l.log.WithFields(logrus.Fields{
 			"jobs": jobs,
 		}).Debug("Added jobs to executor.")
@@ -196,7 +199,7 @@ func (l *Loader) createActionSlack(s *SlackActionConfig) (domain.Action, error) 
 
 func (l *Loader) addJobTo(c *JobConfig, e *watch.Executor) ([]*watch.Job, error) {
 	jobs := make([]*watch.Job, 0)
-	if len(c.WithItems) == 0 {
+	if c.WithItems == nil {
 		job, err := l.addJobOne(c, e)
 		if err != nil {
 			return nil, err
