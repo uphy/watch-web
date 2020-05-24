@@ -2,10 +2,11 @@ package watch
 
 import (
 	"fmt"
-	"github.com/uphy/watch-web/pkg/domain/value"
 	"log"
 	"sync"
 	"time"
+
+	"github.com/uphy/watch-web/pkg/domain/value"
 
 	"github.com/uphy/watch-web/pkg/domain"
 
@@ -21,7 +22,6 @@ type (
 		Jobs       map[string]*Job
 		InitialRun bool
 		store      domain.Store
-		actions    []domain.Action
 		log        *logrus.Logger
 	}
 )
@@ -30,13 +30,12 @@ func init() {
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 }
 
-func NewExecutor(store domain.Store, actions []domain.Action, log *logrus.Logger) *Executor {
+func NewExecutor(store domain.Store, log *logrus.Logger) *Executor {
 	return &Executor{
-		c:       cron.New(),
-		store:   store,
-		Jobs:    make(map[string]*Job),
-		log:     log,
-		actions: actions,
+		c:     cron.New(),
+		store: store,
+		Jobs:  make(map[string]*Job),
+		log:   log,
 	}
 }
 
@@ -85,13 +84,13 @@ func (e *Executor) Check(job *Job) (res *domain.Result, err error) {
 	job.ctx.Log.Info("Running job.")
 
 	// Get previous job properties
-	status, err := e.store.GetStatus(job.ID())
+	status, err := e.store.GetJobStatus(job.ID())
 	if status == nil {
 		status = new(domain.JobStatus)
 	}
 	defer func() {
 		// store status even if got errors for fixing broken data
-		if err := e.store.SetStatus(job.ID(), status); err != nil {
+		if err := e.store.SetJobStatus(job.ID(), status); err != nil {
 			job.failed(status, "failed to set job status", err)
 		}
 	}()
@@ -99,7 +98,7 @@ func (e *Executor) Check(job *Job) (res *domain.Result, err error) {
 		job.failed(status, "failed to get previous job status", err)
 		return nil, err
 	}
-	previous, err := e.store.GetValue(job.ID())
+	previous, err := e.store.GetJobValue(job.ID())
 	firstCheck := false
 	if err != nil {
 		if err == store.ErrNotFound {
@@ -134,7 +133,7 @@ func (e *Executor) Check(job *Job) (res *domain.Result, err error) {
 	currentItemList := current.ItemList()
 	currentItemListJSON := currentItemList.JSON()
 	defer func() {
-		if err := e.store.SetValue(job.ID(), currentItemListJSON); err != nil {
+		if err := e.store.SetJobValue(job.ID(), currentItemListJSON); err != nil {
 			job.failed(status, "failed to store job value", err)
 		}
 	}()
@@ -173,7 +172,7 @@ func (e *Executor) TestActions(job *Job) error {
 
 func (e *Executor) DoActions(job *Job, result *domain.Result) error {
 	var errs error
-	for _, action := range e.actions {
+	for _, action := range job.actions {
 		if err := action.Run(job.ctx, result); err != nil {
 			errs = multierror.Append(errs, err)
 		}
@@ -182,7 +181,7 @@ func (e *Executor) DoActions(job *Job, result *domain.Result) error {
 }
 
 func (e *Executor) GetJobStatus(jobID string) (*domain.JobStatus, error) {
-	status, err := e.store.GetStatus(jobID)
+	status, err := e.store.GetJobStatus(jobID)
 	if err != nil {
 		if err == store.ErrNotFound {
 			return nil, nil
@@ -193,7 +192,7 @@ func (e *Executor) GetJobStatus(jobID string) (*domain.JobStatus, error) {
 }
 
 func (e *Executor) GetJobValue(jobID string) (*string, error) {
-	status, err := e.store.GetValue(jobID)
+	status, err := e.store.GetJobValue(jobID)
 	if err != nil {
 		if err == store.ErrNotFound {
 			return nil, nil

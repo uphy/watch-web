@@ -9,14 +9,15 @@ import (
 
 type (
 	Job struct {
-		Info   *domain.JobInfo `json:"info"`
-		source domain.Source
-		ctx    *domain.JobContext
+		Info    *domain.JobInfo `json:"info"`
+		source  domain.Source
+		ctx     *domain.JobContext
+		actions []domain.Action
 	}
 )
 
-func NewJob(info *domain.JobInfo, source domain.Source) *Job {
-	return &Job{info, source, nil}
+func NewJob(info *domain.JobInfo, source domain.Source, actions []domain.Action) *Job {
+	return &Job{info, source, nil, actions}
 }
 
 func (j *Job) ID() string {

@@ -23,6 +23,11 @@ type (
 		debug   bool
 		repo    SlackBotActionRepository
 	}
+	slackBotResponse struct {
+		OK      bool   `json:"ok"`
+		Channel string `json:"channel"`
+		TS      string `json:"ts"`
+	}
 )
 
 func NewSlackBotAction(token string, channel string, debug bool, repo SlackBotActionRepository) *SlackBotAction {
@@ -45,6 +50,7 @@ func (s *SlackBotAction) Run(ctx *domain.JobContext, res *domain.Result) error {
 
 		// Set additional request parameters
 		payloadValue["channel"] = s.channel
+		isReply := false
 		if s.repo != nil {
 			threadTS, err := s.repo.GetSlackThreadTS(res.JobID, update.ItemID())
 			if err != nil {
@@ -55,6 +61,8 @@ func (s *SlackBotAction) Run(ctx *domain.JobContext, res *domain.Result) error {
 			}
 			if threadTS != nil {
 				payloadValue["thread_ts"] = *threadTS
+				payloadValue["reply_broadcast"] = true
+				isReply = true
 			}
 		}
 
@@ -82,6 +90,19 @@ func (s *SlackBotAction) Run(ctx *domain.JobContext, res *domain.Result) error {
 			b, _ := ioutil.ReadAll(resp.Body)
 			if resp.StatusCode != 200 {
 				return fmt.Errorf("invalid status code: status=%d, body=%s", resp.StatusCode, string(b))
+			}
+			var response slackBotResponse
+			if err := json.Unmarshal(b, &response); err != nil {
+				return fmt.Errorf("failed to unmarshal slack api response: err=%v, body=%s", err, string(b))
+			}
+			threadTS := response.TS
+			if len(threadTS) > 0 && s.repo != nil && !isReply { // if this message is posted to thread, then no need to save timestamp
+				if err := s.repo.PutSlackThreadTS(res.JobID, update.ItemID(), threadTS); err != nil {
+					ctx.Log.WithFields(logrus.Fields{
+						"jobID":  res.JobID,
+						"itemID": update.ItemID(),
+					}).Warn("failed to put slack thread_ts into repository.")
+				}
 			}
 		}
 	}

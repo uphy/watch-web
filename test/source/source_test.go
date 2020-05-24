@@ -3,7 +3,6 @@ package source
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/uphy/watch-web/pkg/domain/value"
 	"io/ioutil"
 	"log"
 	"os"
@@ -11,6 +10,8 @@ import (
 	"reflect"
 	"regexp"
 	"testing"
+
+	"github.com/uphy/watch-web/pkg/domain/value"
 
 	"github.com/ghodss/yaml"
 
@@ -101,19 +102,19 @@ func TestAll(t *testing.T) {
 			jobID := fmt.Sprintf("%s-%d-%s", file.Name(), i, test.Name)
 			store := store.NewMemoryStore()
 			if s, ok := test.Previous.(string); ok {
-				store.SetValue(jobID, s)
+				store.SetJobValue(jobID, s)
 			} else {
 				previousJSON, err := json.Marshal(test.Previous)
 				if err != nil {
 					reporter.Error("failed to marshal previous value")
 					continue
 				}
-				store.SetValue(jobID, string(previousJSON))
+				store.SetJobValue(jobID, string(previousJSON))
 			}
-			exe := watch.NewExecutor(store, make([]domain.Action, 0), logger)
+			exe := watch.NewExecutor(store, logger)
 			job := watch.NewJob(&domain.JobInfo{
 				ID: jobID,
-			}, source)
+			}, source, make([]domain.Action, 0))
 			if err := exe.AddJob(job, nil); err != nil {
 				reporter.Error("failed to add job:", err)
 				continue

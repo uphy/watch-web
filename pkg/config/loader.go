@@ -31,6 +31,7 @@ type (
 		log             *logrus.Logger
 		ctx             *template.TemplateContext
 		configDirectory *configDirectory
+		store           domain.Store
 	}
 )
 
@@ -47,7 +48,7 @@ func LoadAndCreate(log *logrus.Logger, file string) (*watch.Executor, error) {
 func NewLoader(log *logrus.Logger, file string) *Loader {
 	ctx := template.NewRootTemplateContext()
 	dir, _ := filepath.Split(file)
-	return &Loader{log, ctx, newConfigDirectory(dir)}
+	return &Loader{log, ctx, newConfigDirectory(dir), nil}
 }
 
 func (l *Loader) TemplateContext() *template.TemplateContext {
@@ -83,22 +84,19 @@ func (l *Loader) Create(c *Config) (*watch.Executor, error) {
 	if err != nil {
 		return nil, err
 	}
+	l.store = store
 	l.log.WithFields(logrus.Fields{
 		"store": fmt.Sprintf("%#v", store),
 	}).Info("Created store.")
 
 	// action
-	actions := []domain.Action{}
-	for _, actionConfig := range c.Actions {
-		action, err := l.createAction(&actionConfig)
-		if err != nil {
-			return nil, err
-		}
-		actions = append(actions, action)
+	actions, err := l.createActions(c.Actions)
+	if err != nil {
+		return nil, err
 	}
 
 	// executor
-	e := watch.NewExecutor(store, actions, l.log)
+	e := watch.NewExecutor(store, l.log)
 	if c.InitialRun != nil {
 		initialRun, err := c.InitialRun.Evaluate(l.ctx)
 		if err != nil {
@@ -113,7 +111,7 @@ func (l *Loader) Create(c *Config) (*watch.Executor, error) {
 
 	// jobs
 	for _, jobConfig := range c.Jobs {
-		jobs, err := l.addJobTo(&jobConfig, e)
+		jobs, err := l.addJobTo(&jobConfig, e, actions)
 		if err != nil {
 			return nil, err
 		}
@@ -179,6 +177,18 @@ func parseRedisToGoURL(redisToGo string) (addr string, password string, err erro
 	return
 }
 
+func (l *Loader) createActions(a []ActionConfig) ([]domain.Action, error) {
+	actions := []domain.Action{}
+	for _, actionConfig := range a {
+		action, err := l.createAction(&actionConfig)
+		if err != nil {
+			return nil, err
+		}
+		actions = append(actions, action)
+	}
+	return actions, nil
+}
+
 func (l *Loader) createAction(a *ActionConfig) (domain.Action, error) {
 	if a.SlackWebhook != nil {
 		return l.createActionSlackWebhook(a.SlackWebhook)
@@ -209,13 +219,17 @@ func (l *Loader) createActionSlackBot(s *SlackBotActionConfig) (domain.Action, e
 	if err != nil {
 		return nil, fmt.Errorf("failed to evaluate slack token template: %w", err)
 	}
-	return action.NewSlackBotAction(token, channel, s.Debug, nil), nil
+	repo, err := s.newRepository(l.ctx, l.store)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create repository for slack bot action: %w", err)
+	}
+	return action.NewSlackBotAction(token, channel, s.Debug, repo), nil
 }
 
-func (l *Loader) addJobTo(c *JobConfig, e *watch.Executor) ([]*watch.Job, error) {
+func (l *Loader) addJobTo(c *JobConfig, e *watch.Executor, actions []domain.Action) ([]*watch.Job, error) {
 	jobs := make([]*watch.Job, 0)
 	if c.WithItems == nil {
-		job, err := l.addJobOne(c, e)
+		job, err := l.addJobOne(c, e, actions)
 		if err != nil {
 			return nil, err
 		}
@@ -229,7 +243,7 @@ func (l *Loader) addJobTo(c *JobConfig, e *watch.Executor) ([]*watch.Job, error)
 			l.ctx.PushScope()
 			l.ctx.Set("itemIndex", itemIndex)
 			l.ctx.Set("item", evaluatedItem)
-			j, err := l.addJobOne(c, e)
+			j, err := l.addJobOne(c, e, actions)
 			if err != nil {
 				return nil, err
 			}
@@ -264,7 +278,7 @@ func evaluateItemAsTemplate(ctx *template.TemplateContext, v interface{}) (inter
 	return e, nil
 }
 
-func (l *Loader) addJobOne(c *JobConfig, e *watch.Executor) (*watch.Job, error) {
+func (l *Loader) addJobOne(c *JobConfig, e *watch.Executor, actions []domain.Action) (*watch.Job, error) {
 	source, err := l.CreateSource(c.Source)
 	if err != nil {
 		return nil, err
@@ -285,11 +299,18 @@ func (l *Loader) addJobOne(c *JobConfig, e *watch.Executor) (*watch.Job, error) 
 	if err != nil {
 		return nil, err
 	}
+	jobActions, err := l.createActions(c.Actions)
+	if err != nil {
+		return nil, err
+	}
+	if len(jobActions) > 0 {
+		actions = jobActions
+	}
 	job := watch.NewJob(&domain.JobInfo{
 		ID:    id,
 		Label: label,
 		Link:  link,
-	}, source)
+	}, source, actions)
 
 	if err := e.AddJob(job, &schedule); err != nil {
 		return nil, err

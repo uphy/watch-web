@@ -42,10 +42,12 @@ type (
 		Run(ctx *JobContext, result *Result) error
 	}
 	Store interface {
-		GetValue(jobID string) (string, error)
-		SetValue(jobID string, value string) error
-		GetStatus(jobID string) (*JobStatus, error)
-		SetStatus(jobID string, status *JobStatus) error
+		GetJobValue(jobID string) (string, error)
+		SetJobValue(jobID string, value string) error
+		GetJobStatus(jobID string) (*JobStatus, error)
+		SetJobStatus(jobID string, status *JobStatus) error
+		SetTemp(key string, value string, expire time.Duration) error
+		Get(key string) (string, error)
 	}
 	ScriptEngine interface {
 		NewScript(script string) (Script, error)

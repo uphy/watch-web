@@ -3,11 +3,18 @@ jobs:
   - id: ur-{{ .item.shisya }}-{{ .item.danchi }}
     schedule: "@every 10m"
     source:
-      include:
-        file: ur.yml
-        vars:
-          shisya: '{{ .item.shisya }}'
-          danchi: '{{ .item.danchi }}'
+      constant:
+        value:
+          - description: 108,200円(近居割, 近居割WIDE)[共益費 4,700円]
+            id: 4号棟1003号室
+            link: https://www.ur-net.go.jp//chintai/sp/kanto/tokyo/20_6880_room.html?JKSS=000041003
+            summary: 4号棟1003号室(1LDK)
+            thumbnail: https://chintai.sumai.ur-net.go.jp/chintai/img_madori/20/20_688/20_688_0-00-0004_Fz_RA_01_00003.gif
+            制度: 近居割, 近居割WIDE
+            平米数: 58㎡
+            敷金: 2か月
+            間取り: 1LDK
+            階数: 10階 / 10階
     # 監視項目の固定の表示文字列
     label: "{{ .item.name }}"
     # 監視項目のURL
@@ -43,14 +50,17 @@ jobs:
       include:
         file: amazon-timesale.yml
         vars:
-          keyword: 'HDMI'
-      transforms:
-        - filter:
-            javascript: source.summary.indexOf("切替器") >= 0
+          keyword: 'プロジェクタ'
+    actions:
+      - slack_bot:
+          token: '{{ env "SLACK_TOKEN" }}'
+          channel: "web_update"
+          thread_per: item
 actions:
   - slack_bot:
       token: '{{ env "SLACK_TOKEN" }}'
       channel: "web_update"
+      thread_per: job
 # 各ジョブの現在の値を保存するストレージ
 store:
   redis:
