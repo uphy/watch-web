@@ -1,7 +1,6 @@
 {
     "text": "<!channel> *[Add]* <{{ .item.link }}|{{ .res.Label }} - {{ .item.summary | escape }}>",
-    "blocks": [],
-    "attachments": {
+    "attachments": [{
         "color": "#0000FF",
         "blocks": [
             {
@@ -27,5 +26,5 @@
                 "type": "divider"
             }
         ]
-    }
+    }]
 }

@@ -12,7 +12,7 @@ const (
 type (
 	ActionConfig struct {
 		SlackWebhook *SlackWebhookActionConfig `json:"slack_webhook,omitempty"`
-		SlackBot     *SlackBotActionConfig     `json:"slack,omitempty"`
+		SlackBot     *SlackBotActionConfig     `json:"slack_bot,omitempty"`
 		Console      *ConsoleActionConfig      `json:"console"`
 	}
 	SlackWebhookActionConfig struct {
@@ -23,6 +23,7 @@ type (
 		Token     template.TemplateString  `json:"token"`
 		Channel   template.TemplateString  `json:"channel"`
 		ThreadPer *template.TemplateString `json:"thread_per"`
+		Debug     bool                     `json:"debug"`
 	}
 	ConsoleActionConfig struct {
 	}

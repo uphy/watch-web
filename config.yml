@@ -48,8 +48,9 @@ jobs:
         - filter:
             javascript: source.summary.indexOf("切替器") >= 0
 actions:
-  - slack_webhook:
-      url: '{{ env "SLACK_WEBHOOK_URL" }}'
+  - slack_bot:
+      token: '{{ env "SLACK_TOKEN" }}'
+      channel: "web_update"
 # 各ジョブの現在の値を保存するストレージ
 store:
   redis:

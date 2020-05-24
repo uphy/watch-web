@@ -31,67 +31,64 @@
 ---
 # slack request body 1
 attachments:
-  blocks:
-  - type: divider
-  color: '#FF0000'
-blocks: []
+  - blocks:
+    - type: divider
+    color: '#FF0000'
 text: |-
   <!channel> *[Remove]* <http://foo.com/link1|~ - SUMMARY1
   line2~>
 ---
 # slack request body 2
 attachments:
-  blocks:
-  - fields:
-    - text: |-
-        *description:*
-        ~DESCRIPTION2~ -> DESCRIPTION2+
-      type: mrkdwn
-    - text: |-
-        ~otherProp1~:
-        ~prop21~
-      type: mrkdwn
-    - text: |-
-        *otherProp2:*
-        ~prop22~ -> prop22-2
-      type: mrkdwn
-    - text: |-
-        *otherProp3:*
-        prop23
-      type: mrkdwn
-    - text: |-
-        *summary:*
-        ~SUMMARY2~ -> SUMMARY2+
-      type: mrkdwn
-    type: section
-  - alt_text: SUMMARY2+
-    image_url: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
-    type: image
-  - type: divider
-  color: '#FFFF00'
-blocks: []
+  - blocks:
+    - fields:
+      - text: |-
+          *description:*
+          ~DESCRIPTION2~ -> DESCRIPTION2+
+        type: mrkdwn
+      - text: |-
+          ~otherProp1~:
+          ~prop21~
+        type: mrkdwn
+      - text: |-
+          *otherProp2:*
+          ~prop22~ -> prop22-2
+        type: mrkdwn
+      - text: |-
+          *otherProp3:*
+          prop23
+        type: mrkdwn
+      - text: |-
+          *summary:*
+          ~SUMMARY2~ -> SUMMARY2+
+        type: mrkdwn
+      type: section
+    - alt_text: SUMMARY2+
+      image_url: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
+      type: image
+    - type: divider
+    color: '#FFFF00'
 text: <!channel> *[Change]* <http://foo.com/link2| - SUMMARY2+>
 ---
 # slack request body 3
 attachments:
-  blocks:
-  - fields:
-    - text: |-
-        *description:*
-        DESCRIPTION3
-      type: mrkdwn
-    - text: |
-        *label:*
-      type: mrkdwn
-    - text: |-
-        *otherProp1:*
-        prop3
-      type: mrkdwn
-    type: section
-  - alt_text: SUMMARY3
-    image_url: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
-    type: image
-  - type: divider
-  color: '#0000FF'
-blocks: []
+  - blocks:
+    - fields:
+      - text: |-
+          *description:*
+          DESCRIPTION3
+        type: mrkdwn
+      - text: |
+          *label:*
+        type: mrkdwn
+      - text: |-
+          *otherProp1:*
+          prop3
+        type: mrkdwn
+      type: section
+    - alt_text: SUMMARY3
+      image_url: https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg
+      type: image
+    - type: divider
+    color: '#0000FF'
 text: <!channel> *[Add]* <http://foo.com/link3| - SUMMARY3>

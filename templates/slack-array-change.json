@@ -1,7 +1,6 @@
 {
     "text": "<!channel> *[Change]* <{{ .item.link }}|{{ .res.Label | escape }} - {{ .item.summary | escape }}>",
-    "blocks": [],
-    "attachments": {
+    "attachments": [{
         "color": "#FFFF00",
         "blocks": [
             {
@@ -39,5 +38,5 @@
                 "type": "divider"
             }
         ]
-    }
+    }]
 }

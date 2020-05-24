@@ -183,6 +183,9 @@ func (l *Loader) createAction(a *ActionConfig) (domain.Action, error) {
 	if a.SlackWebhook != nil {
 		return l.createActionSlackWebhook(a.SlackWebhook)
 	}
+	if a.SlackBot != nil {
+		return l.createActionSlackBot(a.SlackBot)
+	}
 	if a.Console != nil {
 		return action.NewConsoleAction(), nil
 	}
@@ -195,6 +198,18 @@ func (l *Loader) createActionSlackWebhook(s *SlackWebhookActionConfig) (domain.A
 		return nil, err
 	}
 	return action.NewSlackWebhookAction(url, s.Debug), nil
+}
+
+func (l *Loader) createActionSlackBot(s *SlackBotActionConfig) (domain.Action, error) {
+	channel, err := s.Channel.Evaluate(l.ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to evaluate slack channel template: %w", err)
+	}
+	token, err := s.Token.Evaluate(l.ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to evaluate slack token template: %w", err)
+	}
+	return action.NewSlackBotAction(token, channel, s.Debug, nil), nil
 }
 
 func (l *Loader) addJobTo(c *JobConfig, e *watch.Executor) ([]*watch.Job, error) {
