@@ -1,5 +1,5 @@
 {
-    "text": "<!channel> *[Add]* <{{ .item.link }}|{{ .res.Label }} - {{ .item.summary | escape }}>",
+    "text": "<!channel> *[Add]* <{{ .item.link }}|{{ .res.Label | escape }} - {{ .item.summary | escape }}>",
     "attachments": [{
         "color": "#0000FF",
         "blocks": [

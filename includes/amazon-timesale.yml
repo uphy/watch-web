@@ -7,7 +7,7 @@ transforms:
       javascript: source.dealState != "EXPIRED" && source.minDealPrice !== undefined && source.maxPercentOff > 0
   - map:
       template:
-        summary: '{{ .source.title | truncate 20 }}'
+        summary: '{{ .source.title | truncate 20 | escape }}'
         thumbnail: '{{ .source.primaryImage }}'
         description: ¥{{- .source.minDealPrice }}({{ .source.maxPercentOff }}%OFF)
         link: '{{ .source.egressUrl }}'

@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"sort"
 	"strings"
-	"text/template"
 
 	"github.com/ghodss/yaml"
+	"github.com/uphy/watch-web/pkg/domain/template"
 	"github.com/uphy/watch-web/pkg/domain/value"
 
 	"github.com/uphy/watch-web/pkg/domain"
@@ -67,25 +67,18 @@ func (s *SlackWebhookAction) Run(ctx *domain.JobContext, res *domain.Result) err
 }
 
 func slackPayload(ctx *domain.JobContext, res *domain.Result, update value.Update) (map[string]interface{}, error) {
-	tmpl := template.New("slack-template-" + strings.ToLower(string(update.Type))).Funcs(template.FuncMap{
-		"escape": func(s string) string {
-			s = strings.ReplaceAll(s, "\n", "\\n")
-			s = strings.ReplaceAll(s, "\"", "”")
-			s = strings.ReplaceAll(s, "<", "＜")
-			s = strings.ReplaceAll(s, ">", "＞")
-			return s
-		},
-	})
+	var tmpl *template.Template
 	args := map[string]interface{}{
 		"res": res,
 	}
+	var err error
 	switch item := update.Item().(type) {
 	// add or remove
 	case value.Item:
 		if update.Type == value.UpdateTypeAdd {
-			tmpl = template.Must(tmpl.Parse(resources.SlackArrayTemplateAdd))
+			tmpl, err = template.Parse(resources.SlackArrayTemplateAdd)
 		} else {
-			tmpl = template.Must(tmpl.Parse(resources.SlackArrayTemplateRemove))
+			tmpl, err = template.Parse(resources.SlackArrayTemplateRemove)
 		}
 		fields := make([]map[string]string, 0)
 		for k, v := range item {
@@ -106,7 +99,7 @@ func slackPayload(ctx *domain.JobContext, res *domain.Result, update value.Updat
 		args["item"] = update.Item().(value.Item)
 	// change
 	case *value.ItemChange:
-		tmpl = template.Must(tmpl.Parse(resources.SlackArrayTemplateChange))
+		tmpl, err = template.Parse(resources.SlackArrayTemplateChange)
 		fields := make([]map[string]string, 0)
 		for k, v := range item.AddedKeys {
 			fields = append(fields, map[string]string{
@@ -139,12 +132,19 @@ func slackPayload(ctx *domain.JobContext, res *domain.Result, update value.Updat
 		args["item"] = update.Change.Item
 	}
 
-	buf := new(bytes.Buffer)
-	if err := tmpl.Execute(buf, args); err != nil {
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse template: %v", err)
+	}
+
+	templateContext := template.NewRootTemplateContext()
+	for k, v := range args {
+		templateContext.Set(k, v)
+	}
+	payload, err := tmpl.Evaluate(templateContext)
+	if err != nil {
 		return nil, err
 	}
 
-	payload := buf.String()
 	var payloadValue map[string]interface{}
 	if err := json.Unmarshal([]byte(payload), &payloadValue); err != nil {
 		ctx.Log.WithField("err", err).Error("Failed to parse payload as json")

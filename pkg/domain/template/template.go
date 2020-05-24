@@ -93,6 +93,13 @@ var funcs = map[string]interface{}{
 		n := int64(epochMillis) * 1000000
 		return time.Unix(0, n).Format("2006/01/02 15:04")
 	},
+	"escape": func(s string) string {
+		s = strings.ReplaceAll(s, "\n", "\\n")
+		s = strings.ReplaceAll(s, "\"", "”")
+		s = strings.ReplaceAll(s, "<", "＜")
+		s = strings.ReplaceAll(s, ">", "＞")
+		return s
+	},
 }
 
 func Parse(s string) (*Template, error) {

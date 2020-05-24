@@ -52,12 +52,14 @@ jobs:
       include:
         file: amazon-timesale.yml
         vars:
-          keyword: 'プロジェクタ'
+          keyword: '{{ .item.keyword }}'
     actions:
       - slack_bot:
           token: '{{ env "SLACK_TOKEN" }}'
           channel: "web_update"
           thread_per: item
+    with_items:
+      - keyword: 'プロジェクタ'
 actions:
   - slack_bot:
       token: '{{ env "SLACK_TOKEN" }}'
