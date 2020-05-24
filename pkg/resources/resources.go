@@ -1,7 +1,6 @@
 package resources
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 
@@ -16,7 +15,6 @@ var SlackArrayTemplateChange string
 var HttpStatic pkger.Dir
 
 func init() {
-	fmt.Println("load template")
 	SlackTemplate = load(pkger.Open("/templates/slack.json"))
 	SlackArrayTemplateAdd = load(pkger.Open("/templates/slack-array-add.json"))
 	SlackArrayTemplateRemove = load(pkger.Open("/templates/slack-array-remove.json"))

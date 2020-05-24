@@ -41,7 +41,9 @@ jobs:
         file: amazon.yml
         vars:
           itemId: '{{ .item.id }}'
-    with_items: []
+    with_items: 
+      - id: B083NXQ7LR
+        name: YABER y61
   - id: amazon-timesale
     schedule: "@every 10m"
     label: '{{ .item.keyword }}'

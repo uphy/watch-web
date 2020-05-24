@@ -39,6 +39,14 @@ transforms:
         }
         thumbnail = thumbnail.nodes[0].src
 
+        var comments, err = selectDOM(html, "div[data-hook='total-review-count']>span")
+        if err != nil {
+          return nil, err
+        }
+        comments = comments.text
+        comments = strings.Replace(comments, "評価の数", "", -1)
+        comments = strings.Trim(comments, " \t\n")
+
         map[string]interface{
           "summary": title,
           "description": sprintf("%s [%s]", price, availability),
@@ -47,4 +55,5 @@ transforms:
           "price": price,
           "availability": availability,
           "id": "{{ .itemId }}",
+          "comments": comments,
         }
