@@ -1,16 +1,9 @@
 # Dockerfile for Heroku deployment
 
-FROM node:10 as frontend-builder
-WORKDIR /app
-COPY frontend .
-RUN yarn
-RUN yarn build
-
 FROM golang:1.14-stretch as server-builder
 WORKDIR /go/src/github.com/uphy/watch-web
 # Build app
 COPY . .
-COPY --from=frontend-builder /app/dist/ ./frontend/dist/
 RUN go get -u github.com/markbates/pkger/cmd/pkger && pkger -o pkg/resources
 RUN CGO_ENABLED=0 GOOS=linux go build -o /watch-web
 # Build gojq

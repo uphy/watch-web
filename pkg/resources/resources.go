@@ -12,14 +12,12 @@ var SlackTemplate string
 var SlackArrayTemplateAdd string
 var SlackArrayTemplateRemove string
 var SlackArrayTemplateChange string
-var HttpStatic pkger.Dir
 
 func init() {
 	SlackTemplate = load(pkger.Open("/templates/slack.json"))
 	SlackArrayTemplateAdd = load(pkger.Open("/templates/slack-array-add.json"))
 	SlackArrayTemplateRemove = load(pkger.Open("/templates/slack-array-remove.json"))
 	SlackArrayTemplateChange = load(pkger.Open("/templates/slack-array-change.json"))
-	HttpStatic = pkger.Dir("/frontend/dist")
 }
 
 func load(f pkging.File, err error) string {

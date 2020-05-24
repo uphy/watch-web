@@ -2,14 +2,12 @@ package cli
 
 import (
 	"fmt"
-	"net/http"
 	"regexp"
 	"time"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/uphy/watch-web/pkg/domain"
-	"github.com/uphy/watch-web/pkg/resources"
 	"github.com/uphy/watch-web/pkg/watch"
 	"github.com/urfave/cli"
 )
@@ -172,7 +170,6 @@ func (c *CLI) start() cli.Command {
 				}
 				return ctx.NoContent(200)
 			})
-			e.GET("/*", echo.WrapHandler(http.FileServer(resources.HttpStatic)))
 			return e.Start(fmt.Sprintf(":%d", port))
 		},
 	}

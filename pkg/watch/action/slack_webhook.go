@@ -71,6 +71,8 @@ func slackPayload(ctx *domain.JobContext, res *domain.Result, update value.Updat
 		"escape": func(s string) string {
 			s = strings.ReplaceAll(s, "\n", "\\n")
 			s = strings.ReplaceAll(s, "\"", "”")
+			s = strings.ReplaceAll(s, "<", "＜")
+			s = strings.ReplaceAll(s, ">", "＞")
 			return s
 		},
 	})
