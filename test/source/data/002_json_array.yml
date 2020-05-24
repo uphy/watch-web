@@ -15,8 +15,8 @@ tests:
         - {"id":"001","price":"300","title":"TITLE1"}
       changed: true
       diff:
-        - add: {"id":"000","price":"200","title":"TITLE1"}
-        - add: {"id":"001","price":"300","title":"TITLE1"}
+        - add: {"id":"000","price":"200","title":"TITLE1","label":"","link":"","summary":""}
+        - add: {"id":"001","price":"300","title":"TITLE1","label":"","link":"","summary":""}
   - name: Empty String(Initial value)
     vars:
       current: |
@@ -28,8 +28,8 @@ tests:
         - {"id":"001","price":"300","title":"TITLE1"}
       changed: true
       diff:
-        - add: {"id":"000","price":"200","title":"TITLE1"}
-        - add: {"id":"001","price":"300","title":"TITLE1"}
+        - add: {"id":"000","price":"200","title":"TITLE1","label":"","link":"","summary":""}
+        - add: {"id":"001","price":"300","title":"TITLE1","label":"","link":"","summary":""}
   - name: Removed
     vars:
       current: |
@@ -42,7 +42,7 @@ tests:
         - {"id":"000","price":"200","title":"TITLE1"}
       changed: true
       diff:
-        - remove: {"id":"001","price":"300","title":"TITLE1"}
+        - remove: {"id":"001","price":"300","title":"TITLE1","label":"","link":"","summary":""}
   - name: Mixed
     vars:
       current: |
@@ -56,8 +56,8 @@ tests:
         - {"id":"002","price":"400","title":"TITLE3"}
       changed: true
       diff:
-        - remove: {"id":"001","price":"300","title":"TITLE1"}
-        - add: {"id":"002","price":"400","title":"TITLE3"}
+        - remove: {"id":"001","price":"300","title":"TITLE1","label":"","link":"","summary":""}
+        - add: {"id":"002","price":"400","title":"TITLE3","label":"","link":"","summary":""}
   - name: Element Changed
     vars:
       current: |
@@ -71,10 +71,10 @@ tests:
         - {"id":"003","price":"1000"}
       changed: true
       diff:
-        - remove: {"id":"000","price":"200","title":"TITLE1"}
+        - remove: {"id":"000","price":"200","title":"TITLE1","label":"","link":"","summary":""}
         - change:
-            item: {"id":"002","price":"400","newprop":"NEWPROP"}
+            item: {"id":"002","price":"400","newprop":"NEWPROP","label":"","link":"","summary":""}
             change: {"price":{"old":"500","new":"400"}}
             add: {"newprop":"NEWPROP"}
             remove: {"title":"TITLE3"}
-        - add: {"id":"003","price":"1000"}
+        - add: {"id":"003","price":"1000","label":"","link":"","summary":""}

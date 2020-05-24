@@ -10,12 +10,11 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/ghodss/yaml"
 	"github.com/uphy/watch-web/pkg/domain/value"
 
 	"github.com/uphy/watch-web/pkg/domain"
 	"github.com/uphy/watch-web/pkg/resources"
-
-	"gopkg.in/yaml.v2"
 )
 
 type (
@@ -35,7 +34,7 @@ func (s *SlackWebhookAction) Run(ctx *domain.JobContext, res *domain.Result) err
 		return nil
 	}
 	for _, update := range updates {
-		payloadValue, err := s.run(ctx, res, update)
+		payloadValue, err := slackPayload(ctx, res, update)
 		if err != nil {
 			return err
 		}
@@ -67,7 +66,7 @@ func (s *SlackWebhookAction) Run(ctx *domain.JobContext, res *domain.Result) err
 	return nil
 }
 
-func (s *SlackWebhookAction) run(ctx *domain.JobContext, res *domain.Result, update value.Update) (map[string]interface{}, error) {
+func slackPayload(ctx *domain.JobContext, res *domain.Result, update value.Update) (map[string]interface{}, error) {
 	tmpl := template.New("slack-template-" + strings.ToLower(string(update.Type))).Funcs(template.FuncMap{
 		"escape": func(s string) string {
 			s = strings.ReplaceAll(s, "\n", "\\n")

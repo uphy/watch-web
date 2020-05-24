@@ -11,3 +11,6 @@ tests:
       diff:
         - add:
             Hello:
+            label: ""
+            link: ""
+            summary: ""

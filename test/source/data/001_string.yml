@@ -15,8 +15,14 @@ tests:
       changed: true
       diff:
         - add:
+            label: ""
+            link: ""
+            summary: ""
             line1:
         - add:
+            label: ""
+            link: ""
+            summary: ""
             line2:
   - name: No changes
     vars:
@@ -45,6 +51,9 @@ tests:
       diff:
         - remove:
             line2:
+            label: ""
+            link: ""
+            summary: ""
   - name: Mixed
     vars:
       current: |
@@ -61,8 +70,14 @@ tests:
       diff:
         - add:
             line1:
+            label: ""
+            link: ""
+            summary: ""
         - remove:
             line3:
+            label: ""
+            link: ""
+            summary: ""
   - name: 'JSON-like string but a string'
     vars:
       current: |
@@ -76,5 +91,11 @@ tests:
       diff:
         - remove: 
             '[{"id":"000","price":200,"title":"TITLE1"}]':
+            label: ""
+            link: ""
+            summary: ""
         - add:
             '[{"id":"000","price":200,"title":"TITLE1"},{"id":"001","price":300,"title":"TITLE1"}]':
+            label: ""
+            link: ""
+            summary: ""

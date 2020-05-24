@@ -69,6 +69,9 @@ func TestCompareItemList(t *testing.T) {
 							"a":       "1",
 							"add":     "3",
 							"change":  "4",
+							"label":   "",
+							"link":    "",
+							"summary": "",
 						},
 						AddedKeys: map[string]string{
 							"add": "3",
@@ -84,8 +87,8 @@ func TestCompareItemList(t *testing.T) {
 						},
 					},
 				),
-				*updateRemove(Item{ItemKeyID: "item2", "c": "1", "d": "3"}),
-				*updateAdd(Item{ItemKeyID: "item3", "e": "4", "f": "5"}),
+				*updateRemove(Item{ItemKeyID: "item2", "c": "1", "d": "3", "label": "", "link": "", "summary": ""}),
+				*updateAdd(Item{ItemKeyID: "item3", "e": "4", "f": "5", "label": "", "link": "", "summary": ""}),
 			},
 		},
 		{
@@ -100,8 +103,8 @@ func TestCompareItemList(t *testing.T) {
 				},
 			},
 			want: Updates{
-				*updateRemove(Item{ItemKeyID: "item2", "line2": ""}),
-				*updateAdd(Item{ItemKeyID: "item3", "line3": ""}),
+				*updateRemove(Item{ItemKeyID: "item2", "line2": "", "label": "", "link": "", "summary": ""}),
+				*updateAdd(Item{ItemKeyID: "item3", "line3": "", "label": "", "link": "", "summary": ""}),
 			},
 		},
 	}

@@ -20,5 +20,5 @@ tests:
         - {"a":"300","b":"bbb","id":"001"}
       changed: true
       diff:
-        - add: {"a":"200","b":"bbb","id":"000"}
-        - add: {"a":"300","b":"bbb","id":"001"}
+        - add: {"a":"200","b":"bbb","id":"000","label":"","link":"","summary":""}
+        - add: {"a":"300","b":"bbb","id":"001","label":"","link":"","summary":""}

@@ -18,6 +18,6 @@ tests:
         - {"id":"002","price":"400","title":"TITLE2"}
       changed: true
       diff:
-        - add: {"id":"000","price":"300","title":"TITLE0"}
-        - add: {"id":"001","price":"200","title":"TITLE1"}
-        - add: {"id":"002","price":"400","title":"TITLE2"}
+        - add: {"id":"000","price":"300","title":"TITLE0","label":"","link":"","summary":""}
+        - add: {"id":"001","price":"200","title":"TITLE1","label":"","link":"","summary":""}
+        - add: {"id":"002","price":"400","title":"TITLE2","label":"","link":"","summary":""}

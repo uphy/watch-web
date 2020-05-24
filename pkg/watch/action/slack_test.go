@@ -12,7 +12,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func TestSlackAction_Run(t *testing.T) {
+func TestSlackPayload(t *testing.T) {
 	f, err := os.Open("testdata/slack.yml")
 	if err != nil {
 		t.Error("failed to open test data: ", err)
@@ -32,13 +32,12 @@ func TestSlackAction_Run(t *testing.T) {
 		return
 	}
 
-	sut := NewSlackWebhookAction("", true)
 	logger := logrus.New()
 	ctx := &domain.JobContext{Log: logger.WithFields(logrus.Fields{})}
 	res := domain.NewResult(&domain.JobInfo{}, itemList1, itemList2)
 	updates := res.Diff()
 	for _, update := range updates {
-		actual, err := sut.run(ctx, res, update)
+		actual, err := slackPayload(ctx, res, update)
 		if err != nil {
 			t.Error("error occurred during run function: ", err)
 			return
