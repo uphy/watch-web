@@ -50,6 +50,8 @@ func (s *SlackBotAction) Run(ctx *domain.JobContext, res *domain.Result) error {
 
 		// Set additional request parameters
 		payloadValue["channel"] = s.channel
+		payloadValue["unfurl_links"] = false
+		payloadValue["unfurl_media"] = false
 		isReply := false
 		if s.repo != nil {
 			threadTS, err := s.repo.GetSlackThreadTS(res.JobID, update.ItemID())
