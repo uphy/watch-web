@@ -37,7 +37,11 @@ transforms:
         if err != nil {
           return nil, err
         }
-        thumbnail = thumbnail.nodes[0].src
+        if len(thumbnail.nodes) > 0 {
+          thumbnail = thumbnail.nodes[0].src
+        } else {
+          thumbnail = ""
+        }
 
         var comments, err = selectDOM(html, "div[data-hook='total-review-count']>span")
         if err != nil {
@@ -45,6 +49,7 @@ transforms:
         }
         comments = comments.text
         comments = strings.Replace(comments, "評価の数", "", -1)
+        comments = strings.Replace(comments, "件のグローバル評価", "", -1)
         comments = strings.Trim(comments, " \t\n")
 
         map[string]interface{

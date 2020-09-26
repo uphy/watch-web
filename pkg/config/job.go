@@ -13,5 +13,6 @@ type (
 		Schedule  template.TemplateString `json:"schedule,omitempty"`
 		WithItems []interface{}           `json:"with_items,omitempty"`
 		Actions   []ActionConfig          `json:"actions",omitempty`
+		Enable    *bool                   `json:"enable,omitempty"`
 	}
 )

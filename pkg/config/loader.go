@@ -111,6 +111,9 @@ func (l *Loader) Create(c *Config) (*watch.Executor, error) {
 
 	// jobs
 	for _, jobConfig := range c.Jobs {
+		if jobConfig.Enable != nil && !*jobConfig.Enable {
+			continue
+		}
 		jobs, err := l.addJobTo(&jobConfig, e, actions)
 		if err != nil {
 			return nil, err

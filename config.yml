@@ -32,6 +32,7 @@ jobs:
       - { shisya: 20, danchi: 369, name: "光が丘パークタウン 大通り南" }
       - { shisya: 20, danchi: 350, name: "光が丘パークタウン 公園南" }
       - { shisya: 20, danchi: 435, name: "光が丘パークタウン プロムナード十番街" }
+    enable: false
   - id: amazon-{{ .item.id }}
     schedule: "@every 10m"
     label: '{{ .item.name }}'
@@ -42,8 +43,12 @@ jobs:
         vars:
           itemId: '{{ .item.id }}'
     with_items: 
-      - id: B083NXQ7LR
-        name: YABER y61
+      - id: B00MIBN71I
+        name: Amazonベーシック モニターアーム
+      - id: B01DVGF3W4
+        name: サンワダイレクト モニターアーム
+      - id: B082NHW6ZK
+        name: グリーンハウス モニターアーム
   - id: amazon-timesale
     schedule: "@every 10m"
     label: '{{ .item.keyword }}'
@@ -59,7 +64,7 @@ jobs:
           channel: "web_update"
           thread_per: item
     with_items:
-      - keyword: 'プロジェクタ'
+      - keyword: 'モニターアーム'
 actions:
   - slack_bot:
       token: '{{ env "SLACK_TOKEN" }}'
