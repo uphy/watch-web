@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/uphy/watch-web/pkg/domain/retry"
 	"github.com/uphy/watch-web/pkg/domain/template"
 
 	"github.com/uphy/watch-web/pkg/domain/value"
@@ -350,7 +351,15 @@ func (l *Loader) CreateSource(s *SourceConfig) (domain.Source, error) {
 		}
 	}
 	// wrap source for retry
-	return source.NewRetrySource(src, s.EmptyAction, s.Retry), nil
+	var retrier *retry.Retrier
+	if s.Retry != nil {
+		r, err := parseRetry(s.Retry)
+		if err != nil {
+			return nil, err
+		}
+		retrier = r
+	}
+	return source.NewRetrySource(src, s.EmptyAction, retrier), nil
 }
 
 func (l *Loader) createSourceDOM(d *DOMSourceConfig) (domain.Source, error) {
@@ -483,11 +492,18 @@ func (l *Loader) createTransforms(t TransformsConfig, src domain.Source) (domain
 	}
 	transformers := make([]domain.Transformer, 0)
 	for _, transformConfig := range t {
-		transformer, err := l.createTransform(&transformConfig)
+		t, err := l.createTransform(&transformConfig)
 		if err != nil {
 			return nil, err
 		}
-		transformers = append(transformers, transformer)
+		if transformConfig.Retry != nil {
+			retrier, err := parseRetry(transformConfig.Retry)
+			if err != nil {
+				return nil, err
+			}
+			t = transformer.NewRetryTransform(t, retrier)
+		}
+		transformers = append(transformers, t)
 	}
 	return source.NewTransformerSource(src, transformers), nil
 }

@@ -37,11 +37,7 @@ transforms:
         if err != nil {
           return nil, err
         }
-        if len(thumbnail.nodes) > 0 {
-          thumbnail = thumbnail.nodes[0].src
-        } else {
-          thumbnail = ""
-        }
+        thumbnail = thumbnail.nodes[0].src
 
         var comments, err = selectDOM(html, "div[data-hook='total-review-count']>span")
         if err != nil {

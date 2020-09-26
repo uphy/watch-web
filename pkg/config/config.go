@@ -2,8 +2,9 @@ package config
 
 import (
 	"bytes"
-	"github.com/uphy/watch-web/pkg/domain/template"
 	"io"
+
+	"github.com/uphy/watch-web/pkg/domain/template"
 
 	"github.com/ghodss/yaml"
 )

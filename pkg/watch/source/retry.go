@@ -3,11 +3,10 @@ package source
 import (
 	"errors"
 	"fmt"
-	"github.com/uphy/watch-web/pkg/domain/value"
-	"math"
-	"time"
 
 	"github.com/uphy/watch-web/pkg/domain"
+	"github.com/uphy/watch-web/pkg/domain/retry"
+	"github.com/uphy/watch-web/pkg/domain/value"
 )
 
 const (
@@ -20,33 +19,28 @@ type (
 	SourceWithRetry struct {
 		source      domain.Source
 		emptyAction *EmptyAction
-		retry       *int
+		retrier     *retry.Retrier
 	}
 )
 
-func NewRetrySource(src domain.Source, emptyAction *EmptyAction, retry *int) *SourceWithRetry {
-	return &SourceWithRetry{src, emptyAction, retry}
+func NewRetrySource(src domain.Source, emptyAction *EmptyAction, retrier *retry.Retrier) *SourceWithRetry {
+	return &SourceWithRetry{src, emptyAction, retrier}
 }
 
 func (s *SourceWithRetry) Fetch(ctx *domain.JobContext) (value.Value, error) {
-	if s.retry == nil {
+	if s.retrier == nil {
 		return s.fetch(ctx)
 	}
-	retry := *s.retry
-	var err error
-	for i := 0; i <= retry; i++ {
-		var v value.Value
+	var v value.Value
+	err := s.retrier.Run(func(retryContext *retry.RetryContext) error {
+		var err error
 		v, err = s.fetch(ctx)
-		if err == nil {
-			return v, nil
-		}
-
-		if i < retry {
-			waitSeconds := 1 + int(math.Pow(2, float64(i)))
-			time.Sleep(time.Second * time.Duration(waitSeconds))
-		}
+		return err
+	})
+	if err != nil {
+		return nil, err
 	}
-	return nil, fmt.Errorf("too many retries: lastError=%w", err)
+	return v, nil
 }
 
 func (s *SourceWithRetry) fetch(ctx *domain.JobContext) (value.Value, error) {
@@ -73,8 +67,8 @@ func (s *SourceWithRetry) String() string {
 	if s.emptyAction != nil {
 		emptyAction = string(*s.emptyAction)
 	}
-	if s.retry != nil {
-		retry = fmt.Sprint(*s.retry)
+	if s.retrier != nil {
+		retry = fmt.Sprint(*s.retrier)
 	}
 	return fmt.Sprintf("Retry[source=%v, retry=%v, emptyAction=%v]", s.source, retry, emptyAction)
 }

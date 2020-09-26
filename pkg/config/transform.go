@@ -22,5 +22,6 @@ type (
 		Script *ScriptConfig `json:"script,omitempty"`
 		Filter *ScriptConfig `json:"filter,omitempty"`
 		Debug  *bool         `json:"debug"`
+		Retry  interface{}   `json:"retry"`
 	}
 )

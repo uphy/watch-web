@@ -42,6 +42,7 @@ jobs:
         file: amazon.yml
         vars:
           itemId: '{{ .item.id }}'
+      retry: 3
     with_items: 
       - id: B00MIBN71I
         name: Amazonベーシック モニターアーム
