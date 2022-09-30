@@ -8,8 +8,7 @@ require (
 	github.com/go-redis/redis/v7 v7.2.0
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v0.0.0-20180717150148-3d5d8f294aa0
-	github.com/labstack/echo/v4 v4.6.1
-	github.com/labstack/gommon v0.3.1 // indirect
+	github.com/labstack/echo/v4 v4.9.0
 	github.com/markbates/pkger v0.15.1
 	github.com/mattn/anko v0.1.7
 	github.com/mattn/go-colorable v0.1.12 // indirect
