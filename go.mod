@@ -7,8 +7,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-redis/redis/v7 v7.2.0
 	github.com/hashicorp/go-multierror v0.0.0-20180717150148-3d5d8f294aa0
-	github.com/labstack/echo/v4 v4.6.1
-	github.com/markbates/pkger v0.15.1
+	github.com/labstack/echo/v4 v4.9.0
 	github.com/mattn/anko v0.1.7
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	github.com/robfig/cron v1.2.0
@@ -23,7 +22,6 @@ require (
 require (
 	github.com/andybalholm/cascadia v1.1.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d // indirect
-	github.com/gobuffalo/here v0.6.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.1 // indirect
