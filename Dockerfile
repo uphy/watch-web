@@ -1,6 +1,6 @@
 # Dockerfile for Heroku deployment
 
-FROM golang:1.14-stretch as server-builder
+FROM golang:1.19 as server-builder
 WORKDIR /go/src/github.com/uphy/watch-web
 # Build app
 COPY . .
