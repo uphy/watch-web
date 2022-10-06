@@ -130,7 +130,10 @@ func (l *Loader) Create(c *Config) (*watch.Executor, error) {
 }
 
 func (l *Loader) createStore(config *StoreConfig) (domain.Store, error) {
-	if config != nil && config.Redis != nil {
+	if config == nil {
+		return store.NewMemoryStore(), nil
+	}
+	if config.Redis != nil {
 		password := ""
 		addr := ""
 		if config.Redis.Address != nil {
@@ -164,7 +167,10 @@ func (l *Loader) createStore(config *StoreConfig) (domain.Store, error) {
 			return store.NewRedisStore(client), nil
 		}
 	}
-	return store.NewMemoryStore(), nil
+	if config.Directory != nil {
+		return store.NewDirectoryStore(config.Directory.Path)
+	}
+	return nil, errors.New("unknown store")
 }
 
 func parseRedisToGoURL(redisToGo string) (addr string, password string, err error) {

@@ -3,18 +3,11 @@ jobs:
   - id: ur-{{ .item.shisya }}-{{ .item.danchi }}
     schedule: "@every 10m"
     source:
-      constant:
-        value:
-          - description: 108,200円(近居割, 近居割WIDE)[共益費 4,700円]
-            id: 4号棟1003号室
-            link: https://www.ur-net.go.jp//chintai/sp/kanto/tokyo/20_6880_room.html?JKSS=000041003
-            summary: 4号棟1003号室(1LDK)
-            thumbnail: https://chintai.sumai.ur-net.go.jp/chintai/img_madori/20/20_688/20_688_0-00-0004_Fz_RA_01_00003.gif
-            制度: 近居割, 近居割WIDE
-            平米数: 58㎡
-            敷金: 2か月
-            間取り: 1LDK
-            階数: 10階 / 10階
+      include:
+        file: ur.yml
+        vars:
+          shisya: '{{ .item.shisya }}'
+          danchi: '{{ .item.danchi }}'
     # 監視項目の固定の表示文字列
     label: "{{ .item.name }}"
     # 監視項目のURL
@@ -23,49 +16,18 @@ jobs:
     # ここで指定した要素数だけ、jobが複製される。
     # job内で、各配列要素は `.item として参照できる。
     with_items:
-      - { shisya: 20, danchi: 688, name: "グリーンヒルズ東久留米" }
-      - { shisya: 20, danchi: 399, name: "清瀬駅前ハイツ" }
-      - { shisya: 20, danchi: 465, name: "グリーンプラザ高松＜光が丘＞" }
-      - { shisya: 20, danchi: 391, name: "光が丘パークタウン いちょう通り八番街" }
-      - { shisya: 20, danchi: 455, name: "光が丘パークタウン 大通り中央" }
-      - { shisya: 20, danchi: 410, name: "光が丘パークタウン 四季の香弐番街" }
-      - { shisya: 20, danchi: 369, name: "光が丘パークタウン 大通り南" }
-      - { shisya: 20, danchi: 350, name: "光が丘パークタウン 公園南" }
-      - { shisya: 20, danchi: 435, name: "光が丘パークタウン プロムナード十番街" }
-    enable: false
-  - id: amazon-{{ .item.id }}
-    schedule: "@every 10m"
-    label: '{{ .item.name }}'
-    link: https://www.amazon.co.jp/dp/{{ .item.id }}/
-    source:
-      include:
-        file: amazon.yml
-        vars:
-          itemId: '{{ .item.id }}'
-      retry: 3
-    with_items: 
-      - id: B00MIBN71I
-        name: Amazonベーシック モニターアーム
-      - id: B01DVGF3W4
-        name: サンワダイレクト モニターアーム
-      - id: B082NHW6ZK
-        name: グリーンハウス モニターアーム
-  - id: amazon-timesale
-    schedule: "@every 10m"
-    label: '{{ .item.keyword }}'
-    link: https://a-timesale.com/deals/?search={{ .item.keyword | urlquery}}
-    source:
-      include:
-        file: amazon-timesale.yml
-        vars:
-          keyword: '{{ .item.keyword }}'
-    actions:
-      - slack_bot:
-          token: '{{ env "SLACK_TOKEN" }}'
-          channel: "web_update"
-          thread_per: item
-    with_items:
-      - keyword: 'モニターアーム'
+      - { shisya: 50, danchi: 191, name: "所沢パークタウン駅前通り" }
+      - { shisya: 50, danchi: 197, name: "所沢パークタウン公園通り" }
+      - { shisya: 50, danchi: 198, name: "所沢パークタウン並木通り" }
+      - { shisya: 50, danchi: 213, name: "所沢パークタウン駅前プラザ" }
+      - { shisya: 50, danchi: 303, name: "プラザシティ新所沢　けやき通り" }
+      - { shisya: 50, danchi: 349, name: "プラザシティ新所沢　緑町第二" }
+      - { shisya: 50, danchi: 385, name: "プラザシティ新所沢けやき通り第二" }
+      - { shisya: 50, danchi: 395, name: "プラザシティ新所沢　緑町第三" }
+      - { shisya: 50, danchi: 400, name: "プラザシティ新所沢けやき通り第三" }
+      - { shisya: 50, danchi: 408, name: "プラザシティ新所沢駅前" }
+    enable: true
+
 actions:
   - slack_bot:
       token: '{{ env "SLACK_TOKEN" }}'
@@ -73,9 +35,8 @@ actions:
       thread_per: job
 # 各ジョブの現在の値を保存するストレージ
 store:
-  redis:
-    # アドレスが空の場合には無効として、デフォルト(オンメモリ)に切り替える。
-    redistogo: '{{ env "REDISTOGO_URL" }}'
+  directory:
+    path: data
 
 # 型についての方針
 # - プログラム側で暗黙的に型変換はやらないようにしたい。

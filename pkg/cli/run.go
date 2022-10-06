@@ -26,6 +26,10 @@ func (c *CLI) run() cli.Command {
 			} else {
 				for _, id := range ctx.Args() {
 					job := exe.Job(id)
+					if job == nil {
+						fmt.Printf("No such job: %s\n", id)
+						continue
+					}
 					result, err := exe.Check(job)
 					if err != nil {
 						continue

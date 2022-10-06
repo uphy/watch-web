@@ -67,7 +67,6 @@ func (s *SlackBotAction) Run(ctx *domain.JobContext, res *domain.Result) error {
 				isReply = true
 			}
 		}
-
 		if s.debug || len(s.token) == 0 {
 			ctx.Log.Info("Slack action is debug mode.  No notification.")
 			payloadBytes, _ := yaml.Marshal(payloadValue)
